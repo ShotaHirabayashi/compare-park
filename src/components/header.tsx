@@ -16,7 +16,7 @@ import {
 
 const navLinks = [
   { href: "/#check", label: "駐車場を判定" },
-  { href: "/", label: "車種一覧" },
+  { href: "/car", label: "車種一覧" },
   { href: "/area", label: "エリア" },
 ] as const;
 

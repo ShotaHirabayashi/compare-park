@@ -240,6 +240,42 @@ export async function getRestrictionsByWard(ward: string) {
     .where(like(parkingLots.address, `%${ward}%`));
 }
 
+// ---------- Maker helpers ----------
+
+export async function getMakerBySlug(slug: string) {
+  const result = await db
+    .select()
+    .from(makers)
+    .where(eq(makers.slug, slug))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+export async function getModelsByMakerSlug(makerSlug: string) {
+  return db
+    .select({
+      id: models.id,
+      name: models.name,
+      slug: models.slug,
+      body_type: models.body_type,
+      image_url: models.image_url,
+      maker_name: makers.name,
+      maker_slug: makers.slug,
+      length_mm: dimensions.length_mm,
+      width_mm: dimensions.width_mm,
+      height_mm: dimensions.height_mm,
+      weight_kg: dimensions.weight_kg,
+    })
+    .from(models)
+    .innerJoin(makers, eq(models.maker_id, makers.id))
+    .leftJoin(generations, eq(generations.model_id, models.id))
+    .leftJoin(phases, eq(phases.generation_id, generations.id))
+    .leftJoin(trims, eq(trims.phase_id, phases.id))
+    .leftJoin(dimensions, eq(dimensions.trim_id, trims.id))
+    .where(eq(makers.slug, makerSlug));
+}
+
 // ---------- Search helpers (lightweight for Combobox) ----------
 
 export async function getModelsForSearch() {

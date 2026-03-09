@@ -10,6 +10,7 @@ import {
   getModelBySlug,
   getAllTrimsWithDimensions,
   getRestrictionsByWard,
+  getModelsWithMaker,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
 import { TOKYO_WARDS } from "@/lib/constants";
@@ -17,6 +18,13 @@ import { TOKYO_WARDS } from "@/lib/constants";
 interface Props {
   params: Promise<{ ward: string; slug: string }>;
   searchParams: Promise<{ gen?: string; trim?: string }>;
+}
+
+export async function generateStaticParams() {
+  const allModels = await getModelsWithMaker();
+  return TOKYO_WARDS.flatMap((ward) =>
+    allModels.map((m) => ({ ward, slug: m.slug }))
+  );
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

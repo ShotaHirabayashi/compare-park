@@ -10,6 +10,7 @@ import type { VehicleMatchItem } from "@/components/vehicle-match-list";
 import { JsonLd } from "@/components/json-ld";
 import {
   getParkingLotBySlug,
+  getParkingLots,
   getRestrictionsByParkingLotId,
   getFeesByParkingLotId,
   getOperatingHoursByParkingLotId,
@@ -34,6 +35,11 @@ const dayLabels = ["日", "月", "火", "水", "木", "金", "土"];
 
 interface Props {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  const lots = await getParkingLots();
+  return lots.map((l) => ({ slug: l.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

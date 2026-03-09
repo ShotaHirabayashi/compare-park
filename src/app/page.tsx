@@ -9,10 +9,11 @@ import {
 } from "@/lib/queries";
 import { InstantCheckForm } from "@/components/instant-check-form";
 import { CarSearchTabs } from "@/components/car-search-tabs";
+import { JsonLd } from "@/components/json-ld";
 import { db } from "@/db";
 import { models, makers, dimensions, trims, phases, generations } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { TOKYO_WARDS } from "@/lib/constants";
+import { TOKYO_WARDS, FAQ_ITEMS } from "@/lib/constants";
 
 export default async function Home() {
   const [
@@ -193,6 +194,49 @@ export default async function Home() {
                 OK・ギリギリ・NGの3段階で、停められるかどうかが一目瞭然。
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* セクション5: FAQ */}
+      <section className="py-10 sm:py-16">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: FAQ_ITEMS.map((item) => ({
+                "@type": "Question",
+                name: item.question,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: item.answer,
+                },
+              })),
+            }}
+          />
+          <h2 className="mb-8 text-center text-xl font-bold text-foreground sm:text-2xl">
+            よくある質問
+          </h2>
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((item, index) => (
+              <details
+                key={index}
+                className="group rounded-lg border bg-background"
+              >
+                <summary className="cursor-pointer px-4 py-3 text-sm font-medium transition-colors hover:text-primary [&::-webkit-details-marker]:hidden">
+                  <span className="flex items-center justify-between">
+                    {item.question}
+                    <span className="ml-2 shrink-0 text-muted-foreground transition-transform group-open:rotate-180">
+                      ▼
+                    </span>
+                  </span>
+                </summary>
+                <div className="border-t px-4 py-3 text-sm leading-relaxed text-muted-foreground">
+                  {item.answer}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       </section>

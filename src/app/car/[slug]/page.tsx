@@ -14,6 +14,7 @@ import {
   getModelBySlug,
   getAllTrimsWithDimensions,
   getAllRestrictions,
+  getModelsWithMaker,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
 import { TOKYO_WARDS } from "@/lib/constants";
@@ -31,6 +32,11 @@ const bodyTypeLabels: Record<string, string> = {
 interface Props {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ gen?: string; trim?: string }>;
+}
+
+export async function generateStaticParams() {
+  const allModels = await getModelsWithMaker();
+  return allModels.map((m) => ({ slug: m.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -187,7 +193,8 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
-          { label: model.maker_name },
+          { label: "車種一覧", href: "/car" },
+          { label: model.maker_name, href: `/maker/${model.maker_slug}` },
           { label: model.name },
         ]}
       />

@@ -15,6 +15,10 @@ interface Props {
   params: Promise<{ ward: string }>;
 }
 
+export function generateStaticParams() {
+  return TOKYO_WARDS.map((ward) => ({ ward }));
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ward } = await params;
   const decodedWard = decodeURIComponent(ward);

@@ -6,6 +6,7 @@ const siteLinks = [
   { href: "/area", label: "エリアから探す" },
   { href: "/privacy", label: "プライバシーポリシー" },
   { href: "/terms", label: "利用規約" },
+  { href: "/about", label: "トメピタについて" },
 ] as const;
 
 const popularWards = [
