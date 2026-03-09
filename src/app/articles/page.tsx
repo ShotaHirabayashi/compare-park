@@ -7,9 +7,9 @@ import { getArticles, ARTICLE_CATEGORIES } from "@/lib/articles";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "記事一覧 | トメピタ",
+  title: "コラム | トメピタ",
   description:
-    "機械式駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つ記事を掲載しています。",
+    "機械式駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
   alternates: {
     canonical: "https://tomepita.com/articles",
   },
@@ -42,10 +42,10 @@ async function ArticlesContent({
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Breadcrumb
-        items={[{ label: "トップ", href: "/" }, { label: "記事" }]}
+        items={[{ label: "トップ", href: "/" }, { label: "コラム" }]}
       />
 
-      <h1 className="mb-8 text-3xl font-bold">記事</h1>
+      <h1 className="mb-8 text-3xl font-bold">コラム</h1>
 
       <div className="mb-8 flex flex-wrap gap-2">
         <Link

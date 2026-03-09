@@ -90,7 +90,7 @@ export default async function ArticlePage({ params }: PageProps) {
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
-          { label: "記事", href: "/articles" },
+          { label: "コラム", href: "/articles" },
           { label: categoryLabel, href: `/articles?category=${article.frontmatter.category}` },
           { label: article.frontmatter.title },
         ]}
@@ -176,7 +176,7 @@ export default async function ArticlePage({ params }: PageProps) {
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          記事一覧に戻る
+          コラム一覧に戻る
         </Link>
       </div>
     </div>

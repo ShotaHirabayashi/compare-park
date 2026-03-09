@@ -18,6 +18,7 @@ const navLinks = [
   { href: "/#check", label: "駐車場を判定" },
   { href: "/car", label: "車種一覧" },
   { href: "/area", label: "エリア" },
+  { href: "/articles", label: "コラム" },
 ] as const;
 
 export function Header() {
