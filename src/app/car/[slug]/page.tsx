@@ -39,6 +39,8 @@ export async function generateStaticParams() {
   return allModels.map((m) => ({ slug: m.slug }));
 }
 
+export const revalidate = 604800; // 7d
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const model = await getModelBySlug(slug);
@@ -47,6 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`,
     description: `${model.maker_name} ${model.name}の全長・全幅・全高・重量を一覧表示。東京23区内の駐車場への適合判定も確認できます。`,
+    alternates: { canonical: `/car/${slug}` },
   };
 }
 

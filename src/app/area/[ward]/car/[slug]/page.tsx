@@ -27,6 +27,8 @@ export async function generateStaticParams() {
   );
 }
 
+export const revalidate = 604800; // 7d
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ward, slug } = await params;
   const decodedWard = decodeURIComponent(ward);
@@ -36,6 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${decodedWard}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`,
     description: `${decodedWard}エリアの駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と駐車場の制限寸法を比較し、停められるかを一目で確認できます。`,
+    alternates: { canonical: `/area/${encodeURIComponent(decodedWard)}/car/${slug}` },
   };
 }
 

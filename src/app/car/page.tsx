@@ -3,10 +3,13 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { getMakers, getModelsWithMaker } from "@/lib/queries";
 
+export const revalidate = 86400; // 24h
+
 export const metadata: Metadata = {
   title: "車種一覧 — サイズ・駐車場適合を確認 | トメピタ",
   description:
     "国産車・輸入車の車種一覧。各車種の寸法（全長・全幅・全高・重量）と駐車場への適合判定を確認できます。",
+  alternates: { canonical: "/car" },
 };
 
 export default async function CarListPage() {

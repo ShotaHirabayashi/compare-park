@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "トメピタについて | トメピタ",
   description:
     "トメピタは車種の寸法と駐車場の制限サイズを比較し、停められるかどうかを判定するサービスです。",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

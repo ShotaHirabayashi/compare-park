@@ -42,6 +42,8 @@ export async function generateStaticParams() {
   return lots.map((l) => ({ slug: l.slug }));
 }
 
+export const revalidate = 604800; // 7d
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const lot = await getParkingLotBySlug(slug);
@@ -50,6 +52,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${lot.name} の制限寸法と対応車種 | トメピタ`,
     description: `${lot.name}(${lot.address ?? ""})の制限寸法を確認。対応する車種の一覧と適合判定も表示します。`,
+    alternates: { canonical: `/parking/${slug}` },
   };
 }
 

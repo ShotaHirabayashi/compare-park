@@ -19,6 +19,8 @@ export function generateStaticParams() {
   return TOKYO_WARDS.map((ward) => ({ ward }));
 }
 
+export const revalidate = 86400; // 24h
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ward } = await params;
   const decodedWard = decodeURIComponent(ward);
@@ -26,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${decodedWard}の駐車場一覧 | トメピタ`,
     description: `${decodedWard}エリアの駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
+    alternates: { canonical: `/area/${encodeURIComponent(decodedWard)}` },
   };
 }
 

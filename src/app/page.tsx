@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Car, Search, CheckCircle, MapPin } from "lucide-react";
@@ -14,6 +15,12 @@ import { db } from "@/db";
 import { models, makers, dimensions, trims, phases, generations } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { TOKYO_WARDS, FAQ_ITEMS } from "@/lib/constants";
+
+export const revalidate = 86400; // 24h
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function Home() {
   const [

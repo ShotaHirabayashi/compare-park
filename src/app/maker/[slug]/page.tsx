@@ -13,6 +13,8 @@ export async function generateStaticParams() {
   return allMakers.map((m) => ({ slug: m.slug }));
 }
 
+export const revalidate = 604800; // 7d
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const maker = await getMakerBySlug(slug);
@@ -21,6 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${maker.name}の車種一覧 — 駐車場サイズ適合 | トメピタ`,
     description: `${maker.name}の車種一覧。各車種の寸法と駐車場への適合判定を確認できます。`,
+    alternates: { canonical: `/maker/${slug}` },
   };
 }
 

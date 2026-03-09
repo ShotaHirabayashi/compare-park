@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter, Noto_Sans_JP } from "next/font/google";
 import { Header } from "@/components/header";
@@ -21,14 +21,17 @@ const notoSansJP = Noto_Sans_JP({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
 export const metadata: Metadata = {
   title: "トメピタ - 車種×駐車場マッチングサービス",
   description:
     "機械式駐車場に車が入るか即判定。車種サイズと駐車場の制限寸法を比較し、OK・ギリギリ・NGを瞬時に判定。東京23区内の機械式・タワー式駐車場対応。",
   metadataBase: new URL("https://tomepita.com"),
-  alternates: {
-    canonical: "/",
-  },
   icons: {
     icon: "/logo.svg",
     apple: "/apple-touch-icon.png",
