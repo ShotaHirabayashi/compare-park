@@ -27,7 +27,7 @@ export function Header() {
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-xl font-bold text-primary">Compare Park</span>
+          <span className="text-xl font-bold text-primary">トメピタ</span>
         </Link>
 
         {/* Desktop nav */}
@@ -56,7 +56,7 @@ export function Header() {
           <SheetContent side="right" className="w-[280px]">
             <SheetHeader>
               <SheetTitle>
-                <span className="text-primary">Compare Park</span>
+                <span className="text-primary">トメピタ</span>
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-4 px-4">

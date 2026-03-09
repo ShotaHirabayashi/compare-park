@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const decodedWard = decodeURIComponent(ward);
 
   return {
-    title: `${decodedWard}の駐車場一覧 | Compare Park`,
+    title: `${decodedWard}の駐車場一覧 | トメピタ`,
     description: `${decodedWard}エリアの駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
   };
 }

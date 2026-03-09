@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!model) return { title: "車種が見つかりません" };
 
   return {
-    title: `${decodedWard}で${model.maker_name} ${model.name}が停められる駐車場 | Compare Park`,
+    title: `${decodedWard}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`,
     description: `${decodedWard}エリアの駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と駐車場の制限寸法を比較し、停められるかを一目で確認できます。`,
   };
 }

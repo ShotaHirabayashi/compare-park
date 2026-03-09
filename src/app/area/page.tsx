@@ -7,7 +7,7 @@ import { getParkingLots } from "@/lib/queries";
 import { TOKYO_WARDS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "エリアから駐車場を探す | Compare Park",
+  title: "エリアから駐車場を探す | トメピタ",
   description:
     "東京23区からエリアを選んで駐車場を検索。各区の駐車場数も一覧表示します。",
 };

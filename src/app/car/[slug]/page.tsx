@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!model) return { title: "車種が見つかりません" };
 
   return {
-    title: `${model.name} (${model.maker_name}) の寸法と駐車場適合 | Compare Park`,
+    title: `${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`,
     description: `${model.maker_name} ${model.name}の全長・全幅・全高・重量を一覧表示。東京23区内の駐車場への適合判定も確認できます。`,
   };
 }

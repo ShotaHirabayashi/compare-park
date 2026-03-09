@@ -61,7 +61,7 @@ export function Footer() {
           {/* ブランド */}
           <div>
             <Link href="/" className="text-lg font-bold text-primary">
-              Compare Park
+              トメピタ
             </Link>
             <p className="mt-2 text-sm text-muted-foreground">
               車種の寸法と駐車場の制限サイズを比較して、停められるかどうかを瞬時に判定。
@@ -71,7 +71,7 @@ export function Footer() {
 
         <div className="mt-8 border-t pt-6">
           <p className="text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Compare Park. All rights reserved.
+            &copy; {new Date().getFullYear()} トメピタ. All rights reserved.
           </p>
         </div>
       </div>

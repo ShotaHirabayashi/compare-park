@@ -3,7 +3,7 @@ import { FileText } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
 
 export const metadata: Metadata = {
-  title: "記事一覧 | Compare Park",
+  title: "記事一覧 | トメピタ",
   description: "駐車場選びや車の寸法に関する記事を掲載予定です。",
 };
 

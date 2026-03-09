@@ -21,17 +21,17 @@ export async function generateMetadata({
   searchParams,
 }: Props): Promise<Metadata> {
   const { car, parking } = await searchParams;
-  if (!car || !parking) return { title: "判定結果 | Compare Park" };
+  if (!car || !parking) return { title: "判定結果 | トメピタ" };
 
   const [model, lot] = await Promise.all([
     getModelBySlug(car),
     getParkingLotBySlug(parking),
   ]);
 
-  if (!model || !lot) return { title: "判定結果 | Compare Park" };
+  if (!model || !lot) return { title: "判定結果 | トメピタ" };
 
   return {
-    title: `${model.maker_name} ${model.name}は${lot.name}に停められる？ | Compare Park`,
+    title: `${model.maker_name} ${model.name}は${lot.name}に停められる？ | トメピタ`,
     description: `${model.maker_name} ${model.name}の寸法と${lot.name}の制限サイズを比較。駐車可能かどうかを判定します。`,
   };
 }

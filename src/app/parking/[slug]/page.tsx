@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!lot) return { title: "駐車場が見つかりません" };
 
   return {
-    title: `${lot.name} の制限寸法と対応車種 | Compare Park`,
+    title: `${lot.name} の制限寸法と対応車種 | トメピタ`,
     description: `${lot.name}(${lot.address ?? ""})の制限寸法を確認。対応する車種の一覧と適合判定も表示します。`,
   };
 }
