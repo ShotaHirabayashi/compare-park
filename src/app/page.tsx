@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Car, Search, CheckCircle, MapPin } from "lucide-react";
 import {
@@ -5,11 +6,9 @@ import {
   getPopularModels,
   getModelsForSearch,
   getParkingLotsForSearch,
-  getParkingLotsByWard,
 } from "@/lib/queries";
-import { MakerSearch } from "@/components/maker-search";
-import { VehicleCard } from "@/components/vehicle-card";
 import { InstantCheckForm } from "@/components/instant-check-form";
+import { CarSearchTabs } from "@/components/car-search-tabs";
 import { db } from "@/db";
 import { models, makers, dimensions, trims, phases, generations } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -85,127 +84,114 @@ export default async function Home() {
 
   return (
     <div>
-      {/* ヒーローセクション */}
-      <section className="bg-gradient-to-b from-primary/5 to-background py-16 md:py-24">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-5xl">
-            あなたの車、その駐車場に停められる？
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            車種の寸法と駐車場の制限サイズを比較して、停められるかどうかを瞬時に判定。
-            東京23区内の機械式駐車場を中心にデータを収録しています。
-          </p>
+      {/* セクション1: ヒーロー + 即判定フォーム（統合） */}
+      <section className="relative overflow-hidden pb-12 pt-16 md:pb-16 md:pt-24">
+        {/* 背景画像 */}
+        <Image
+          src="/hero-bg.jpg"
+          alt=""
+          fill
+          className="object-cover object-left"
+          priority
+        />
+        {/* オーバーレイ */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-background/60 to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
+
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-5xl">
+              あなたの車、その駐車場に停められる？
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+              車種と駐車場を選ぶだけ。OK・ギリギリ・NGを瞬時に判定します。
+            </p>
+          </div>
+          <div id="check" className="mx-auto mt-8 max-w-4xl rounded-xl border bg-background/95 p-6 shadow-lg backdrop-blur-sm">
+            <InstantCheckForm
+              vehicles={vehiclesForSearch}
+              parkingLots={parkingLotsForSearch}
+            />
+          </div>
         </div>
       </section>
 
-      {/* 即判定フォーム */}
-      <section id="check" className="-mt-8 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-xl border bg-background p-6 shadow-lg">
-          <h2 className="mb-4 text-center text-lg font-bold text-foreground">
-            車種と駐車場を選んで即判定
+      {/* セクション2: 車種を探す（人気車種 + メーカー検索をタブ統合） */}
+      <section className="bg-muted/50 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-8 text-center text-2xl font-bold text-foreground">
+            車種を探す
           </h2>
-          <InstantCheckForm
-            vehicles={vehiclesForSearch}
-            parkingLots={parkingLotsForSearch}
+          <CarSearchTabs
+            makers={makerList.map((m) => ({
+              id: m.id,
+              name: m.name,
+              slug: m.slug,
+            }))}
+            models={uniqueModels}
+            popularWithDims={popularWithDims}
           />
         </div>
       </section>
 
-      {/* 車種検索セクション */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <h2 className="mb-6 text-2xl font-bold text-foreground">
-          メーカーから車種を探す
-        </h2>
-        <MakerSearch
-          makers={makerList.map((m) => ({
-            id: m.id,
-            name: m.name,
-            slug: m.slug,
-          }))}
-          models={uniqueModels}
-        />
-      </section>
-
-      {/* 人気車種セクション */}
-      {popularWithDims.length > 0 && (
-        <section className="bg-muted/30 py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <h2 className="mb-6 text-2xl font-bold text-foreground">
-              人気の車種
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {popularWithDims.map((model) => (
-                <VehicleCard
-                  key={model.id}
-                  slug={model.slug}
-                  name={model.name}
-                  makerName={model.maker_name}
-                  bodyType={model.body_type}
-                  lengthMm={model.length_mm}
-                  widthMm={model.width_mm}
-                  heightMm={model.height_mm}
-                  weightKg={model.weight_kg}
-                />
-              ))}
-            </div>
+      {/* セクション3: エリアから探す（pill型チップ） */}
+      <section className="py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-2 flex items-center justify-center gap-2 text-2xl font-bold text-foreground">
+            <MapPin className="size-5 text-muted-foreground" />
+            エリアから探す
+          </h2>
+          <p className="mb-6 text-center text-sm text-muted-foreground">
+            東京23区の駐車場を探す
+          </p>
+          <div className="flex flex-wrap justify-center gap-2">
+            {TOKYO_WARDS.map((ward) => (
+              <Link
+                key={ward}
+                href={`/area/${ward}`}
+                className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary"
+              >
+                {ward}
+              </Link>
+            ))}
           </div>
-        </section>
-      )}
-
-      {/* エリアから探す */}
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <h2 className="mb-2 text-2xl font-bold text-foreground">
-          エリアから探す
-        </h2>
-        <p className="mb-6 text-sm text-muted-foreground">
-          東京23区の駐車場を探す
-        </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {TOKYO_WARDS.map((ward) => (
-            <Link
-              key={ward}
-              href={`/area/${ward}`}
-              className="flex items-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-medium transition-colors hover:bg-muted hover:border-primary/30"
-            >
-              <MapPin className="size-3.5 shrink-0 text-muted-foreground" />
-              {ward}
-            </Link>
-          ))}
         </div>
       </section>
 
-      {/* 使い方セクション */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <h2 className="mb-10 text-center text-2xl font-bold text-foreground">
-          使い方
-        </h2>
-        <div className="grid gap-8 md:grid-cols-3">
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
-              <Car className="size-8 text-primary" />
+      {/* セクション4: 使い方 */}
+      <section className="bg-muted/50 py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-10 text-center text-2xl font-bold text-foreground">
+            使い方
+          </h2>
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
+                <Car className="size-8 text-primary" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold">1. 車種を選ぶ</h3>
+              <p className="text-sm text-muted-foreground">
+                上の即判定フォームから車種名を入力。メーカー名でも検索できます。
+              </p>
             </div>
-            <h3 className="mb-2 text-lg font-semibold">1. 車種を選ぶ</h3>
-            <p className="text-sm text-muted-foreground">
-              上の即判定フォームから車種名を入力。メーカー名でも検索できます。
-            </p>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
-              <Search className="size-8 text-primary" />
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
+                <Search className="size-8 text-primary" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold">2. 駐車場を選ぶ</h3>
+              <p className="text-sm text-muted-foreground">
+                駐車場名や住所で検索。気になる駐車場を見つけましょう。
+              </p>
             </div>
-            <h3 className="mb-2 text-lg font-semibold">2. 駐車場を選ぶ</h3>
-            <p className="text-sm text-muted-foreground">
-              駐車場名や住所で検索。気になる駐車場を見つけましょう。
-            </p>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
-              <CheckCircle className="size-8 text-primary" />
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
+                <CheckCircle className="size-8 text-primary" />
+              </div>
+              <h3 className="mb-2 text-lg font-semibold">3. 判定を確認</h3>
+              <p className="text-sm text-muted-foreground">
+                OK・ギリギリ・NGの3段階で、停められるかどうかが一目瞭然。
+              </p>
             </div>
-            <h3 className="mb-2 text-lg font-semibold">3. 判定を確認</h3>
-            <p className="text-sm text-muted-foreground">
-              OK・ギリギリ・NGの3段階で、停められるかどうかが一目瞭然。
-            </p>
           </div>
         </div>
       </section>
