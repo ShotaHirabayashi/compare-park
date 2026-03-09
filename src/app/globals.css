@@ -146,32 +146,49 @@
   }
 }
 
-/* prose内テーブルのスタイル */
-.prose table {
-  @apply w-full border-collapse overflow-hidden rounded-lg border text-sm;
+/* prose内テーブル — 記事コラム用 */
+.prose .article-table-wrapper {
+  @apply my-6 overflow-x-auto rounded-xl border border-border bg-card shadow-sm;
 }
 
-.prose thead {
-  @apply bg-muted;
+.prose .article-table-wrapper table {
+  @apply m-0 w-full border-collapse border-0 text-sm;
 }
 
-.prose thead th {
-  @apply border-b border-border px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+.prose .article-table-wrapper thead {
+  @apply border-b-2 border-primary/20 bg-primary/5;
 }
 
-.prose tbody tr {
-  @apply border-b border-border transition-colors hover:bg-muted/50;
+.prose .article-table-wrapper thead th {
+  @apply border-0 px-4 py-3 text-left text-xs font-bold tracking-wide text-primary;
+  white-space: nowrap;
 }
 
-.prose tbody tr:last-child {
+.prose .article-table-wrapper tbody tr {
+  @apply border-b border-border/60 transition-colors;
+}
+
+.prose .article-table-wrapper tbody tr:nth-child(even) {
+  @apply bg-muted/30;
+}
+
+.prose .article-table-wrapper tbody tr:hover {
+  @apply bg-primary/5;
+}
+
+.prose .article-table-wrapper tbody tr:last-child {
   @apply border-b-0;
 }
 
-.prose tbody td {
-  @apply px-4 py-2.5;
+.prose .article-table-wrapper tbody td {
+  @apply border-0 px-4 py-3;
 }
 
-/* proseのモバイル対応テーブル */
-.prose .table-wrapper {
-  @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
+.prose .article-table-wrapper tbody td:first-child {
+  @apply font-medium text-foreground;
+}
+
+/* 判定ラベル */
+.prose .article-table-wrapper tbody td:last-child {
+  @apply font-semibold;
 }

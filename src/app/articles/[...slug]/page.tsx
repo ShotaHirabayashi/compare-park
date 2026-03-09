@@ -144,8 +144,8 @@ export default async function ArticlePage({ params }: PageProps) {
             }}
             components={{
               table: (props) => (
-                <div className="my-6 overflow-x-auto rounded-lg border">
-                  <table {...props} className="m-0 border-0" />
+                <div className="article-table-wrapper">
+                  <table {...props} />
                 </div>
               ),
             }}
