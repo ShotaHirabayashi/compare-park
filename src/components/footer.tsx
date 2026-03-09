@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const siteLinks = [
   { href: "/#check", label: "駐車場を判定" },
@@ -60,7 +61,8 @@ export function Footer() {
 
           {/* ブランド */}
           <div>
-            <Link href="/" className="text-lg font-bold text-primary">
+            <Link href="/" className="flex items-center gap-2 text-lg font-bold text-primary">
+              <Image src="/logo.svg" alt="トメピタ" width={28} height={28} />
               トメピタ
             </Link>
             <p className="mt-2 text-sm text-muted-foreground">

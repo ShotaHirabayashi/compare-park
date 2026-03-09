@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   title: "トメピタ - 車種×駐車場マッチングサービス",
   description:
     "あなたの車がその駐車場に停められるか、寸法データで即判定。東京23区内の駐車場と車種のマッチングサービス。",
+  icons: {
+    icon: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
