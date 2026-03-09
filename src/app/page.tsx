@@ -1,18 +1,32 @@
 import Link from "next/link";
-import { Search, Car, MapPin, CheckCircle } from "lucide-react";
-import { getMakers, getPopularModels, getAllDimensions } from "@/lib/queries";
+import { Car, Search, CheckCircle, MapPin } from "lucide-react";
+import {
+  getMakers,
+  getPopularModels,
+  getModelsForSearch,
+  getParkingLotsForSearch,
+  getParkingLotsByWard,
+} from "@/lib/queries";
 import { MakerSearch } from "@/components/maker-search";
 import { VehicleCard } from "@/components/vehicle-card";
+import { InstantCheckForm } from "@/components/instant-check-form";
 import { db } from "@/db";
 import { models, makers, dimensions, trims, phases, generations } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { TOKYO_WARDS } from "@/lib/constants";
 
 export default async function Home() {
-  const [makerList, popularModels, allModelsWithDims] = await Promise.all([
+  const [
+    makerList,
+    popularModels,
+    vehiclesForSearch,
+    parkingLotsForSearch,
+    allModelsWithDims,
+  ] = await Promise.all([
     getMakers(),
     getPopularModels(),
-    // モデル一覧と代表寸法を結合して取得
+    getModelsForSearch(),
+    getParkingLotsForSearch(),
     db
       .select({
         id: models.id,
@@ -84,6 +98,19 @@ export default async function Home() {
         </div>
       </section>
 
+      {/* 即判定フォーム */}
+      <section id="check" className="-mt-8 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="rounded-xl border bg-background p-6 shadow-lg">
+          <h2 className="mb-4 text-center text-lg font-bold text-foreground">
+            車種と駐車場を選んで即判定
+          </h2>
+          <InstantCheckForm
+            vehicles={vehiclesForSearch}
+            parkingLots={parkingLotsForSearch}
+          />
+        </div>
+      </section>
+
       {/* 車種検索セクション */}
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <h2 className="mb-6 text-2xl font-bold text-foreground">
@@ -125,60 +152,27 @@ export default async function Home() {
         </section>
       )}
 
-      {/* エリア×車種セクション */}
-      {popularWithDims.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <h2 className="mb-2 text-2xl font-bold text-foreground">
-            エリア×車種で駐車場を探す
-          </h2>
-          <p className="mb-6 text-sm text-muted-foreground">
-            エリアと車種を選んで、停められる駐車場をチェック
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                    エリア
-                  </th>
-                  {popularWithDims.map((m) => (
-                    <th
-                      key={m.id}
-                      className="px-3 py-2 text-center font-medium text-muted-foreground"
-                    >
-                      {m.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {TOKYO_WARDS.map((ward) => (
-                  <tr key={ward} className="border-b last:border-b-0">
-                    <td className="px-3 py-2">
-                      <Link
-                        href={`/area/${ward}`}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {ward}
-                      </Link>
-                    </td>
-                    {popularWithDims.map((m) => (
-                      <td key={m.id} className="px-3 py-2 text-center">
-                        <Link
-                          href={`/area/${ward}/car/${m.slug}`}
-                          className="inline-block rounded-md border border-border px-2 py-1 text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
-                        >
-                          判定
-                        </Link>
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
+      {/* エリアから探す */}
+      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <h2 className="mb-2 text-2xl font-bold text-foreground">
+          エリアから探す
+        </h2>
+        <p className="mb-6 text-sm text-muted-foreground">
+          東京23区の駐車場を探す
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          {TOKYO_WARDS.map((ward) => (
+            <Link
+              key={ward}
+              href={`/area/${ward}`}
+              className="flex items-center gap-2 rounded-lg border border-border px-4 py-3 text-sm font-medium transition-colors hover:bg-muted hover:border-primary/30"
+            >
+              <MapPin className="size-3.5 shrink-0 text-muted-foreground" />
+              {ward}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {/* 使い方セクション */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -192,16 +186,16 @@ export default async function Home() {
             </div>
             <h3 className="mb-2 text-lg font-semibold">1. 車種を選ぶ</h3>
             <p className="text-sm text-muted-foreground">
-              メーカーから車種を選択。車の寸法データが自動で読み込まれます。
+              上の即判定フォームから車種名を入力。メーカー名でも検索できます。
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-primary/10">
               <Search className="size-8 text-primary" />
             </div>
-            <h3 className="mb-2 text-lg font-semibold">2. 駐車場を検索</h3>
+            <h3 className="mb-2 text-lg font-semibold">2. 駐車場を選ぶ</h3>
             <p className="text-sm text-muted-foreground">
-              エリアや駐車場名から、気になる駐車場を見つけましょう。
+              駐車場名や住所で検索。気になる駐車場を見つけましょう。
             </p>
           </div>
           <div className="flex flex-col items-center text-center">

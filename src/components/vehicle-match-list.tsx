@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { CircleCheck, CircleX, TriangleAlert, Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ParkingMatchRow } from "@/components/parking-match-row";
-import type { ParkingMatchItem } from "@/components/parking-match-row";
+import { MatchBadge } from "@/components/match-badge";
 import type { MatchResult } from "@/lib/matching";
 
 const PAGE_SIZE = 20;
@@ -46,37 +46,22 @@ const filterConfig: {
   },
 ];
 
-interface ParkingMatchListProps {
-  items: ParkingMatchItem[];
-  showSearch?: boolean;
-  showAreaFilter?: boolean;
+export interface VehicleMatchItem {
+  modelId: number;
+  modelName: string;
+  modelSlug: string;
+  makerName: string;
+  result: MatchResult;
 }
 
-function extractWard(address: string): string | null {
-  const match = address.match(/([\u4e00-\u9fa5]+区)/);
-  return match ? match[1] : null;
+interface VehicleMatchListProps {
+  items: VehicleMatchItem[];
 }
 
-export function ParkingMatchList({
-  items,
-  showSearch = true,
-  showAreaFilter = false,
-}: ParkingMatchListProps) {
+export function VehicleMatchList({ items }: VehicleMatchListProps) {
   const [activeFilter, setActiveFilter] = useState<FilterType>("all");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedWard, setSelectedWard] = useState<string | null>(null);
-
-  // エリア（区）一覧を抽出
-  const wards = useMemo(() => {
-    if (!showAreaFilter) return [];
-    const wardSet = new Set<string>();
-    for (const item of items) {
-      const ward = extractWard(item.parkingLotAddress);
-      if (ward) wardSet.add(ward);
-    }
-    return Array.from(wardSet).sort();
-  }, [items, showAreaFilter]);
 
   const counts = useMemo(() => {
     const c = { ok: 0, caution: 0, ng: 0 };
@@ -97,20 +82,14 @@ export function ParkingMatchList({
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (item) =>
-          item.parkingLotName.toLowerCase().includes(q) ||
-          item.parkingLotAddress.toLowerCase().includes(q)
+          item.modelName.toLowerCase().includes(q) ||
+          item.makerName.toLowerCase().includes(q) ||
+          `${item.makerName} ${item.modelName}`.toLowerCase().includes(q)
       );
     }
 
-    if (selectedWard) {
-      result = result.filter((item) => {
-        const ward = extractWard(item.parkingLotAddress);
-        return ward === selectedWard;
-      });
-    }
-
     return result;
-  }, [items, activeFilter, searchQuery, selectedWard]);
+  }, [items, activeFilter, searchQuery]);
 
   const visible = filtered.slice(0, visibleCount);
   const remaining = filtered.length - visibleCount;
@@ -123,55 +102,18 @@ export function ParkingMatchList({
   return (
     <div className="space-y-4">
       {/* テキスト検索 */}
-      {showSearch && (
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="駐車場名・住所で検索..."
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setVisibleCount(PAGE_SIZE);
-            }}
-            className="pl-9"
-          />
-        </div>
-      )}
-
-      {/* エリアフィルタ */}
-      {showAreaFilter && wards.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => {
-              setSelectedWard(null);
-              setVisibleCount(PAGE_SIZE);
-            }}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              selectedWard === null
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            すべて
-          </button>
-          {wards.map((ward) => (
-            <button
-              key={ward}
-              onClick={() => {
-                setSelectedWard(selectedWard === ward ? null : ward);
-                setVisibleCount(PAGE_SIZE);
-              }}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                selectedWard === ward
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {ward}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="車種名・メーカー名で検索..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setVisibleCount(PAGE_SIZE);
+          }}
+          className="pl-9"
+        />
+      </div>
 
       {/* サマリーカード */}
       <div className="grid grid-cols-3 gap-3">
@@ -185,7 +127,9 @@ export function ParkingMatchList({
                 handleFilterChange(isActive ? "all" : key)
               }
               className={`rounded-lg border-2 p-3 text-center transition-all ${bg} ${
-                isActive ? `${border} ring-2 ring-offset-1 ring-current ${color}` : "border-transparent"
+                isActive
+                  ? `${border} ring-2 ring-offset-1 ring-current ${color}`
+                  : "border-transparent"
               }`}
             >
               <Icon className={`mx-auto size-5 ${color}`} />
@@ -231,14 +175,30 @@ export function ParkingMatchList({
         <Card>
           <CardContent className="p-0">
             {visible.map((item) => (
-              <ParkingMatchRow key={item.restrictionId} item={item} />
+              <div
+                key={item.modelId}
+                className="border-b border-border last:border-b-0"
+              >
+                <Link
+                  href={`/car/${item.modelSlug}`}
+                  className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-muted/50"
+                >
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{item.modelName}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.makerName}
+                    </p>
+                  </div>
+                  <MatchBadge result={item.result} className="shrink-0" />
+                </Link>
+              </div>
             ))}
           </CardContent>
         </Card>
       ) : (
         <Card>
           <CardContent className="py-8 text-center text-muted-foreground">
-            該当する駐車場はありません。
+            該当する車種はありません。
           </CardContent>
         </Card>
       )}

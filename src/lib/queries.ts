@@ -11,7 +11,7 @@ import {
   parkingFees,
   operatingHours,
 } from "@/db/schema";
-import { eq, and, like } from "drizzle-orm";
+import { eq, and, like, sql } from "drizzle-orm";
 
 // ---------- Makers ----------
 
@@ -238,6 +238,50 @@ export async function getRestrictionsByWard(ward: string) {
     .from(vehicleRestrictions)
     .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id))
     .where(like(parkingLots.address, `%${ward}%`));
+}
+
+// ---------- Search helpers (lightweight for Combobox) ----------
+
+export async function getModelsForSearch() {
+  return db
+    .select({
+      slug: models.slug,
+      name: models.name,
+      makerName: makers.name,
+    })
+    .from(models)
+    .innerJoin(makers, eq(models.maker_id, makers.id))
+    .orderBy(makers.name, models.name);
+}
+
+export async function getParkingLotsForSearch() {
+  return db
+    .select({
+      slug: parkingLots.slug,
+      name: parkingLots.name,
+      address: parkingLots.address,
+    })
+    .from(parkingLots)
+    .orderBy(parkingLots.name);
+}
+
+export async function getRestrictionsByParkingLotSlug(slug: string) {
+  return db
+    .select({
+      id: vehicleRestrictions.id,
+      parking_lot_id: vehicleRestrictions.parking_lot_id,
+      restriction_name: vehicleRestrictions.restriction_name,
+      max_length_mm: vehicleRestrictions.max_length_mm,
+      max_width_mm: vehicleRestrictions.max_width_mm,
+      max_height_mm: vehicleRestrictions.max_height_mm,
+      max_weight_kg: vehicleRestrictions.max_weight_kg,
+      spaces_count: vehicleRestrictions.spaces_count,
+      monthly_fee_yen: vehicleRestrictions.monthly_fee_yen,
+      notes: vehicleRestrictions.notes,
+    })
+    .from(vehicleRestrictions)
+    .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id))
+    .where(eq(parkingLots.slug, slug));
 }
 
 // ---------- Parking Fees ----------

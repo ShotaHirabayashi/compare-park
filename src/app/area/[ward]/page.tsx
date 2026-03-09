@@ -3,7 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingCard } from "@/components/parking-card";
-import { getParkingLotsByWard, getRestrictionsByParkingLotId, getPopularModels } from "@/lib/queries";
+import { VehicleComboboxNav } from "@/components/vehicle-combobox-nav";
+import {
+  getParkingLotsByWard,
+  getRestrictionsByParkingLotId,
+  getModelsForSearch,
+} from "@/lib/queries";
 import { TOKYO_WARDS } from "@/lib/constants";
 
 interface Props {
@@ -25,13 +30,13 @@ export default async function WardPage({ params }: Props) {
   const decodedWard = decodeURIComponent(ward);
 
   // 有効な区名かチェック
-  if (!TOKYO_WARDS.includes(decodedWard as typeof TOKYO_WARDS[number])) {
+  if (!TOKYO_WARDS.includes(decodedWard as (typeof TOKYO_WARDS)[number])) {
     notFound();
   }
 
-  const [lots, popularModels] = await Promise.all([
+  const [lots, vehiclesForSearch] = await Promise.all([
     getParkingLotsByWard(decodedWard),
-    getPopularModels(),
+    getModelsForSearch(),
   ]);
 
   // 各駐車場の代表制限値を取得
@@ -58,6 +63,17 @@ export default async function WardPage({ params }: Props) {
         {decodedWard}エリアの駐車場一覧 ({lots.length}件)
       </p>
 
+      {/* 車種選択で適合確認 */}
+      <div className="mb-8 rounded-lg border bg-muted/30 p-4">
+        <h2 className="mb-3 text-sm font-semibold">
+          車種を選んで適合を確認
+        </h2>
+        <VehicleComboboxNav
+          vehicles={vehiclesForSearch}
+          basePath={`/area/${ward}/car`}
+        />
+      </div>
+
       {lotsWithRestrictions.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {lotsWithRestrictions.map(({ lot, restriction }) => (
@@ -80,26 +96,6 @@ export default async function WardPage({ params }: Props) {
             {decodedWard}の駐車場データはまだ登録されていません。
           </p>
         </div>
-      )}
-
-      {/* 車種別の適合判定リンク */}
-      {popularModels.length > 0 && (
-        <section className="mt-10">
-          <h2 className="mb-4 text-lg font-bold">
-            {decodedWard}で車種別に適合を確認
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {popularModels.map((m) => (
-              <Link
-                key={m.id}
-                href={`/area/${ward}/car/${m.slug}`}
-                className="rounded-lg border border-border px-3 py-1.5 text-sm transition-colors hover:bg-muted"
-              >
-                {m.maker_name} {m.name}
-              </Link>
-            ))}
-          </div>
-        </section>
       )}
     </div>
   );

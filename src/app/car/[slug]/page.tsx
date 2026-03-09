@@ -8,6 +8,7 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingMatchList } from "@/components/parking-match-list";
 import type { ParkingMatchItem } from "@/components/parking-match-row";
 import { TrimSelector } from "@/components/trim-selector";
+import { AreaSearchMini } from "@/components/area-search-mini";
 import {
   getModelBySlug,
   getAllTrimsWithDimensions,
@@ -252,11 +253,17 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
         </Card>
       )}
 
+      {/* エリア検索ミニフォーム */}
+      <div className="mb-10 rounded-lg border bg-muted/30 p-4">
+        <h3 className="mb-3 text-sm font-semibold">この車で駐車場を探す</h3>
+        <AreaSearchMini carSlug={slug} />
+      </div>
+
       {/* 停められる駐車場一覧 */}
       <section>
         <h2 className="mb-6 text-2xl font-bold">駐車場との適合判定</h2>
         {parkingMatchItems.length > 0 ? (
-          <ParkingMatchList items={parkingMatchItems} />
+          <ParkingMatchList items={parkingMatchItems} showAreaFilter />
         ) : (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">

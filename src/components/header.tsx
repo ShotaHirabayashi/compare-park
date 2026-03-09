@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/sheet";
 
 const navLinks = [
-  { href: "/", label: "車種を探す" },
-  { href: "/area", label: "エリアから探す" },
-  { href: "/articles", label: "記事" },
+  { href: "/#check", label: "駐車場を判定" },
+  { href: "/", label: "車種一覧" },
+  { href: "/area", label: "エリア" },
 ] as const;
 
 export function Header() {

@@ -4,8 +4,9 @@ import { MapPin, Clock, Phone, ExternalLink } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { MatchBadge } from "@/components/match-badge";
-import { DimensionCompare } from "@/components/dimension-compare";
+import { InlineParkingChecker } from "@/components/inline-parking-checker";
+import { VehicleMatchList } from "@/components/vehicle-match-list";
+import type { VehicleMatchItem } from "@/components/vehicle-match-list";
 import {
   getParkingLotBySlug,
   getRestrictionsByParkingLotId,
@@ -14,7 +15,6 @@ import {
   getAllDimensions,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, type MatchResult } from "@/lib/matching";
-import Link from "next/link";
 
 const parkingTypeLabels: Record<string, string> = {
   mechanical: "機械式",
@@ -67,20 +67,20 @@ export default async function ParkingDetailPage({ params }: Props) {
   const ward = extractWard(lot.address);
 
   // 車種ごとに最良の制限でマッチング判定
-  type VehicleMatch = {
-    model_id: number;
-    model_name: string;
-    model_slug: string;
-    body_type: string;
-    maker_name: string;
-    result: MatchResult;
-    length_mm: number | null;
-    width_mm: number | null;
-    height_mm: number | null;
-    weight_kg: number | null;
-  };
-
-  const vehicleMap = new Map<number, VehicleMatch>();
+  const vehicleMap = new Map<
+    number,
+    {
+      model_id: number;
+      model_name: string;
+      model_slug: string;
+      maker_name: string;
+      result: MatchResult;
+      length_mm: number | null;
+      width_mm: number | null;
+      height_mm: number | null;
+      weight_kg: number | null;
+    }
+  >();
 
   // model_idで重複排除しつつ最初の寸法を使う
   const uniqueDims = new Map<number, (typeof allDims)[number]>();
@@ -117,7 +117,6 @@ export default async function ParkingDetailPage({ params }: Props) {
       model_id: dim.model_id,
       model_name: dim.model_name,
       model_slug: dim.model_slug,
-      body_type: dim.body_type,
       maker_name: dim.maker_name,
       result: bestResult,
       length_mm: dim.length_mm,
@@ -131,9 +130,33 @@ export default async function ParkingDetailPage({ params }: Props) {
     (a, b) => matchSortOrder(a.result) - matchSortOrder(b.result)
   );
 
-  const okVehicles = vehicleResults.filter((v) => v.result === "ok");
-  const cautionVehicles = vehicleResults.filter((v) => v.result === "caution");
-  const ngVehicles = vehicleResults.filter((v) => v.result === "ng");
+  // VehicleMatchList用のデータ
+  const vehicleMatchItems: VehicleMatchItem[] = vehicleResults.map((v) => ({
+    modelId: v.model_id,
+    modelName: v.model_name,
+    modelSlug: v.model_slug,
+    makerName: v.maker_name,
+    result: v.result,
+  }));
+
+  // InlineParkingChecker用の車種データ
+  const vehiclesForChecker = Array.from(uniqueDims.values()).map((d) => ({
+    slug: d.model_slug,
+    name: d.model_name,
+    makerName: d.maker_name,
+    lengthMm: d.length_mm,
+    widthMm: d.width_mm,
+    heightMm: d.height_mm,
+    weightKg: d.weight_kg,
+  }));
+
+  // InlineParkingChecker用の制限データ
+  const restrictionsForChecker = restrictions.map((r) => ({
+    max_length_mm: r.max_length_mm,
+    max_width_mm: r.max_width_mm,
+    max_height_mm: r.max_height_mm,
+    max_weight_kg: r.max_weight_kg,
+  }));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -242,7 +265,7 @@ export default async function ParkingDetailPage({ params }: Props) {
       )}
 
       {/* 制限値一覧 */}
-      <section className="mb-10">
+      <section className="mb-8">
         <h2 className="mb-4 text-2xl font-bold">制限サイズ</h2>
         {restrictions.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -301,87 +324,24 @@ export default async function ParkingDetailPage({ params }: Props) {
         )}
       </section>
 
-      {/* 停められる車種一覧 */}
+      {/* あなたの車は停められる？ */}
+      {restrictions.length > 0 && vehiclesForChecker.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-4 text-xl font-bold">あなたの車は停められる？</h2>
+          <div className="rounded-lg border bg-muted/30 p-4">
+            <InlineParkingChecker
+              restrictions={restrictionsForChecker}
+              vehicles={vehiclesForChecker}
+            />
+          </div>
+        </section>
+      )}
+
+      {/* 車種との適合判定 */}
       <section>
         <h2 className="mb-6 text-2xl font-bold">車種との適合判定</h2>
-
-        {vehicleResults.length > 0 ? (
-          <div className="space-y-8">
-            {/* OK */}
-            {okVehicles.length > 0 && (
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-                  <MatchBadge result="ok" />
-                  <span>{okVehicles.length}車種</span>
-                </h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {okVehicles.map((v) => (
-                    <Link key={v.model_id} href={`/car/${v.model_slug}`} className="block">
-                      <Card className="h-full transition-transform hover:scale-[1.02]" size="sm">
-                        <CardContent className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{v.model_name}</p>
-                            <p className="text-xs text-muted-foreground">{v.maker_name}</p>
-                          </div>
-                          <MatchBadge result="ok" />
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* CAUTION */}
-            {cautionVehicles.length > 0 && (
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-                  <MatchBadge result="caution" />
-                  <span>{cautionVehicles.length}車種</span>
-                </h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {cautionVehicles.map((v) => (
-                    <Link key={v.model_id} href={`/car/${v.model_slug}`} className="block">
-                      <Card className="h-full transition-transform hover:scale-[1.02]" size="sm">
-                        <CardContent className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{v.model_name}</p>
-                            <p className="text-xs text-muted-foreground">{v.maker_name}</p>
-                          </div>
-                          <MatchBadge result="caution" />
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* NG */}
-            {ngVehicles.length > 0 && (
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-                  <MatchBadge result="ng" />
-                  <span>{ngVehicles.length}車種</span>
-                </h3>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {ngVehicles.map((v) => (
-                    <Link key={v.model_id} href={`/car/${v.model_slug}`} className="block">
-                      <Card className="h-full transition-transform hover:scale-[1.02]" size="sm">
-                        <CardContent className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{v.model_name}</p>
-                            <p className="text-xs text-muted-foreground">{v.maker_name}</p>
-                          </div>
-                          <MatchBadge result="ng" />
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+        {vehicleMatchItems.length > 0 ? (
+          <VehicleMatchList items={vehicleMatchItems} />
         ) : (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
