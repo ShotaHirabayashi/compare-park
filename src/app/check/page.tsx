@@ -29,11 +29,13 @@ export async function generateMetadata({
     getParkingLotBySlug(parking),
   ]);
 
-  if (!model || !lot) return { title: "判定結果 | トメピタ" };
+  if (!model || !lot)
+    return { title: "判定結果 | トメピタ", robots: { index: false } };
 
   return {
     title: `${model.maker_name} ${model.name}は${lot.name}に停められる？ | トメピタ`,
     description: `${model.maker_name} ${model.name}の寸法と${lot.name}の制限サイズを比較。駐車可能かどうかを判定します。`,
+    robots: { index: false },
   };
 }
 

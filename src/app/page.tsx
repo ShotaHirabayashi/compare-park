@@ -91,6 +91,7 @@ export default async function Home() {
           src="/hero-bg.jpg"
           alt=""
           fill
+          sizes="100vw"
           className="object-cover object-left"
           priority
         />

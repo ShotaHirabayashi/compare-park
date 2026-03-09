@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "ページが見つかりません | トメピタ",
+  description: "お探しのページは存在しないか、移動した可能性があります。",
+  robots: { index: false },
+};
 
 export default function NotFound() {
   return (
