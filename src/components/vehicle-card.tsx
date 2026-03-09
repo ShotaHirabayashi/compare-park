@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Car } from "lucide-react";
 import {
@@ -19,6 +20,16 @@ const bodyTypeLabels: Record<string, string> = {
   wagon: "ワゴン",
   coupe: "クーペ",
   truck: "トラック",
+};
+
+const bodyTypeImages: Record<string, string> = {
+  sedan: "/images/cars/sedan.jpg",
+  suv: "/images/cars/suv.jpg",
+  minivan: "/images/cars/minivan.jpg",
+  compact: "/images/cars/compact.jpg",
+  wagon: "/images/cars/wagon.jpg",
+  coupe: "/images/cars/coupe.jpg",
+  truck: "/images/cars/truck.jpg",
 };
 
 interface VehicleCardProps {
@@ -46,8 +57,17 @@ export function VehicleCard({
 }: VehicleCardProps) {
   return (
     <Link href={`/car/${slug}`} className="block transition-transform hover:scale-[1.02]">
-      <Card className="h-full">
-        <CardHeader>
+      <Card className="h-full overflow-hidden">
+        <div className="relative h-32 w-full bg-muted/30">
+          <Image
+            src={bodyTypeImages[bodyType] ?? bodyTypeImages.sedan}
+            alt={bodyTypeLabels[bodyType] ?? bodyType}
+            fill
+            className="object-contain p-2"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+        </div>
+        <CardHeader className="pt-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base font-semibold">{name}</CardTitle>
             {matchResult && <MatchBadge result={matchResult} />}

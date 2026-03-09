@@ -1,0 +1,2239 @@
+import { db } from "../index";
+import {
+  makers,
+  models,
+  generations,
+  phases,
+  trims,
+  dimensions,
+  parkingLots,
+  vehicleRestrictions,
+  parkingFees,
+  operatingHours,
+} from "../schema";
+import { sql } from "drizzle-orm";
+
+// ============================================================
+// 車種データ定義
+// ============================================================
+interface CarSeed {
+  makerName: string;
+  makerSlug: string;
+  country: string;
+  modelName: string;
+  modelSlug: string;
+  bodyType: "sedan" | "suv" | "minivan" | "compact" | "wagon" | "coupe" | "truck";
+  generationName: string;
+  startYear: number;
+  endYear?: number;
+  trimName: string;
+  driveType: "2WD" | "4WD" | "AWD";
+  transmission: string;
+  lengthMm: number;
+  widthMm: number;
+  heightMm: number;
+  weightKg: number;
+  minTurningRadiusM: number;
+  existingModel?: boolean;
+}
+
+// ヘルパー: 同一モデルの追加トリム生成
+function t(base: Partial<CarSeed>, overrides?: Partial<CarSeed>): CarSeed {
+  return { ...base, existingModel: true, ...overrides } as CarSeed;
+}
+
+// --- トヨタ ベース定義 ---
+const toyotaBase = { makerName: "トヨタ" as const, makerSlug: "toyota" as const, country: "日本" as const };
+
+const alphard40Base = { ...toyotaBase, modelName: "アルファード", modelSlug: "alphard", bodyType: "minivan" as const, generationName: "40系 (2023-)", startYear: 2023 };
+const alphard30Base = { ...toyotaBase, modelName: "アルファード", modelSlug: "alphard", bodyType: "minivan" as const, generationName: "30系後期 (2018-2022)", startYear: 2018, endYear: 2022 };
+const voxy90Base = { ...toyotaBase, modelName: "ヴォクシー", modelSlug: "voxy", bodyType: "minivan" as const, generationName: "90系 (2022-)", startYear: 2022 };
+const voxy80Base = { ...toyotaBase, modelName: "ヴォクシー", modelSlug: "voxy", bodyType: "minivan" as const, generationName: "80系後期 (2017-2021)", startYear: 2017, endYear: 2021 };
+const harrier80Base = { ...toyotaBase, modelName: "ハリアー", modelSlug: "harrier", bodyType: "suv" as const, generationName: "80系 (2020-)", startYear: 2020 };
+const harrier60Base = { ...toyotaBase, modelName: "ハリアー", modelSlug: "harrier", bodyType: "suv" as const, generationName: "60系 (2013-2020)", startYear: 2013, endYear: 2020 };
+const rav4Base = { ...toyotaBase, modelName: "RAV4", modelSlug: "rav4", bodyType: "suv" as const, generationName: "5代目 (2019-)", startYear: 2019 };
+const yarisBase = { ...toyotaBase, modelName: "ヤリス", modelSlug: "yaris", bodyType: "compact" as const, generationName: "初代 (2020-)", startYear: 2020 };
+const prius60Base = { ...toyotaBase, modelName: "プリウス", modelSlug: "prius", bodyType: "sedan" as const, generationName: "60系 5代目 (2023-)", startYear: 2023 };
+const prius50Base = { ...toyotaBase, modelName: "プリウス", modelSlug: "prius", bodyType: "sedan" as const, generationName: "50系 4代目 (2015-2022)", startYear: 2015, endYear: 2022 };
+const lc300Base = { ...toyotaBase, modelName: "ランドクルーザー300", modelSlug: "land-cruiser-300", bodyType: "suv" as const, generationName: "300系 (2021-)", startYear: 2021 };
+
+// --- ホンダ ベース定義 ---
+const hondaBase = { makerName: "ホンダ" as const, makerSlug: "honda" as const, country: "日本" as const };
+const nbox3Base = { ...hondaBase, modelName: "N-BOX", modelSlug: "n-box", bodyType: "compact" as const, generationName: "3代目 JF5/JF6 (2023-)", startYear: 2023 };
+const nbox2Base = { ...hondaBase, modelName: "N-BOX", modelSlug: "n-box", bodyType: "compact" as const, generationName: "2代目 JF3/JF4 (2017-2023)", startYear: 2017, endYear: 2023 };
+const freed3Base = { ...hondaBase, modelName: "フリード", modelSlug: "freed", bodyType: "minivan" as const, generationName: "3代目 (2024-)", startYear: 2024 };
+const freed2Base = { ...hondaBase, modelName: "フリード", modelSlug: "freed", bodyType: "minivan" as const, generationName: "2代目 GB5/6/7/8 (2016-2024)", startYear: 2016, endYear: 2024 };
+
+// --- 日産 ベース定義 ---
+const nissanBase = { makerName: "日産" as const, makerSlug: "nissan" as const, country: "日本" as const };
+const serenaC28Base = { ...nissanBase, modelName: "セレナ", modelSlug: "serena", bodyType: "minivan" as const, generationName: "C28型 (2022-)", startYear: 2022 };
+const serenaC27Base = { ...nissanBase, modelName: "セレナ", modelSlug: "serena", bodyType: "minivan" as const, generationName: "C27型 (2016-2022)", startYear: 2016, endYear: 2022 };
+
+// --- マツダ ベース定義 ---
+const mazdaBase = { makerName: "マツダ" as const, makerSlug: "mazda" as const, country: "日本" as const };
+const cx5Base = { ...mazdaBase, modelName: "CX-5", modelSlug: "cx-5", bodyType: "suv" as const, generationName: "2代目 (2017-)", startYear: 2017 };
+const cx60Base = { ...mazdaBase, modelName: "CX-60", modelSlug: "cx-60", bodyType: "suv" as const, generationName: "初代 (2022-)", startYear: 2022 };
+
+// --- スバル ベース定義 ---
+const subaruBase = { makerName: "スバル" as const, makerSlug: "subaru" as const, country: "日本" as const };
+const forester6Base = { ...subaruBase, modelName: "フォレスター", modelSlug: "forester", bodyType: "suv" as const, generationName: "6代目 (2024-)", startYear: 2024 };
+const forester5Base = { ...subaruBase, modelName: "フォレスター", modelSlug: "forester", bodyType: "suv" as const, generationName: "5代目 SK (2018-2024)", startYear: 2018, endYear: 2024 };
+
+// --- レクサス ベース定義 ---
+const lexusBase = { makerName: "レクサス" as const, makerSlug: "lexus" as const, country: "日本" as const };
+const rx5Base = { ...lexusBase, modelName: "RX", modelSlug: "rx", bodyType: "suv" as const, generationName: "5代目 (2022-)", startYear: 2022 };
+const rx4Base = { ...lexusBase, modelName: "RX", modelSlug: "rx", bodyType: "suv" as const, generationName: "4代目 (2015-2022)", startYear: 2015, endYear: 2022 };
+const nx2Base = { ...lexusBase, modelName: "NX", modelSlug: "nx", bodyType: "suv" as const, generationName: "2代目 (2021-)", startYear: 2021 };
+const nx1Base = { ...lexusBase, modelName: "NX", modelSlug: "nx", bodyType: "suv" as const, generationName: "初代 (2014-2021)", startYear: 2014, endYear: 2021 };
+
+// --- BMW ベース定義 ---
+const bmwBase = { makerName: "BMW" as const, makerSlug: "bmw" as const, country: "ドイツ" as const };
+const x3g45Base = { ...bmwBase, modelName: "X3", modelSlug: "x3", bodyType: "suv" as const, generationName: "G45 (2024-)", startYear: 2024 };
+const x3g01Base = { ...bmwBase, modelName: "X3", modelSlug: "x3", bodyType: "suv" as const, generationName: "G01 (2017-2024)", startYear: 2017, endYear: 2024 };
+const series3Base = { ...bmwBase, modelName: "3シリーズ", modelSlug: "3-series", bodyType: "sedan" as const, generationName: "G20 (2019-)", startYear: 2019 };
+
+// --- メルセデス・ベンツ ベース定義 ---
+const mbBase = { makerName: "メルセデス・ベンツ" as const, makerSlug: "mercedes-benz" as const, country: "ドイツ" as const };
+const glcX254Base = { ...mbBase, modelName: "GLC", modelSlug: "glc", bodyType: "suv" as const, generationName: "X254 (2022-)", startYear: 2022 };
+const glcX253Base = { ...mbBase, modelName: "GLC", modelSlug: "glc", bodyType: "suv" as const, generationName: "X253 (2016-2022)", startYear: 2016, endYear: 2022 };
+
+// --- アウディ ベース定義 ---
+const audiBase = { makerName: "アウディ" as const, makerSlug: "audi" as const, country: "ドイツ" as const };
+const q5Base = { ...audiBase, modelName: "Q5", modelSlug: "q5", bodyType: "suv" as const, generationName: "FY (2017-)", startYear: 2017 };
+
+// --- ボルボ ベース定義 ---
+const volvoBase = { makerName: "ボルボ" as const, makerSlug: "volvo" as const, country: "スウェーデン" as const };
+const xc60Base = { ...volvoBase, modelName: "XC60", modelSlug: "xc60", bodyType: "suv" as const, generationName: "2代目 (2017-)", startYear: 2017 };
+
+const carData: CarSeed[] = [
+  // ============================================================
+  // トヨタ アルファード 40系 (2023-)
+  // ============================================================
+  { ...alphard40Base, trimName: "Z 2.5L ガソリン", driveType: "2WD", transmission: "CVT", lengthMm: 4995, widthMm: 1850, heightMm: 1935, weightKg: 2060, minTurningRadiusM: 5.9 },
+  t(alphard40Base, { trimName: "Z 2.5L ガソリン", driveType: "4WD", transmission: "CVT", lengthMm: 4995, widthMm: 1850, heightMm: 1935, weightKg: 2130, minTurningRadiusM: 5.9 }),
+  t(alphard40Base, { trimName: "Executive Lounge 2.5L HV", driveType: "2WD", transmission: "CVT", lengthMm: 4995, widthMm: 1850, heightMm: 1935, weightKg: 2090, minTurningRadiusM: 5.9 }),
+  t(alphard40Base, { trimName: "Executive Lounge 2.5L HV", driveType: "4WD", transmission: "CVT", lengthMm: 4995, widthMm: 1850, heightMm: 1935, weightKg: 2160, minTurningRadiusM: 5.9 }),
+  t(alphard40Base, { trimName: "Z PHEV", driveType: "4WD", transmission: "CVT", lengthMm: 4995, widthMm: 1850, heightMm: 1935, weightKg: 2290, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // トヨタ アルファード 30系後期 (2018-2022)
+  // ============================================================
+  t(alphard30Base, { trimName: "S-C 2.5L", driveType: "2WD", transmission: "CVT", lengthMm: 4950, widthMm: 1850, heightMm: 1935, weightKg: 2010, minTurningRadiusM: 5.6 }),
+  t(alphard30Base, { trimName: "S-C 2.5L", driveType: "4WD", transmission: "CVT", lengthMm: 4950, widthMm: 1850, heightMm: 1935, weightKg: 2070, minTurningRadiusM: 5.6 }),
+  t(alphard30Base, { trimName: "Executive Lounge 3.5L", driveType: "2WD", transmission: "8AT", lengthMm: 4945, widthMm: 1850, heightMm: 1950, weightKg: 2100, minTurningRadiusM: 5.6 }),
+  t(alphard30Base, { trimName: "Executive Lounge 3.5L", driveType: "4WD", transmission: "8AT", lengthMm: 4945, widthMm: 1850, heightMm: 1950, weightKg: 2170, minTurningRadiusM: 5.6 }),
+  t(alphard30Base, { trimName: "S HV", driveType: "2WD", transmission: "CVT", lengthMm: 4950, widthMm: 1850, heightMm: 1935, weightKg: 2000, minTurningRadiusM: 5.6 }),
+  t(alphard30Base, { trimName: "S HV", driveType: "4WD", transmission: "CVT", lengthMm: 4950, widthMm: 1850, heightMm: 1935, weightKg: 2060, minTurningRadiusM: 5.6 }),
+
+  // ============================================================
+  // トヨタ ヴォクシー 90系 (2022-)
+  // ============================================================
+  { ...voxy90Base, trimName: "S-G 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4695, widthMm: 1730, heightMm: 1895, weightKg: 1610, minTurningRadiusM: 5.5 },
+  t(voxy90Base, { trimName: "S-G 2.0L", driveType: "4WD", transmission: "CVT", lengthMm: 4695, widthMm: 1730, heightMm: 1895, weightKg: 1670, minTurningRadiusM: 5.5 }),
+  t(voxy90Base, { trimName: "S-Z 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4695, widthMm: 1730, heightMm: 1895, weightKg: 1640, minTurningRadiusM: 5.5 }),
+  t(voxy90Base, { trimName: "S-Z HV", driveType: "2WD", transmission: "CVT", lengthMm: 4695, widthMm: 1730, heightMm: 1895, weightKg: 1690, minTurningRadiusM: 5.5 }),
+  t(voxy90Base, { trimName: "S-Z HV", driveType: "4WD", transmission: "CVT", lengthMm: 4695, widthMm: 1730, heightMm: 1895, weightKg: 1740, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // トヨタ ヴォクシー 80系後期 (2017-2021)
+  // ============================================================
+  t(voxy80Base, { trimName: "ZS 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4710, widthMm: 1735, heightMm: 1825, weightKg: 1570, minTurningRadiusM: 5.5 }),
+  t(voxy80Base, { trimName: "ZS 2.0L", driveType: "4WD", transmission: "CVT", lengthMm: 4710, widthMm: 1735, heightMm: 1850, weightKg: 1620, minTurningRadiusM: 5.5 }),
+  t(voxy80Base, { trimName: "ZS HV", driveType: "2WD", transmission: "CVT", lengthMm: 4710, widthMm: 1735, heightMm: 1825, weightKg: 1610, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // トヨタ ハリアー 80系 (2020-)
+  // ============================================================
+  { ...harrier80Base, trimName: "S 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1530, minTurningRadiusM: 5.5 },
+  t(harrier80Base, { trimName: "G 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1570, minTurningRadiusM: 5.5 }),
+  t(harrier80Base, { trimName: "G 2.0L", driveType: "4WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1640, minTurningRadiusM: 5.7 }),
+  t(harrier80Base, { trimName: "Z 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1590, minTurningRadiusM: 5.5 }),
+  t(harrier80Base, { trimName: "Z Leather Package 2.0L", driveType: "4WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1660, minTurningRadiusM: 5.7 }),
+  t(harrier80Base, { trimName: "G HV", driveType: "2WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1620, minTurningRadiusM: 5.5 }),
+  t(harrier80Base, { trimName: "G HV", driveType: "4WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1680, minTurningRadiusM: 5.5 }),
+  t(harrier80Base, { trimName: "Z HV", driveType: "2WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1640, minTurningRadiusM: 5.5 }),
+  t(harrier80Base, { trimName: "Z PHEV", driveType: "4WD", transmission: "CVT", lengthMm: 4740, widthMm: 1855, heightMm: 1660, weightKg: 1880, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // トヨタ ハリアー 60系 (2013-2020)
+  // ============================================================
+  t(harrier60Base, { trimName: "PREMIUM 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4725, widthMm: 1835, heightMm: 1690, weightKg: 1580, minTurningRadiusM: 5.6 }),
+  t(harrier60Base, { trimName: "PREMIUM 2.0L", driveType: "4WD", transmission: "CVT", lengthMm: 4725, widthMm: 1835, heightMm: 1690, weightKg: 1640, minTurningRadiusM: 5.6 }),
+
+  // ============================================================
+  // トヨタ RAV4 5代目 (2019-)
+  // ============================================================
+  { ...rav4Base, trimName: "X 2.0L", driveType: "2WD", transmission: "CVT", lengthMm: 4600, widthMm: 1855, heightMm: 1685, weightKg: 1500, minTurningRadiusM: 5.5 },
+  t(rav4Base, { trimName: "G 2.0L", driveType: "4WD", transmission: "CVT", lengthMm: 4600, widthMm: 1855, heightMm: 1685, weightKg: 1570, minTurningRadiusM: 5.5 }),
+  t(rav4Base, { trimName: "Adventure 2.0L", driveType: "4WD", transmission: "CVT", lengthMm: 4610, widthMm: 1865, heightMm: 1690, weightKg: 1630, minTurningRadiusM: 5.7 }),
+  t(rav4Base, { trimName: "G HV", driveType: "2WD", transmission: "CVT", lengthMm: 4600, widthMm: 1855, heightMm: 1685, weightKg: 1590, minTurningRadiusM: 5.5 }),
+  t(rav4Base, { trimName: "G HV", driveType: "4WD", transmission: "CVT", lengthMm: 4600, widthMm: 1855, heightMm: 1685, weightKg: 1640, minTurningRadiusM: 5.5 }),
+  t(rav4Base, { trimName: "Adventure PHEV", driveType: "4WD", transmission: "CVT", lengthMm: 4600, widthMm: 1855, heightMm: 1695, weightKg: 1900, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // トヨタ ヤリス 初代 (2020-)
+  // ============================================================
+  { ...yarisBase, trimName: "X 1.0L", driveType: "2WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 940, minTurningRadiusM: 4.8 },
+  t(yarisBase, { trimName: "G 1.5L", driveType: "2WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1020, minTurningRadiusM: 4.8 }),
+  t(yarisBase, { trimName: "G 1.5L", driveType: "4WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1060, minTurningRadiusM: 5.1 }),
+  t(yarisBase, { trimName: "Z 1.5L", driveType: "2WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1050, minTurningRadiusM: 4.8 }),
+  t(yarisBase, { trimName: "Z HV", driveType: "2WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1050, minTurningRadiusM: 5.1 }),
+  t(yarisBase, { trimName: "Z HV", driveType: "4WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1110, minTurningRadiusM: 5.1 }),
+  t(yarisBase, { trimName: "GR SPORT 1.5L", driveType: "2WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1040, minTurningRadiusM: 5.1 }),
+
+  // ============================================================
+  // トヨタ プリウス 60系 5代目 (2023-)
+  // ============================================================
+  { ...prius60Base, trimName: "G HV", driveType: "2WD", transmission: "CVT", lengthMm: 4600, widthMm: 1780, heightMm: 1420, weightKg: 1360, minTurningRadiusM: 5.4 },
+  t(prius60Base, { trimName: "G HV", driveType: "4WD", transmission: "CVT", lengthMm: 4600, widthMm: 1780, heightMm: 1420, weightKg: 1420, minTurningRadiusM: 5.4 }),
+  t(prius60Base, { trimName: "Z HV", driveType: "2WD", transmission: "CVT", lengthMm: 4600, widthMm: 1780, heightMm: 1430, weightKg: 1400, minTurningRadiusM: 5.4 }),
+  t(prius60Base, { trimName: "Z PHEV", driveType: "2WD", transmission: "CVT", lengthMm: 4600, widthMm: 1780, heightMm: 1430, weightKg: 1570, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // トヨタ プリウス 50系 4代目 (2015-2022)
+  // ============================================================
+  t(prius50Base, { trimName: "S HV", driveType: "2WD", transmission: "CVT", lengthMm: 4540, widthMm: 1760, heightMm: 1470, weightKg: 1360, minTurningRadiusM: 5.1 }),
+  t(prius50Base, { trimName: "S HV", driveType: "4WD", transmission: "CVT", lengthMm: 4540, widthMm: 1760, heightMm: 1470, weightKg: 1410, minTurningRadiusM: 5.1 }),
+  t(prius50Base, { trimName: "A HV", driveType: "2WD", transmission: "CVT", lengthMm: 4540, widthMm: 1760, heightMm: 1470, weightKg: 1380, minTurningRadiusM: 5.1 }),
+
+  // ============================================================
+  // トヨタ ランドクルーザー300 300系 (2021-)
+  // ============================================================
+  { ...lc300Base, trimName: "GX 3.5L ガソリン", driveType: "4WD", transmission: "10AT", lengthMm: 4950, widthMm: 1980, heightMm: 1925, weightKg: 2350, minTurningRadiusM: 5.9 },
+  t(lc300Base, { trimName: "AX 3.5L ガソリン", driveType: "4WD", transmission: "10AT", lengthMm: 4950, widthMm: 1980, heightMm: 1925, weightKg: 2430, minTurningRadiusM: 5.9 }),
+  t(lc300Base, { trimName: "VX 3.5L ガソリン", driveType: "4WD", transmission: "10AT", lengthMm: 4985, widthMm: 1980, heightMm: 1925, weightKg: 2480, minTurningRadiusM: 5.9 }),
+  t(lc300Base, { trimName: "ZX 3.5L ガソリン", driveType: "4WD", transmission: "10AT", lengthMm: 4985, widthMm: 1980, heightMm: 1925, weightKg: 2550, minTurningRadiusM: 5.9 }),
+  t(lc300Base, { trimName: "GR SPORT 3.3L ディーゼル", driveType: "4WD", transmission: "10AT", lengthMm: 4965, widthMm: 1990, heightMm: 1925, weightKg: 2560, minTurningRadiusM: 5.9 }),
+  t(lc300Base, { trimName: "ZX 3.3L ディーゼル", driveType: "4WD", transmission: "10AT", lengthMm: 4985, widthMm: 1980, heightMm: 1925, weightKg: 2530, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // ホンダ N-BOX 3代目 JF5/JF6 (2023-) ※4WDは全高1815mm
+  // ============================================================
+  { ...nbox3Base, trimName: "ベースグレード", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 910, minTurningRadiusM: 4.5 },
+  t(nbox3Base, { trimName: "ベースグレード", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 960, minTurningRadiusM: 4.5 }),
+  t(nbox3Base, { trimName: "ファッションスタイル", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 920, minTurningRadiusM: 4.5 }),
+  t(nbox3Base, { trimName: "ファッションスタイル", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 970, minTurningRadiusM: 4.5 }),
+  t(nbox3Base, { trimName: "Custom ベースグレード", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 920, minTurningRadiusM: 4.5 }),
+  t(nbox3Base, { trimName: "Custom ベースグレード", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 980, minTurningRadiusM: 4.5 }),
+  t(nbox3Base, { trimName: "Custom ターボ", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 940, minTurningRadiusM: 4.8 }),
+  t(nbox3Base, { trimName: "Custom ターボ", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 990, minTurningRadiusM: 4.8 }),
+  t(nbox3Base, { trimName: "Custom コーディネートスタイル", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 920, minTurningRadiusM: 4.5 }),
+  t(nbox3Base, { trimName: "Custom コーディネートスタイル", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 980, minTurningRadiusM: 4.5 }),
+
+  // ============================================================
+  // ホンダ N-BOX 2代目 JF3/JF4 (2017-2023) ※4WDは全高1815mm
+  // ============================================================
+  t(nbox2Base, { trimName: "G", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 890, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "G", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 950, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "L", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 900, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "L", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 960, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "EX", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 900, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "EX", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 960, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "Custom L", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 910, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "Custom L", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 970, minTurningRadiusM: 4.5 }),
+  t(nbox2Base, { trimName: "Custom L ターボ", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 920, minTurningRadiusM: 4.7 }),
+  t(nbox2Base, { trimName: "Custom L ターボ", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 980, minTurningRadiusM: 4.7 }),
+  t(nbox2Base, { trimName: "Custom EX ターボ", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1790, weightKg: 930, minTurningRadiusM: 4.7 }),
+  t(nbox2Base, { trimName: "Custom EX ターボ", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1815, weightKg: 990, minTurningRadiusM: 4.7 }),
+
+  // ============================================================
+  // ホンダ フリード 3代目 (2024-) ※CROSSTARは全幅1720mm
+  // ============================================================
+  { ...freed3Base, trimName: "AIR", driveType: "2WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1755, weightKg: 1370, minTurningRadiusM: 5.2 },
+  t(freed3Base, { trimName: "AIR", driveType: "4WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1780, weightKg: 1440, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "AIR EX", driveType: "2WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1755, weightKg: 1380, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "AIR EX", driveType: "4WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1780, weightKg: 1450, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "CROSSTAR", driveType: "2WD", transmission: "CVT", lengthMm: 4310, widthMm: 1720, heightMm: 1755, weightKg: 1400, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "CROSSTAR", driveType: "4WD", transmission: "CVT", lengthMm: 4310, widthMm: 1720, heightMm: 1780, weightKg: 1470, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "e:HEV AIR", driveType: "2WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1755, weightKg: 1410, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "e:HEV AIR", driveType: "4WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1780, weightKg: 1490, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "e:HEV AIR EX", driveType: "2WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1755, weightKg: 1420, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "e:HEV AIR EX", driveType: "4WD", transmission: "CVT", lengthMm: 4310, widthMm: 1695, heightMm: 1780, weightKg: 1500, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "e:HEV CROSSTAR", driveType: "2WD", transmission: "CVT", lengthMm: 4310, widthMm: 1720, heightMm: 1755, weightKg: 1440, minTurningRadiusM: 5.2 }),
+  t(freed3Base, { trimName: "e:HEV CROSSTAR", driveType: "4WD", transmission: "CVT", lengthMm: 4310, widthMm: 1720, heightMm: 1780, weightKg: 1520, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // ホンダ フリード 2代目 GB5/6/7/8 (2016-2024)
+  // ============================================================
+  t(freed2Base, { trimName: "G (7人)", driveType: "2WD", transmission: "CVT", lengthMm: 4265, widthMm: 1695, heightMm: 1710, weightKg: 1360, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "G (6人)", driveType: "2WD", transmission: "CVT", lengthMm: 4265, widthMm: 1695, heightMm: 1710, weightKg: 1350, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "G (6人)", driveType: "4WD", transmission: "CVT", lengthMm: 4265, widthMm: 1695, heightMm: 1735, weightKg: 1410, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "CROSSTAR (6人)", driveType: "2WD", transmission: "CVT", lengthMm: 4265, widthMm: 1695, heightMm: 1710, weightKg: 1380, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "CROSSTAR (6人)", driveType: "4WD", transmission: "CVT", lengthMm: 4265, widthMm: 1695, heightMm: 1735, weightKg: 1440, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "HYBRID G (7人)", driveType: "2WD", transmission: "7DCT", lengthMm: 4265, widthMm: 1695, heightMm: 1710, weightKg: 1430, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "HYBRID G (6人)", driveType: "2WD", transmission: "7DCT", lengthMm: 4265, widthMm: 1695, heightMm: 1710, weightKg: 1410, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "HYBRID G (6人)", driveType: "4WD", transmission: "7DCT", lengthMm: 4265, widthMm: 1695, heightMm: 1735, weightKg: 1480, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "HYBRID CROSSTAR (6人)", driveType: "2WD", transmission: "7DCT", lengthMm: 4265, widthMm: 1695, heightMm: 1710, weightKg: 1440, minTurningRadiusM: 5.2 }),
+  t(freed2Base, { trimName: "HYBRID CROSSTAR (6人)", driveType: "4WD", transmission: "7DCT", lengthMm: 4265, widthMm: 1695, heightMm: 1735, weightKg: 1510, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // 日産 セレナ C28型 (2022-)
+  // ============================================================
+  { ...serenaC28Base, trimName: "X", driveType: "2WD", transmission: "CVT", lengthMm: 4690, widthMm: 1695, heightMm: 1870, weightKg: 1670, minTurningRadiusM: 5.7 },
+  t(serenaC28Base, { trimName: "X", driveType: "4WD", transmission: "CVT", lengthMm: 4690, widthMm: 1695, heightMm: 1870, weightKg: 1740, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "XV", driveType: "2WD", transmission: "CVT", lengthMm: 4690, widthMm: 1695, heightMm: 1870, weightKg: 1680, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "XV", driveType: "4WD", transmission: "CVT", lengthMm: 4690, widthMm: 1695, heightMm: 1870, weightKg: 1750, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "ハイウェイスターV", driveType: "2WD", transmission: "CVT", lengthMm: 4765, widthMm: 1715, heightMm: 1870, weightKg: 1690, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "ハイウェイスターV", driveType: "4WD", transmission: "CVT", lengthMm: 4765, widthMm: 1715, heightMm: 1870, weightKg: 1760, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "e-POWER X", driveType: "2WD", transmission: "e-POWER", lengthMm: 4690, widthMm: 1695, heightMm: 1870, weightKg: 1760, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "e-POWER XV", driveType: "2WD", transmission: "e-POWER", lengthMm: 4690, widthMm: 1695, heightMm: 1870, weightKg: 1770, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "e-POWER ハイウェイスターV", driveType: "2WD", transmission: "e-POWER", lengthMm: 4765, widthMm: 1715, heightMm: 1870, weightKg: 1790, minTurningRadiusM: 5.7 }),
+  t(serenaC28Base, { trimName: "e-POWER LUXION", driveType: "2WD", transmission: "e-POWER", lengthMm: 4765, widthMm: 1715, heightMm: 1885, weightKg: 1810, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // 日産 セレナ C27型 (2016-2022)
+  // ============================================================
+  t(serenaC27Base, { trimName: "X", driveType: "2WD", transmission: "CVT", lengthMm: 4690, widthMm: 1695, heightMm: 1865, weightKg: 1650, minTurningRadiusM: 5.5 }),
+  t(serenaC27Base, { trimName: "X", driveType: "4WD", transmission: "CVT", lengthMm: 4690, widthMm: 1695, heightMm: 1875, weightKg: 1730, minTurningRadiusM: 5.5 }),
+  t(serenaC27Base, { trimName: "XV", driveType: "2WD", transmission: "CVT", lengthMm: 4690, widthMm: 1695, heightMm: 1865, weightKg: 1660, minTurningRadiusM: 5.5 }),
+  t(serenaC27Base, { trimName: "ハイウェイスター", driveType: "2WD", transmission: "CVT", lengthMm: 4770, widthMm: 1740, heightMm: 1865, weightKg: 1680, minTurningRadiusM: 5.5 }),
+  t(serenaC27Base, { trimName: "ハイウェイスター", driveType: "4WD", transmission: "CVT", lengthMm: 4770, widthMm: 1740, heightMm: 1875, weightKg: 1760, minTurningRadiusM: 5.5 }),
+  t(serenaC27Base, { trimName: "ハイウェイスターV", driveType: "2WD", transmission: "CVT", lengthMm: 4770, widthMm: 1740, heightMm: 1865, weightKg: 1700, minTurningRadiusM: 5.7 }),
+  t(serenaC27Base, { trimName: "e-POWER X", driveType: "2WD", transmission: "e-POWER", lengthMm: 4690, widthMm: 1695, heightMm: 1865, weightKg: 1740, minTurningRadiusM: 5.5 }),
+  t(serenaC27Base, { trimName: "e-POWER ハイウェイスターV", driveType: "2WD", transmission: "e-POWER", lengthMm: 4770, widthMm: 1740, heightMm: 1865, weightKg: 1760, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // マツダ CX-5 2代目 (2017-)
+  // ============================================================
+  { ...cx5Base, trimName: "20S", driveType: "2WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1520, minTurningRadiusM: 5.5 },
+  t(cx5Base, { trimName: "20S", driveType: "4WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1590, minTurningRadiusM: 5.5 }),
+  t(cx5Base, { trimName: "25S L Package", driveType: "2WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1560, minTurningRadiusM: 5.5 }),
+  t(cx5Base, { trimName: "25S L Package", driveType: "4WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1620, minTurningRadiusM: 5.5 }),
+  t(cx5Base, { trimName: "XD", driveType: "2WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1600, minTurningRadiusM: 5.5 }),
+  t(cx5Base, { trimName: "XD L Package", driveType: "2WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1620, minTurningRadiusM: 5.5 }),
+  t(cx5Base, { trimName: "XD L Package", driveType: "4WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1680, minTurningRadiusM: 5.5 }),
+  t(cx5Base, { trimName: "XD Exclusive Mode", driveType: "4WD", transmission: "6AT", lengthMm: 4545, widthMm: 1840, heightMm: 1690, weightKg: 1690, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // マツダ CX-60 初代 (2022-)
+  // ============================================================
+  { ...cx60Base, trimName: "25S S Package", driveType: "2WD", transmission: "8AT", lengthMm: 4740, widthMm: 1890, heightMm: 1685, weightKg: 1680, minTurningRadiusM: 5.4 },
+  t(cx60Base, { trimName: "25S L Package", driveType: "2WD", transmission: "8AT", lengthMm: 4740, widthMm: 1890, heightMm: 1685, weightKg: 1710, minTurningRadiusM: 5.4 }),
+  t(cx60Base, { trimName: "XD S Package", driveType: "2WD", transmission: "8AT", lengthMm: 4740, widthMm: 1890, heightMm: 1685, weightKg: 1760, minTurningRadiusM: 5.4 }),
+  t(cx60Base, { trimName: "XD L Package", driveType: "4WD", transmission: "8AT", lengthMm: 4740, widthMm: 1890, heightMm: 1685, weightKg: 1890, minTurningRadiusM: 5.4 }),
+  t(cx60Base, { trimName: "XD-HYBRID Premium Sports", driveType: "4WD", transmission: "8AT", lengthMm: 4740, widthMm: 1890, heightMm: 1685, weightKg: 1920, minTurningRadiusM: 5.4 }),
+  t(cx60Base, { trimName: "PHEV S Package", driveType: "4WD", transmission: "8AT", lengthMm: 4740, widthMm: 1890, heightMm: 1685, weightKg: 2010, minTurningRadiusM: 5.4 }),
+  t(cx60Base, { trimName: "PHEV Premium Sports", driveType: "4WD", transmission: "8AT", lengthMm: 4740, widthMm: 1890, heightMm: 1685, weightKg: 2060, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // スバル フォレスター 6代目 (2024-)
+  // ============================================================
+  { ...forester6Base, trimName: "Touring", driveType: "AWD", transmission: "CVT", lengthMm: 4655, widthMm: 1830, heightMm: 1730, weightKg: 1600, minTurningRadiusM: 5.4 },
+  t(forester6Base, { trimName: "X-BREAK", driveType: "AWD", transmission: "CVT", lengthMm: 4655, widthMm: 1830, heightMm: 1730, weightKg: 1610, minTurningRadiusM: 5.4 }),
+  t(forester6Base, { trimName: "Advance", driveType: "AWD", transmission: "CVT", lengthMm: 4655, widthMm: 1830, heightMm: 1730, weightKg: 1620, minTurningRadiusM: 5.4 }),
+  t(forester6Base, { trimName: "S Limited", driveType: "AWD", transmission: "CVT", lengthMm: 4655, widthMm: 1830, heightMm: 1730, weightKg: 1630, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // スバル フォレスター 5代目 SK (2018-2024)
+  // ============================================================
+  t(forester5Base, { trimName: "Touring", driveType: "AWD", transmission: "CVT", lengthMm: 4640, widthMm: 1815, heightMm: 1715, weightKg: 1570, minTurningRadiusM: 5.4 }),
+  t(forester5Base, { trimName: "X-BREAK", driveType: "AWD", transmission: "CVT", lengthMm: 4640, widthMm: 1815, heightMm: 1715, weightKg: 1580, minTurningRadiusM: 5.4 }),
+  t(forester5Base, { trimName: "Advance e-BOXER", driveType: "AWD", transmission: "CVT", lengthMm: 4640, widthMm: 1815, heightMm: 1715, weightKg: 1640, minTurningRadiusM: 5.4 }),
+  t(forester5Base, { trimName: "Sport", driveType: "AWD", transmission: "CVT", lengthMm: 4640, widthMm: 1815, heightMm: 1715, weightKg: 1570, minTurningRadiusM: 5.4 }),
+  t(forester5Base, { trimName: "STI Sport", driveType: "AWD", transmission: "CVT", lengthMm: 4640, widthMm: 1815, heightMm: 1715, weightKg: 1580, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // レクサス RX 5代目 (2022-)
+  // ============================================================
+  { ...rx5Base, trimName: "RX350", driveType: "2WD", transmission: "8AT", lengthMm: 4890, widthMm: 1920, heightMm: 1700, weightKg: 1880, minTurningRadiusM: 5.9 },
+  t(rx5Base, { trimName: "RX350", driveType: "AWD", transmission: "8AT", lengthMm: 4890, widthMm: 1920, heightMm: 1700, weightKg: 1950, minTurningRadiusM: 5.9 }),
+  t(rx5Base, { trimName: "RX350 version L", driveType: "2WD", transmission: "8AT", lengthMm: 4890, widthMm: 1920, heightMm: 1700, weightKg: 1950, minTurningRadiusM: 5.9 }),
+  t(rx5Base, { trimName: "RX350h", driveType: "AWD", transmission: "CVT", lengthMm: 4890, widthMm: 1920, heightMm: 1700, weightKg: 2000, minTurningRadiusM: 5.9 }),
+  t(rx5Base, { trimName: "RX350h version L", driveType: "AWD", transmission: "CVT", lengthMm: 4890, widthMm: 1920, heightMm: 1700, weightKg: 2010, minTurningRadiusM: 5.9 }),
+  t(rx5Base, { trimName: "RX450h+ PHEV", driveType: "AWD", transmission: "CVT", lengthMm: 4890, widthMm: 1920, heightMm: 1700, weightKg: 2110, minTurningRadiusM: 5.9 }),
+  t(rx5Base, { trimName: "RX500h F SPORT Performance", driveType: "AWD", transmission: "6AT", lengthMm: 4890, widthMm: 1920, heightMm: 1700, weightKg: 2100, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // レクサス RX 4代目 (2015-2022)
+  // ============================================================
+  t(rx4Base, { trimName: "RX300", driveType: "2WD", transmission: "6AT", lengthMm: 4890, widthMm: 1895, heightMm: 1710, weightKg: 1890, minTurningRadiusM: 5.9 }),
+  t(rx4Base, { trimName: "RX300", driveType: "AWD", transmission: "6AT", lengthMm: 4890, widthMm: 1895, heightMm: 1710, weightKg: 1940, minTurningRadiusM: 5.9 }),
+  t(rx4Base, { trimName: "RX450h", driveType: "2WD", transmission: "CVT", lengthMm: 4890, widthMm: 1895, heightMm: 1710, weightKg: 2010, minTurningRadiusM: 5.9 }),
+  t(rx4Base, { trimName: "RX450h", driveType: "AWD", transmission: "CVT", lengthMm: 4890, widthMm: 1895, heightMm: 1710, weightKg: 2100, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // レクサス NX 2代目 (2021-)
+  // ============================================================
+  { ...nx2Base, trimName: "NX250", driveType: "2WD", transmission: "8AT", lengthMm: 4660, widthMm: 1865, heightMm: 1660, weightKg: 1620, minTurningRadiusM: 5.4 },
+  t(nx2Base, { trimName: "NX250", driveType: "AWD", transmission: "8AT", lengthMm: 4660, widthMm: 1865, heightMm: 1660, weightKg: 1680, minTurningRadiusM: 5.4 }),
+  t(nx2Base, { trimName: "NX350h", driveType: "2WD", transmission: "CVT", lengthMm: 4660, widthMm: 1865, heightMm: 1660, weightKg: 1720, minTurningRadiusM: 5.4 }),
+  t(nx2Base, { trimName: "NX350h", driveType: "AWD", transmission: "CVT", lengthMm: 4660, widthMm: 1865, heightMm: 1660, weightKg: 1790, minTurningRadiusM: 5.4 }),
+  t(nx2Base, { trimName: "NX350", driveType: "AWD", transmission: "8AT", lengthMm: 4660, widthMm: 1865, heightMm: 1660, weightKg: 1740, minTurningRadiusM: 5.4 }),
+  t(nx2Base, { trimName: "NX450h+ PHEV", driveType: "AWD", transmission: "CVT", lengthMm: 4660, widthMm: 1865, heightMm: 1660, weightKg: 1990, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // レクサス NX 初代 (2014-2021)
+  // ============================================================
+  t(nx1Base, { trimName: "NX300", driveType: "2WD", transmission: "6AT", lengthMm: 4640, widthMm: 1845, heightMm: 1645, weightKg: 1710, minTurningRadiusM: 5.3 }),
+  t(nx1Base, { trimName: "NX300", driveType: "AWD", transmission: "6AT", lengthMm: 4640, widthMm: 1845, heightMm: 1645, weightKg: 1770, minTurningRadiusM: 5.3 }),
+  t(nx1Base, { trimName: "NX300h", driveType: "2WD", transmission: "CVT", lengthMm: 4640, widthMm: 1845, heightMm: 1645, weightKg: 1780, minTurningRadiusM: 5.3 }),
+
+  // ============================================================
+  // BMW X3 G45 (2024-)
+  // ============================================================
+  { ...x3g45Base, trimName: "xDrive20d", driveType: "AWD", transmission: "8AT", lengthMm: 4755, widthMm: 1920, heightMm: 1660, weightKg: 1965, minTurningRadiusM: 5.7 },
+  t(x3g45Base, { trimName: "xDrive30e PHEV", driveType: "AWD", transmission: "8AT", lengthMm: 4755, widthMm: 1920, heightMm: 1660, weightKg: 2195, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // BMW X3 G01 (2017-2024)
+  // ============================================================
+  t(x3g01Base, { trimName: "xDrive20d", driveType: "AWD", transmission: "8AT", lengthMm: 4720, widthMm: 1890, heightMm: 1675, weightKg: 1850, minTurningRadiusM: 5.7 }),
+  t(x3g01Base, { trimName: "xDrive20i", driveType: "AWD", transmission: "8AT", lengthMm: 4720, widthMm: 1890, heightMm: 1675, weightKg: 1770, minTurningRadiusM: 5.7 }),
+  t(x3g01Base, { trimName: "M40d", driveType: "AWD", transmission: "8AT", lengthMm: 4720, widthMm: 1890, heightMm: 1675, weightKg: 1950, minTurningRadiusM: 5.7 }),
+  t(x3g01Base, { trimName: "xDrive30e PHEV", driveType: "AWD", transmission: "8AT", lengthMm: 4720, widthMm: 1890, heightMm: 1675, weightKg: 2040, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // BMW 3シリーズ G20 (2019-)
+  // ============================================================
+  { ...series3Base, trimName: "318i", driveType: "2WD", transmission: "8AT", lengthMm: 4715, widthMm: 1825, heightMm: 1440, weightKg: 1480, minTurningRadiusM: 5.3 },
+  t(series3Base, { trimName: "320i", driveType: "2WD", transmission: "8AT", lengthMm: 4715, widthMm: 1825, heightMm: 1440, weightKg: 1520, minTurningRadiusM: 5.3 }),
+  t(series3Base, { trimName: "320d xDrive", driveType: "AWD", transmission: "8AT", lengthMm: 4715, widthMm: 1825, heightMm: 1440, weightKg: 1680, minTurningRadiusM: 5.3 }),
+  t(series3Base, { trimName: "330i", driveType: "2WD", transmission: "8AT", lengthMm: 4715, widthMm: 1825, heightMm: 1440, weightKg: 1580, minTurningRadiusM: 5.3 }),
+  t(series3Base, { trimName: "M340i xDrive", driveType: "AWD", transmission: "8AT", lengthMm: 4715, widthMm: 1825, heightMm: 1440, weightKg: 1740, minTurningRadiusM: 5.3 }),
+
+  // ============================================================
+  // メルセデス・ベンツ GLC X254 (2022-)
+  // ============================================================
+  { ...glcX254Base, trimName: "GLC200d 4MATIC", driveType: "AWD", transmission: "9AT", lengthMm: 4720, widthMm: 1890, heightMm: 1640, weightKg: 1930, minTurningRadiusM: 5.5 },
+  t(glcX254Base, { trimName: "GLC220d 4MATIC", driveType: "AWD", transmission: "9AT", lengthMm: 4720, widthMm: 1890, heightMm: 1640, weightKg: 1950, minTurningRadiusM: 5.5 }),
+  t(glcX254Base, { trimName: "GLC300 4MATIC", driveType: "AWD", transmission: "9AT", lengthMm: 4720, widthMm: 1890, heightMm: 1640, weightKg: 1880, minTurningRadiusM: 5.5 }),
+  t(glcX254Base, { trimName: "GLC350e 4MATIC PHEV", driveType: "AWD", transmission: "9AT", lengthMm: 4720, widthMm: 1890, heightMm: 1640, weightKg: 2170, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // メルセデス・ベンツ GLC X253 (2016-2022)
+  // ============================================================
+  t(glcX253Base, { trimName: "GLC200", driveType: "2WD", transmission: "9AT", lengthMm: 4670, widthMm: 1890, heightMm: 1645, weightKg: 1760, minTurningRadiusM: 5.5 }),
+  t(glcX253Base, { trimName: "GLC220d 4MATIC", driveType: "AWD", transmission: "9AT", lengthMm: 4670, widthMm: 1890, heightMm: 1645, weightKg: 1860, minTurningRadiusM: 5.5 }),
+  t(glcX253Base, { trimName: "GLC300 4MATIC", driveType: "AWD", transmission: "9AT", lengthMm: 4670, widthMm: 1890, heightMm: 1645, weightKg: 1820, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // アウディ Q5 FY (2017-)
+  // ============================================================
+  { ...q5Base, trimName: "40 TDI quattro", driveType: "AWD", transmission: "7AT", lengthMm: 4680, widthMm: 1900, heightMm: 1665, weightKg: 1920, minTurningRadiusM: 5.5 },
+  t(q5Base, { trimName: "45 TFSI quattro", driveType: "AWD", transmission: "7AT", lengthMm: 4680, widthMm: 1900, heightMm: 1665, weightKg: 1870, minTurningRadiusM: 5.5 }),
+  t(q5Base, { trimName: "55 TFSI e quattro PHEV", driveType: "AWD", transmission: "7AT", lengthMm: 4680, widthMm: 1900, heightMm: 1665, weightKg: 2110, minTurningRadiusM: 5.5 }),
+  t(q5Base, { trimName: "SQ5 3.0 TFSI quattro", driveType: "AWD", transmission: "8AT", lengthMm: 4680, widthMm: 1900, heightMm: 1665, weightKg: 1960, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // ボルボ XC60 2代目 (2017-)
+  // ============================================================
+  { ...xc60Base, trimName: "B5 AWD Momentum", driveType: "AWD", transmission: "8AT", lengthMm: 4710, widthMm: 1900, heightMm: 1660, weightKg: 1890, minTurningRadiusM: 5.7 },
+  t(xc60Base, { trimName: "B5 AWD Inscription", driveType: "AWD", transmission: "8AT", lengthMm: 4710, widthMm: 1900, heightMm: 1660, weightKg: 1910, minTurningRadiusM: 5.7 }),
+  t(xc60Base, { trimName: "T8 Recharge PHEV", driveType: "AWD", transmission: "8AT", lengthMm: 4710, widthMm: 1900, heightMm: 1660, weightKg: 2150, minTurningRadiusM: 5.7 }),
+  t(xc60Base, { trimName: "Ultimate B5", driveType: "AWD", transmission: "8AT", lengthMm: 4710, widthMm: 1900, heightMm: 1660, weightKg: 1920, minTurningRadiusM: 5.7 }),
+];
+
+// ============================================================
+// 駐車場データ定義
+// ============================================================
+interface ParkingLotSeed {
+  name: string;
+  slug: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  parkingType: "mechanical" | "self_propelled" | "flat" | "tower";
+  totalSpaces: number;
+  restrictions: {
+    name: string;
+    maxLengthMm: number;
+    maxWidthMm: number;
+    maxHeightMm: number;
+    maxWeightKg: number;
+    spacesCount: number;
+    notes?: string;
+  }[];
+  fees: {
+    feeType: "hourly" | "daily" | "monthly";
+    amountYen: number;
+    durationMinutes?: number;
+    notes?: string;
+  }[];
+  is24h: boolean;
+  openTime?: string;
+  closeTime?: string;
+}
+
+const parkingData: ParkingLotSeed[] = [
+  // ============================================================
+  // 港区
+  // ============================================================
+  {
+    name: "汐留タワーパーキング",
+    slug: "shiodome-tower-parking",
+    address: "東京都港区東新橋1-6-2",
+    latitude: 35.6625, longitude: 139.7615,
+    parkingType: "tower", totalSpaces: 30,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 15 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 2100, maxWeightKg: 2300, spacesCount: 15 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 200, durationMinutes: 15, notes: "8-24時" },
+    ],
+    is24h: true,
+  },
+  {
+    name: "赤坂パーキングセンター",
+    slug: "akasaka-parking-center",
+    address: "東京都港区赤坂6-5-1",
+    latitude: 35.6720, longitude: 139.7340,
+    parkingType: "self_propelled", totalSpaces: 128,
+    restrictions: [
+      { name: "一般", maxLengthMm: 6000, maxWidthMm: 2100, maxHeightMm: 2100, maxWeightKg: 3000, spacesCount: 128 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 20, notes: "7-20時" },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 中央区
+  // ============================================================
+  {
+    name: "ノイパーキング銀座7丁目",
+    slug: "noi-parking-ginza-7chome",
+    address: "東京都中央区銀座7-12-9",
+    latitude: 35.6680, longitude: 139.7610,
+    parkingType: "mechanical", totalSpaces: 31,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 2000, maxWeightKg: 2500, spacesCount: 31 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "22:00",
+  },
+  {
+    name: "銀座四丁目タワー駐車場",
+    slug: "ginza-4chome-tower-parking",
+    address: "東京都中央区銀座4-9-13",
+    latitude: 35.6695, longitude: 139.7670,
+    parkingType: "tower", totalSpaces: 50,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 50 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 330, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:30", closeTime: "22:00",
+  },
+  {
+    name: "NPC24H GINZA KABUKIZAパーキング",
+    slug: "npc24h-ginza-kabukiza-parking",
+    address: "東京都中央区銀座4-12-15",
+    latitude: 35.6693, longitude: 139.7685,
+    parkingType: "mechanical", totalSpaces: 80,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 40 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 2050, maxWeightKg: 2500, spacesCount: 40 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 330, durationMinutes: 30 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "日本橋室町三井タワー駐車場",
+    slug: "nihonbashi-muromachi-mitsui-tower-parking",
+    address: "東京都中央区日本橋室町3-2-1",
+    latitude: 35.6870, longitude: 139.7740,
+    parkingType: "mechanical", totalSpaces: 260,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2500, spacesCount: 130 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2500, spacesCount: 130 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 250, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "26:00",
+  },
+  // ============================================================
+  // 千代田区
+  // ============================================================
+  {
+    name: "東京ミッドタウン日比谷駐車場",
+    slug: "tokyo-midtown-hibiya-parking",
+    address: "東京都千代田区有楽町1-1-3",
+    latitude: 35.6740, longitude: 139.7590,
+    parkingType: "mechanical", totalSpaces: 290,
+    restrictions: [
+      { name: "機械式", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2050, maxWeightKg: 2300, spacesCount: 290 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "26:00",
+  },
+  {
+    name: "丸の内中央パーキング",
+    slug: "marunouchi-chuo-parking",
+    address: "東京都千代田区丸の内2丁目",
+    latitude: 35.6815, longitude: 139.7640,
+    parkingType: "self_propelled", totalSpaces: 997,
+    restrictions: [
+      { name: "一般", maxLengthMm: 6000, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 3000, spacesCount: 997 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "24:00",
+  },
+  // ============================================================
+  // 新宿区
+  // ============================================================
+  {
+    name: "新宿エルタワー駐車場",
+    slug: "shinjuku-l-tower-parking",
+    address: "東京都新宿区西新宿1-6-1",
+    latitude: 35.6922, longitude: 139.6974,
+    parkingType: "mechanical", totalSpaces: 131,
+    restrictions: [
+      { name: "機械式", maxLengthMm: 4700, maxWidthMm: 1700, maxHeightMm: 1500, maxWeightKg: 1500, spacesCount: 100, notes: "機械式パレット" },
+      { name: "自走式", maxLengthMm: 6000, maxWidthMm: 2000, maxHeightMm: 2100, maxWeightKg: 4000, spacesCount: 31, notes: "自走式スペース" },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "23:30",
+  },
+  {
+    name: "京王新宿追分ビル駐車場",
+    slug: "keio-shinjuku-oiwake-building-parking",
+    address: "東京都新宿区新宿3-1-13",
+    latitude: 35.6903, longitude: 139.7037,
+    parkingType: "mechanical", totalSpaces: 30,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 30 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "22:00",
+  },
+  {
+    name: "公共新宿パーキング",
+    slug: "kokyo-shinjuku-parking",
+    address: "東京都新宿区歌舞伎町2-3-2",
+    latitude: 35.6961, longitude: 139.7034,
+    parkingType: "mechanical", totalSpaces: 100,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 100 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 渋谷区
+  // ============================================================
+  {
+    name: "タイムズ道玄坂通",
+    slug: "times-dogenzaka-dori",
+    address: "東京都渋谷区道玄坂2-25",
+    latitude: 35.6575, longitude: 139.6968,
+    parkingType: "mechanical", totalSpaces: 128,
+    restrictions: [
+      { name: "ロールーフ", maxLengthMm: 5300, maxWidthMm: 2000, maxHeightMm: 1550, maxWeightKg: 2500, spacesCount: 64 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 2000, maxHeightMm: 2050, maxWeightKg: 2500, spacesCount: 64 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 20 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "トラストパーク渋東シネタワー",
+    slug: "trustpark-shibuton-cinetower",
+    address: "東京都渋谷区道玄坂2-6-17",
+    latitude: 35.6580, longitude: 139.6957,
+    parkingType: "mechanical", totalSpaces: 35,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5600, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2200, spacesCount: 35 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 20 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "渋谷1丁目駐車場",
+    slug: "shibuya-1chome-parking",
+    address: "東京都渋谷区渋谷1-26-5",
+    latitude: 35.6593, longitude: 139.7035,
+    parkingType: "mechanical", totalSpaces: 375,
+    restrictions: [
+      { name: "北棟", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 188 },
+      { name: "南棟", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 2100, maxWeightKg: 2300, spacesCount: 187 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 350, durationMinutes: 30 },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 目黒区
+  // ============================================================
+  {
+    name: "中目黒GT駐車場",
+    slug: "nakameguro-gt-parking",
+    address: "東京都目黒区上目黒2-1-1",
+    latitude: 35.6441, longitude: 139.6987,
+    parkingType: "tower", totalSpaces: 42,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 1700, spacesCount: 42 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+  {
+    name: "ノアビル23立体駐車場",
+    slug: "noah-building-23-parking",
+    address: "東京都目黒区平町1-26-2",
+    latitude: 35.6183, longitude: 139.6848,
+    parkingType: "mechanical", totalSpaces: 51,
+    restrictions: [
+      { name: "1号機", maxLengthMm: 5200, maxWidthMm: 1950, maxHeightMm: 1550, maxWeightKg: 1800, spacesCount: 26 },
+      { name: "2号機", maxLengthMm: 5250, maxWidthMm: 2050, maxHeightMm: 1750, maxWeightKg: 2300, spacesCount: 25 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 200, durationMinutes: 20 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+  // ============================================================
+  // 品川区
+  // ============================================================
+  {
+    name: "タイムズ大崎センタービル",
+    slug: "times-osaki-center-building",
+    address: "東京都品川区大崎1-5",
+    latitude: 35.6197, longitude: 139.7285,
+    parkingType: "mechanical", totalSpaces: 68,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5000, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 68 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 330, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "23:00",
+  },
+  {
+    name: "コインパーク大森ベルポート",
+    slug: "coinpark-omori-bellport",
+    address: "東京都品川区南大井6-26-2",
+    latitude: 35.5882, longitude: 139.7358,
+    parkingType: "mechanical", totalSpaces: 93,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 93 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "23:30",
+  },
+  // ============================================================
+  // 世田谷区
+  // ============================================================
+  {
+    name: "二子玉川ライズP1駐車場",
+    slug: "futakotamagawa-rise-p1-parking",
+    address: "東京都世田谷区玉川1-14-1",
+    latitude: 35.6115, longitude: 139.6265,
+    parkingType: "mechanical", totalSpaces: 602,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 301 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 301 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "25:30",
+  },
+  {
+    name: "キャロットパーク三軒茶屋",
+    slug: "carrot-park-sangenjaya",
+    address: "東京都世田谷区太子堂4-1-1",
+    latitude: 35.6436, longitude: 139.6703,
+    parkingType: "mechanical", totalSpaces: 92,
+    restrictions: [
+      { name: "機械式", maxLengthMm: 6000, maxWidthMm: 2300, maxHeightMm: 1550, maxWeightKg: 4000, spacesCount: 46 },
+      { name: "自走式", maxLengthMm: 6000, maxWidthMm: 2300, maxHeightMm: 2500, maxWeightKg: 4000, spacesCount: 46 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "25:00",
+  },
+  {
+    name: "西友三軒茶屋店駐車場",
+    slug: "seiyu-sangenjaya-parking",
+    address: "東京都世田谷区太子堂4-24-8",
+    latitude: 35.6439, longitude: 139.6710,
+    parkingType: "mechanical", totalSpaces: 22,
+    restrictions: [
+      { name: "標準", maxLengthMm: 4900, maxWidthMm: 1720, maxHeightMm: 1500, maxWeightKg: 2000, spacesCount: 22, notes: "制限が厳しいため要注意" },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 210, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+  // ============================================================
+  // 大田区
+  // ============================================================
+  {
+    name: "グランデュオ蒲田東館駐車場",
+    slug: "granduo-kamata-higashikan-parking",
+    address: "東京都大田区蒲田5-12",
+    latitude: 35.5625, longitude: 139.7165,
+    parkingType: "mechanical", totalSpaces: 30,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5750, maxWidthMm: 2050, maxHeightMm: 1600, maxWeightKg: 2200, spacesCount: 30 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "22:00",
+  },
+  {
+    name: "京急蒲田駅前機械式駐車場",
+    slug: "keikyu-kamata-ekimae-parking",
+    address: "東京都大田区蒲田4-10-14",
+    latitude: 35.5610, longitude: 139.7195,
+    parkingType: "mechanical", totalSpaces: 36,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2500, spacesCount: 18 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 18 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "06:30", closeTime: "25:30",
+  },
+  // ============================================================
+  // 文京区
+  // ============================================================
+  {
+    name: "文京シビックセンター駐車場",
+    slug: "bunkyo-civic-center-parking",
+    address: "東京都文京区春日1-16-21",
+    latitude: 35.7079, longitude: 139.7521,
+    parkingType: "mechanical", totalSpaces: 130,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5700, maxWidthMm: 2000, maxHeightMm: 1550, maxWeightKg: 2200, spacesCount: 130 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 250, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "08:15", closeTime: "22:00",
+  },
+  {
+    name: "NPC24H後楽1丁目パーキング",
+    slug: "npc24h-koraku-1chome-parking",
+    address: "東京都文京区後楽1-2-8",
+    latitude: 35.7058, longitude: 139.7517,
+    parkingType: "mechanical", totalSpaces: 36,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5000, maxWidthMm: 1900, maxHeightMm: 2300, maxWeightKg: 2500, spacesCount: 36 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 30 },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 台東区
+  // ============================================================
+  {
+    name: "上野中央通り地下駐車場",
+    slug: "ueno-chuo-dori-underground-parking",
+    address: "東京都台東区上野2-13先",
+    latitude: 35.7096, longitude: 139.7726,
+    parkingType: "mechanical", totalSpaces: 300,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 300 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30, notes: "初回30分300円、以降30分100円" },
+    ],
+    is24h: true,
+  },
+  {
+    name: "上野パーキングセンター",
+    slug: "ueno-parking-center",
+    address: "東京都台東区上野公園1-50",
+    latitude: 35.7132, longitude: 139.7745,
+    parkingType: "self_propelled", totalSpaces: 400,
+    restrictions: [
+      { name: "一般", maxLengthMm: 6000, maxWidthMm: 2500, maxHeightMm: 2000, maxWeightKg: 2000, spacesCount: 400 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 豊島区
+  // ============================================================
+  {
+    name: "NPC24Hクイック池袋パーキング",
+    slug: "npc24h-quick-ikebukuro-parking",
+    address: "東京都豊島区池袋2-47-2",
+    latitude: 35.7315, longitude: 139.7090,
+    parkingType: "mechanical", totalSpaces: 38,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 19 },
+      { name: "ハイルーフ", maxLengthMm: 5050, maxWidthMm: 1900, maxHeightMm: 2050, maxWeightKg: 2300, spacesCount: 19 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 220, durationMinutes: 20 },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 江東区
+  // ============================================================
+  {
+    name: "タイムズ有明フロンティア",
+    slug: "times-ariake-frontier",
+    address: "東京都江東区有明3-7",
+    latitude: 35.6325, longitude: 139.7920,
+    parkingType: "mechanical", totalSpaces: 141,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5000, maxWidthMm: 1900, maxHeightMm: 1500, maxWeightKg: 1700, spacesCount: 141, notes: "制限が厳しいため要注意" },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 440, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "22:00",
+  },
+  // ============================================================
+  // 墨田区
+  // ============================================================
+  {
+    name: "墨田区庁舎駐車場",
+    slug: "sumida-city-hall-parking",
+    address: "東京都墨田区吾妻橋1-23-20",
+    latitude: 35.7102, longitude: 139.8020,
+    parkingType: "mechanical", totalSpaces: 60,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5050, maxWidthMm: 1950, maxHeightMm: 1550, maxWeightKg: 1600, spacesCount: 60 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 250, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "22:00",
+  },
+  // ============================================================
+  // 足立区
+  // ============================================================
+  {
+    name: "北千住駅前駐車場",
+    slug: "kitasenju-ekimae-parking",
+    address: "東京都足立区千住3-92",
+    latitude: 35.7496, longitude: 139.8046,
+    parkingType: "mechanical", totalSpaces: 336,
+    restrictions: [
+      { name: "ロールーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 168 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 168 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+  // ============================================================
+  // 北区
+  // ============================================================
+  {
+    name: "タイムズ赤羽駅前第2",
+    slug: "times-akabane-ekimae-2",
+    address: "東京都北区赤羽西1-4",
+    latitude: 35.7775, longitude: 139.7200,
+    parkingType: "mechanical", totalSpaces: 24,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 12 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 12 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 200, durationMinutes: 30 },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 荒川区
+  // ============================================================
+  {
+    name: "日暮里駅前ステーションガーデンタワー駐車場",
+    slug: "nippori-station-garden-tower-parking",
+    address: "東京都荒川区西日暮里2-25-1",
+    latitude: 35.7282, longitude: 139.7711,
+    parkingType: "mechanical", totalSpaces: 59,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5000, maxWidthMm: 1980, maxHeightMm: 1550, maxWeightKg: 2200, spacesCount: 30 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 29 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+  // ============================================================
+  // 練馬区
+  // ============================================================
+  {
+    name: "大泉学園ゆめりあ北パーキング",
+    slug: "oizumi-gakuen-yumeria-kita-parking",
+    address: "東京都練馬区東大泉1丁目",
+    latitude: 35.7525, longitude: 139.5870,
+    parkingType: "mechanical", totalSpaces: 38,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 38 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 100, durationMinutes: 15 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "23:00",
+  },
+  // ============================================================
+  // 中野区
+  // ============================================================
+  {
+    name: "タイムズ丸井中野店",
+    slug: "times-marui-nakano",
+    address: "東京都中野区中野3-34",
+    latitude: 35.7047, longitude: 139.6651,
+    parkingType: "mechanical", totalSpaces: 57,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5300, maxWidthMm: 2000, maxHeightMm: 1500, maxWeightKg: 2300, spacesCount: 57, notes: "高さ制限が厳しいため要注意" },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 250, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "08:30", closeTime: "23:00",
+  },
+  // ============================================================
+  // 杉並区
+  // ============================================================
+  {
+    name: "NPC24H高円寺北パーキング",
+    slug: "npc24h-koenji-kita-parking",
+    address: "東京都杉並区高円寺北2-30-9",
+    latitude: 35.7100, longitude: 139.6498,
+    parkingType: "mechanical", totalSpaces: 12,
+    restrictions: [
+      { name: "標準", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 12 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 220, durationMinutes: 20 },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 葛飾区
+  // ============================================================
+  {
+    name: "葛飾区金町南駐車場",
+    slug: "katsushika-kanamachi-minami-parking",
+    address: "東京都葛飾区金町6-2",
+    latitude: 35.7687, longitude: 139.8713,
+    parkingType: "self_propelled", totalSpaces: 100,
+    restrictions: [
+      { name: "一般", maxLengthMm: 5000, maxWidthMm: 1900, maxHeightMm: 2100, maxWeightKg: 2000, spacesCount: 100 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60, notes: "初回60分400円、以降30分200円" },
+    ],
+    is24h: true,
+  },
+  // ============================================================
+  // 江戸川区
+  // ============================================================
+  {
+    name: "江戸川区新川地下駐車場",
+    slug: "edogawa-shinkawa-underground-parking",
+    address: "東京都江戸川区船堀6-11先",
+    latitude: 35.6862, longitude: 139.8610,
+    parkingType: "self_propelled", totalSpaces: 200,
+    restrictions: [
+      { name: "一般", maxLengthMm: 5600, maxWidthMm: 2000, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 200 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 200, durationMinutes: 60, notes: "初回60分200円、以降30分100円" },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "25:00",
+  },
+  // ============================================================
+  // 追加分: 百貨店・商業施設 + 各区追加 (39-100件目)
+  // ============================================================
+
+  // --- 中央区: 百貨店・商業施設 ---
+  {
+    name: "日本橋三越本店駐車場",
+    slug: "nihombashi-mitsukoshi-parking",
+    address: "東京都中央区日本橋室町1-3",
+    latitude: 35.6858, longitude: 139.7731,
+    parkingType: "mechanical", totalSpaces: 260,
+    restrictions: [
+      { name: "機械式", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 1660, maxWeightKg: 2500, spacesCount: 200 },
+      { name: "自走式", maxLengthMm: 5300, maxWidthMm: 2000, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 60 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "09:30", closeTime: "22:15",
+  },
+  {
+    name: "銀座三越駐車場",
+    slug: "ginza-mitsukoshi-parking",
+    address: "東京都中央区銀座4-6-16",
+    latitude: 35.6719, longitude: 139.7671,
+    parkingType: "self_propelled", totalSpaces: 399,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 399 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:30",
+  },
+  {
+    name: "西銀座駐車場",
+    slug: "nishi-ginza-parking",
+    address: "東京都中央区銀座2丁目地先",
+    latitude: 35.6724, longitude: 139.7649,
+    parkingType: "self_propelled", totalSpaces: 800,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 6000, maxWidthMm: 2100, maxHeightMm: 2000, maxWeightKg: 3000, spacesCount: 800 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "松屋銀座駐車場",
+    slug: "matsuya-ginza-parking",
+    address: "東京都中央区銀座3-6-1",
+    latitude: 35.6722, longitude: 139.7667,
+    parkingType: "mechanical", totalSpaces: 93,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1920, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 93 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "09:45", closeTime: "22:10",
+  },
+  {
+    name: "GINZA SIX駐車場",
+    slug: "ginza-six-parking",
+    address: "東京都中央区銀座6-10-1",
+    latitude: 35.6697, longitude: 139.7633,
+    parkingType: "mechanical", totalSpaces: 445,
+    restrictions: [
+      { name: "機械式", maxLengthMm: 5300, maxWidthMm: 2000, maxHeightMm: 2000, maxWeightKg: 2500, spacesCount: 423 },
+      { name: "自走式", maxLengthMm: 6000, maxWidthMm: 2200, maxHeightMm: 2000, maxWeightKg: 2500, spacesCount: 22 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "02:00",
+  },
+  {
+    name: "東急プラザ銀座駐車場",
+    slug: "tokyu-plaza-ginza-parking",
+    address: "東京都中央区銀座5-2-1",
+    latitude: 35.6722, longitude: 139.7624,
+    parkingType: "mechanical", totalSpaces: 174,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 1550, maxWeightKg: 2600, spacesCount: 100 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 2000, maxWeightKg: 2600, spacesCount: 74 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 660, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "日本橋高島屋タワーパーキング",
+    slug: "nihombashi-takashimaya-tower-parking",
+    address: "東京都中央区日本橋2-4-1",
+    latitude: 35.6812, longitude: 139.7739,
+    parkingType: "tower", totalSpaces: 178,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5600, maxWidthMm: 2050, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 178 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:30", closeTime: "21:30",
+  },
+  {
+    name: "コレド室町1駐車場",
+    slug: "coredo-muromachi-1-parking",
+    address: "東京都中央区日本橋室町2-2-1",
+    latitude: 35.6870, longitude: 139.7736,
+    parkingType: "mechanical", totalSpaces: 290,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5300, maxWidthMm: 1950, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 290 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "02:00",
+  },
+
+  // --- 港区: 追加 ---
+  {
+    name: "六本木ヒルズP2駐車場",
+    slug: "roppongi-hills-p2-parking",
+    address: "東京都港区六本木6-10-1",
+    latitude: 35.6603, longitude: 139.7295,
+    parkingType: "self_propelled", totalSpaces: 437,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 6000, maxWidthMm: 2500, maxHeightMm: 2200, maxWeightKg: 2300, spacesCount: 437 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "表参道ヒルズ駐車場",
+    slug: "omotesando-hills-parking",
+    address: "東京都渋谷区神宮前4-12-10",
+    latitude: 35.6662, longitude: 139.7100,
+    parkingType: "self_propelled", totalSpaces: 182,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5000, maxWidthMm: 1900, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 182 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+  {
+    name: "東京ミッドタウン六本木駐車場",
+    slug: "tokyo-midtown-roppongi-parking",
+    address: "東京都港区赤坂9-7-1",
+    latitude: 35.6655, longitude: 139.7310,
+    parkingType: "self_propelled", totalSpaces: 390,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5400, maxWidthMm: 2100, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 390 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "02:00",
+  },
+
+  // --- 新宿区: 百貨店・商業施設 ---
+  {
+    name: "伊勢丹新宿店駐車場",
+    slug: "isetan-shinjuku-parking",
+    address: "東京都新宿区新宿3-14-1",
+    latitude: 35.6920, longitude: 139.7044,
+    parkingType: "mechanical", totalSpaces: 120,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 80 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 40 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "21:00",
+  },
+  {
+    name: "小田急百貨店新宿店駐車場",
+    slug: "odakyu-shinjuku-parking",
+    address: "東京都新宿区西新宿1-1-3",
+    latitude: 35.6915, longitude: 139.6997,
+    parkingType: "mechanical", totalSpaces: 180,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5200, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 120 },
+      { name: "ハイルーフ", maxLengthMm: 5200, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 60 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+  {
+    name: "京王百貨店新宿店駐車場",
+    slug: "keio-dept-shinjuku-parking",
+    address: "東京都新宿区西新宿1-1-4",
+    latitude: 35.6904, longitude: 139.6992,
+    parkingType: "mechanical", totalSpaces: 100,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 70 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 30 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "21:30",
+  },
+  {
+    name: "ルミネ新宿駐車場",
+    slug: "lumine-shinjuku-parking",
+    address: "東京都新宿区新宿3-38-2",
+    latitude: 35.6894, longitude: 139.7006,
+    parkingType: "mechanical", totalSpaces: 106,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 106 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:30", closeTime: "24:00",
+  },
+  {
+    name: "新宿タカシマヤタイムズスクエア駐車場",
+    slug: "takashimaya-times-square-parking",
+    address: "東京都渋谷区千駄ヶ谷5-24-2",
+    latitude: 35.6871, longitude: 139.7022,
+    parkingType: "self_propelled", totalSpaces: 340,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 340 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:30", closeTime: "24:30",
+  },
+
+  // --- 渋谷区: 追加 ---
+  {
+    name: "渋谷ヒカリエ駐車場",
+    slug: "shibuya-hikarie-parking",
+    address: "東京都渋谷区渋谷2-21-1",
+    latitude: 35.6590, longitude: 139.7035,
+    parkingType: "self_propelled", totalSpaces: 400,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 400 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:30", closeTime: "24:00",
+  },
+  {
+    name: "渋谷スクランブルスクエア駐車場",
+    slug: "shibuya-scramble-square-parking",
+    address: "東京都渋谷区渋谷2-24-12",
+    latitude: 35.6586, longitude: 139.7021,
+    parkingType: "self_propelled", totalSpaces: 280,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 280 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:30", closeTime: "24:00",
+  },
+  {
+    name: "渋谷マークシティ駐車場",
+    slug: "shibuya-mark-city-parking",
+    address: "東京都渋谷区道玄坂1-12-1",
+    latitude: 35.6578, longitude: 139.6985,
+    parkingType: "self_propelled", totalSpaces: 340,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 340 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "渋谷パルコ駐車場",
+    slug: "shibuya-parco-parking",
+    address: "東京都渋谷区宇田川町15-1",
+    latitude: 35.6612, longitude: 139.6983,
+    parkingType: "mechanical", totalSpaces: 58,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 36 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2050, maxWeightKg: 2300, spacesCount: 22 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "23:30",
+  },
+
+  // --- 豊島区: 百貨店・商業施設 ---
+  {
+    name: "西武池袋本店駐車場",
+    slug: "seibu-ikebukuro-parking",
+    address: "東京都豊島区南池袋1-28-1",
+    latitude: 35.7290, longitude: 139.7100,
+    parkingType: "mechanical", totalSpaces: 300,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 200 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2000, maxWeightKg: 2300, spacesCount: 100 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "22:00",
+  },
+  {
+    name: "東武百貨店池袋店駐車場",
+    slug: "tobu-ikebukuro-parking",
+    address: "東京都豊島区西池袋1-1-25",
+    latitude: 35.7298, longitude: 139.7094,
+    parkingType: "self_propelled", totalSpaces: 800,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2000, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 800 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "22:30",
+  },
+  {
+    name: "サンシャインシティ駐車場",
+    slug: "sunshine-city-parking",
+    address: "東京都豊島区東池袋3-1-1",
+    latitude: 35.7292, longitude: 139.7185,
+    parkingType: "self_propelled", totalSpaces: 1800,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 1800 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "池袋パルコ駐車場",
+    slug: "ikebukuro-parco-parking",
+    address: "東京都豊島区南池袋1-28-2",
+    latitude: 35.7284, longitude: 139.7110,
+    parkingType: "mechanical", totalSpaces: 120,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 80 },
+      { name: "ハイルーフ", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2300, spacesCount: 40 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "23:00",
+  },
+
+  // --- 台東区: 追加 ---
+  {
+    name: "松坂屋上野店駐車場",
+    slug: "matsuzakaya-ueno-parking",
+    address: "東京都台東区上野3-29-5",
+    latitude: 35.7083, longitude: 139.7730,
+    parkingType: "mechanical", totalSpaces: 200,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2300, spacesCount: 130 },
+      { name: "ハイルーフ", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2300, spacesCount: 70 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "21:30",
+  },
+  {
+    name: "松屋浅草駐車場",
+    slug: "matsuya-asakusa-parking",
+    address: "東京都台東区花川戸1-4-1",
+    latitude: 35.7105, longitude: 139.7967,
+    parkingType: "mechanical", totalSpaces: 100,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5050, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 70 },
+      { name: "ハイルーフ", maxLengthMm: 5050, maxWidthMm: 1900, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 30 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "09:30", closeTime: "22:00",
+  },
+  {
+    name: "浅草ROX駐車場",
+    slug: "asakusa-rox-parking",
+    address: "東京都台東区浅草1-25-15",
+    latitude: 35.7118, longitude: 139.7950,
+    parkingType: "self_propelled", totalSpaces: 120,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2100, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 120 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "09:30", closeTime: "23:00",
+  },
+
+  // --- 文京区: 追加 ---
+  {
+    name: "東京ドームシティ駐車場",
+    slug: "tokyo-dome-city-parking",
+    address: "東京都文京区後楽1-3-61",
+    latitude: 35.7056, longitude: 139.7520,
+    parkingType: "self_propelled", totalSpaces: 700,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 700 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+
+  // --- 墨田区: 追加 ---
+  {
+    name: "東京ソラマチ駐車場",
+    slug: "tokyo-solamachi-parking",
+    address: "東京都墨田区押上1-1-2",
+    latitude: 35.7101, longitude: 139.8107,
+    parkingType: "self_propelled", totalSpaces: 460,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 460 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 350, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "07:30", closeTime: "23:00",
+  },
+  {
+    name: "錦糸町丸井駐車場",
+    slug: "kinshicho-marui-parking",
+    address: "東京都墨田区江東橋3-9-10",
+    latitude: 35.6961, longitude: 139.8141,
+    parkingType: "mechanical", totalSpaces: 160,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 100 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 60 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "21:30",
+  },
+  {
+    name: "錦糸町アルカキット駐車場",
+    slug: "kinshicho-arcakit-parking",
+    address: "東京都墨田区錦糸1-2-1",
+    latitude: 35.6975, longitude: 139.8130,
+    parkingType: "self_propelled", totalSpaces: 250,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2000, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 250 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 30 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "24:00",
+  },
+
+  // --- 江東区: 追加 ---
+  {
+    name: "ららぽーと豊洲駐車場",
+    slug: "lalaport-toyosu-parking",
+    address: "東京都江東区豊洲2-4-9",
+    latitude: 35.6555, longitude: 139.7928,
+    parkingType: "self_propelled", totalSpaces: 2100,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 2100 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の1時間無料" },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "24:00",
+  },
+  {
+    name: "アリオ北砂駐車場",
+    slug: "ario-kitasuna-parking",
+    address: "東京都江東区北砂2-17-1",
+    latitude: 35.6876, longitude: 139.8320,
+    parkingType: "self_propelled", totalSpaces: 900,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 900 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の2時間無料" },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "23:00",
+  },
+  {
+    name: "南砂町ショッピングセンターSUNAMO駐車場",
+    slug: "sunamo-parking",
+    address: "東京都江東区新砂3-4-31",
+    latitude: 35.6678, longitude: 139.8378,
+    parkingType: "self_propelled", totalSpaces: 1400,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 1400 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の1時間無料" },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "24:00",
+  },
+
+  // --- 品川区: 追加 ---
+  {
+    name: "アトレ大井町駐車場",
+    slug: "atre-oimachi-parking",
+    address: "東京都品川区大井1-2-1",
+    latitude: 35.6063, longitude: 139.7346,
+    parkingType: "mechanical", totalSpaces: 67,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 40 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 27 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+  {
+    name: "天王洲アイル駐車場",
+    slug: "tennozu-isle-parking",
+    address: "東京都品川区東品川2-3-12",
+    latitude: 35.6225, longitude: 139.7482,
+    parkingType: "self_propelled", totalSpaces: 200,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2100, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 200 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+
+  // --- 目黒区: 追加 ---
+  {
+    name: "アトレ目黒駐車場",
+    slug: "atre-meguro-parking",
+    address: "東京都品川区上大崎3-1-1",
+    latitude: 35.6339, longitude: 139.7157,
+    parkingType: "mechanical", totalSpaces: 80,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 50 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 30 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:30",
+  },
+  {
+    name: "自由が丘東急ストア駐車場",
+    slug: "jiyugaoka-tokyu-store-parking",
+    address: "東京都目黒区自由が丘1-28-8",
+    latitude: 35.6076, longitude: 139.6695,
+    parkingType: "mechanical", totalSpaces: 50,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 4900, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 30 },
+      { name: "ハイルーフ", maxLengthMm: 4900, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 20 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "22:00",
+  },
+
+  // --- 世田谷区: 追加 ---
+  {
+    name: "玉川高島屋S.C.駐車場",
+    slug: "tamagawa-takashimaya-sc-parking",
+    address: "東京都世田谷区玉川3-17-1",
+    latitude: 35.6115, longitude: 139.6264,
+    parkingType: "self_propelled", totalSpaces: 2000,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 2000 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "23:30",
+  },
+  {
+    name: "経堂コルティ駐車場",
+    slug: "kyodo-corty-parking",
+    address: "東京都世田谷区経堂1-12-10",
+    latitude: 35.6471, longitude: 139.6322,
+    parkingType: "mechanical", totalSpaces: 44,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 30 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 14 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+
+  // --- 大田区: 追加 ---
+  {
+    name: "グランデュオ蒲田西館駐車場",
+    slug: "granduo-kamata-west-parking",
+    address: "東京都大田区西蒲田7-68-1",
+    latitude: 35.5627, longitude: 139.7137,
+    parkingType: "mechanical", totalSpaces: 110,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 70 },
+      { name: "ハイルーフ", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 40 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "22:00",
+  },
+
+  // --- 足立区: 追加 ---
+  {
+    name: "アリオ西新井駐車場",
+    slug: "ario-nishiarai-parking",
+    address: "東京都足立区西新井栄町1-20-1",
+    latitude: 35.7745, longitude: 139.7820,
+    parkingType: "self_propelled", totalSpaces: 1300,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 1300 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の2時間無料" },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "24:00",
+  },
+  {
+    name: "ルミネ北千住駐車場",
+    slug: "lumine-kitasenju-parking",
+    address: "東京都足立区千住旭町42-2",
+    latitude: 35.7493, longitude: 139.8044,
+    parkingType: "mechanical", totalSpaces: 90,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 60 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 30 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "22:30",
+  },
+
+  // --- 葛飾区: 追加 ---
+  {
+    name: "アリオ亀有駐車場",
+    slug: "ario-kameari-parking",
+    address: "東京都葛飾区亀有3-49-3",
+    latitude: 35.7620, longitude: 139.8469,
+    parkingType: "self_propelled", totalSpaces: 900,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 900 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の1時間無料" },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "24:00",
+  },
+
+  // --- 江戸川区: 追加 ---
+  {
+    name: "イオン葛西店駐車場",
+    slug: "aeon-kasai-parking",
+    address: "東京都江戸川区西葛西3-9-19",
+    latitude: 35.6618, longitude: 139.8540,
+    parkingType: "self_propelled", totalSpaces: 700,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 700 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の3時間無料" },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "23:00",
+  },
+
+  // --- 練馬区: 追加 ---
+  {
+    name: "光が丘IMA駐車場",
+    slug: "hikarigaoka-ima-parking",
+    address: "東京都練馬区光が丘5-1-1",
+    latitude: 35.7593, longitude: 139.6312,
+    parkingType: "self_propelled", totalSpaces: 570,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2000, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 570 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の1時間無料" },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+  {
+    name: "西武練馬店駐車場",
+    slug: "seibu-nerima-parking",
+    address: "東京都練馬区練馬1-5-1",
+    latitude: 35.7368, longitude: 139.6523,
+    parkingType: "mechanical", totalSpaces: 100,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 60 },
+      { name: "ハイルーフ", maxLengthMm: 5050, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 40 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "21:30",
+  },
+
+  // --- 中野区: 追加 ---
+  {
+    name: "中野サンモール駐車場",
+    slug: "nakano-sunmall-parking",
+    address: "東京都中野区中野5-64",
+    latitude: 35.7063, longitude: 139.6658,
+    parkingType: "mechanical", totalSpaces: 60,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 40 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 20 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "22:00",
+  },
+
+  // --- 杉並区: 追加 ---
+  {
+    name: "ルミネ荻窪駐車場",
+    slug: "lumine-ogikubo-parking",
+    address: "東京都杉並区上荻1-7-1",
+    latitude: 35.7035, longitude: 139.6200,
+    parkingType: "mechanical", totalSpaces: 48,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 30 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 18 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "23:00",
+  },
+
+  // --- 板橋区: 追加 ---
+  {
+    name: "イオンスタイル板橋前野町駐車場",
+    slug: "aeon-itabashi-maenomachi-parking",
+    address: "東京都板橋区前野町4-21-22",
+    latitude: 35.7686, longitude: 139.6805,
+    parkingType: "self_propelled", totalSpaces: 600,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 600 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の3時間無料" },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+  {
+    name: "成増スキップ村パーキング",
+    slug: "narimasu-skip-mura-parking",
+    address: "東京都板橋区成増2-11-1",
+    latitude: 35.7783, longitude: 139.6313,
+    parkingType: "mechanical", totalSpaces: 60,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 40 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 20 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+
+  // --- 北区: 追加 ---
+  {
+    name: "アピレ赤羽駐車場",
+    slug: "apire-akabane-parking",
+    address: "東京都北区赤羽西1-6-1",
+    latitude: 35.7776, longitude: 139.7207,
+    parkingType: "mechanical", totalSpaces: 70,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 45 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 25 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "10:00", closeTime: "21:00",
+  },
+
+  // --- 荒川区: 追加 ---
+  {
+    name: "LaLaテラス南千住駐車場",
+    slug: "lalaterrace-minamisenju-parking",
+    address: "東京都荒川区南千住4-7-2",
+    latitude: 35.7349, longitude: 139.7962,
+    parkingType: "self_propelled", totalSpaces: 250,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2000, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 250 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の2時間無料" },
+    ],
+    is24h: false, openTime: "09:00", closeTime: "23:00",
+  },
+
+  // --- 千代田区: 追加 ---
+  {
+    name: "有楽町イトシア駐車場",
+    slug: "yurakucho-itocia-parking",
+    address: "東京都千代田区有楽町2-7-1",
+    latitude: 35.6736, longitude: 139.7627,
+    parkingType: "mechanical", totalSpaces: 270,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 1550, maxWeightKg: 2500, spacesCount: 170 },
+      { name: "ハイルーフ", maxLengthMm: 5300, maxWidthMm: 1900, maxHeightMm: 2050, maxWeightKg: 2500, spacesCount: 100 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "02:00",
+  },
+  {
+    name: "秋葉原UDXパーキング",
+    slug: "akihabara-udx-parking",
+    address: "東京都千代田区外神田4-14-1",
+    latitude: 35.6999, longitude: 139.7710,
+    parkingType: "self_propelled", totalSpaces: 800,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5300, maxWidthMm: 2050, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 800 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: true,
+  },
+  {
+    name: "有楽町センタービル駐車場",
+    slug: "yurakucho-center-building-parking",
+    address: "東京都千代田区有楽町1-1",
+    latitude: 35.6750, longitude: 139.7612,
+    parkingType: "self_propelled", totalSpaces: 480,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 480 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "24:00",
+  },
+
+  // --- 追加6件 (95-100) ---
+  {
+    name: "東京ガーデンテラス紀尾井町駐車場",
+    slug: "tokyo-garden-terrace-kioicho-parking",
+    address: "東京都千代田区紀尾井町1-2",
+    latitude: 35.6813, longitude: 139.7354,
+    parkingType: "self_propelled", totalSpaces: 200,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 200 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 600, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "24:00",
+  },
+  {
+    name: "恵比寿ガーデンプレイス駐車場",
+    slug: "ebisu-garden-place-parking",
+    address: "東京都渋谷区恵比寿4-20",
+    latitude: 35.6413, longitude: 139.7135,
+    parkingType: "self_propelled", totalSpaces: 670,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 670 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "06:00", closeTime: "24:00",
+  },
+  {
+    name: "アトレ吉祥寺駐車場",
+    slug: "atre-kichijoji-parking",
+    address: "東京都武蔵野市吉祥寺南町1-1-24",
+    latitude: 35.7023, longitude: 139.5797,
+    parkingType: "mechanical", totalSpaces: 80,
+    restrictions: [
+      { name: "普通車", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 1550, maxWeightKg: 2000, spacesCount: 50 },
+      { name: "ハイルーフ", maxLengthMm: 5000, maxWidthMm: 1850, maxHeightMm: 2050, maxWeightKg: 2000, spacesCount: 30 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 400, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+  {
+    name: "東京オペラシティ駐車場",
+    slug: "tokyo-opera-city-parking",
+    address: "東京都新宿区西新宿3-20-2",
+    latitude: 35.6838, longitude: 139.6886,
+    parkingType: "self_propelled", totalSpaces: 200,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 200 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 500, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+  {
+    name: "品川シーサイドフォレスト駐車場",
+    slug: "shinagawa-seaside-forest-parking",
+    address: "東京都品川区東品川4-12-4",
+    latitude: 35.6097, longitude: 139.7483,
+    parkingType: "self_propelled", totalSpaces: 700,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 700 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60 },
+    ],
+    is24h: false, openTime: "07:00", closeTime: "24:00",
+  },
+  {
+    name: "イオンモール板橋駐車場",
+    slug: "aeon-mall-itabashi-parking",
+    address: "東京都板橋区徳丸2-6-1",
+    latitude: 35.7810, longitude: 139.6707,
+    parkingType: "self_propelled", totalSpaces: 1100,
+    restrictions: [
+      { name: "全車共通", maxLengthMm: 5500, maxWidthMm: 2200, maxHeightMm: 2100, maxWeightKg: 2500, spacesCount: 1100 },
+    ],
+    fees: [
+      { feeType: "hourly", amountYen: 300, durationMinutes: 60, notes: "最初の3時間無料" },
+    ],
+    is24h: false, openTime: "08:00", closeTime: "23:00",
+  },
+];
+
+// ============================================================
+// Seed 実行
+// ============================================================
+async function seed() {
+  console.log("--- Seed開始 ---");
+
+  // 全テーブル削除 (外部キー依存順)
+  console.log("既存データを削除中...");
+  db.run(sql`DELETE FROM operating_hours`);
+  db.run(sql`DELETE FROM parking_fees`);
+  db.run(sql`DELETE FROM vehicle_restrictions`);
+  db.run(sql`DELETE FROM parking_lots`);
+  db.run(sql`DELETE FROM dimensions`);
+  db.run(sql`DELETE FROM trims`);
+  db.run(sql`DELETE FROM phases`);
+  db.run(sql`DELETE FROM generations`);
+  db.run(sql`DELETE FROM models`);
+  db.run(sql`DELETE FROM makers`);
+  console.log("削除完了");
+
+  // ----------------------------------------------------------
+  // 車種データ投入
+  // ----------------------------------------------------------
+  console.log("車種データを投入中...");
+
+  // メーカーの重複排除
+  const uniqueMakers = new Map<string, { name: string; slug: string; country: string }>();
+  for (const car of carData) {
+    if (!uniqueMakers.has(car.makerSlug)) {
+      uniqueMakers.set(car.makerSlug, {
+        name: car.makerName,
+        slug: car.makerSlug,
+        country: car.country,
+      });
+    }
+  }
+
+  // メーカー投入
+  const makerIdMap = new Map<string, number>();
+  let displayOrder = 1;
+  for (const [slug, maker] of uniqueMakers) {
+    const result = db
+      .insert(makers)
+      .values({
+        name: maker.name,
+        slug: maker.slug,
+        country: maker.country,
+        display_order: displayOrder++,
+      })
+      .returning({ id: makers.id })
+      .get();
+    makerIdMap.set(slug, result.id);
+    console.log(`  メーカー: ${maker.name} (id=${result.id})`);
+  }
+
+  // 各車種を投入
+  const modelIdMap = new Map<string, number>();          // modelSlug → model.id
+  const generationIdMap = new Map<string, number>();     // modelSlug:generationName → generation.id
+  const phaseIdMap = new Map<string, number>();           // modelSlug:generationName → phase.id (現行型)
+
+  for (const car of carData) {
+    const makerId = makerIdMap.get(car.makerSlug)!;
+
+    // model: 同一modelSlugが既に存在する場合はスキップ
+    let modelId: number;
+    if (modelIdMap.has(car.modelSlug)) {
+      modelId = modelIdMap.get(car.modelSlug)!;
+    } else {
+      const model = db
+        .insert(models)
+        .values({
+          maker_id: makerId,
+          name: car.modelName,
+          slug: car.modelSlug,
+          body_type: car.bodyType,
+          is_popular: true,
+        })
+        .returning({ id: models.id })
+        .get();
+      modelId = model.id;
+      modelIdMap.set(car.modelSlug, modelId);
+    }
+
+    // generation: 同一model+generationNameが既に存在する場合はスキップ
+    const genKey = `${car.modelSlug}:${car.generationName}`;
+    let generationId: number;
+    let phaseId: number;
+    if (generationIdMap.has(genKey)) {
+      generationId = generationIdMap.get(genKey)!;
+      phaseId = phaseIdMap.get(genKey)!;
+    } else {
+      const generation = db
+        .insert(generations)
+        .values({
+          model_id: modelId,
+          name: car.generationName,
+          start_year: car.startYear,
+          end_year: car.endYear,
+        })
+        .returning({ id: generations.id })
+        .get();
+      generationId = generation.id;
+      generationIdMap.set(genKey, generationId);
+
+      const phaseName = car.endYear ? "前期型" : "現行型";
+      const phase = db
+        .insert(phases)
+        .values({
+          generation_id: generationId,
+          name: phaseName,
+        })
+        .returning({ id: phases.id })
+        .get();
+      phaseId = phase.id;
+      phaseIdMap.set(genKey, phaseId);
+    }
+
+    // trim
+    const trim = db
+      .insert(trims)
+      .values({
+        phase_id: phaseId,
+        name: car.trimName,
+        drive_type: car.driveType,
+        transmission: car.transmission,
+      })
+      .returning({ id: trims.id })
+      .get();
+
+    // dimension
+    db.insert(dimensions)
+      .values({
+        trim_id: trim.id,
+        length_mm: car.lengthMm,
+        width_mm: car.widthMm,
+        height_mm: car.heightMm,
+        weight_kg: car.weightKg,
+        min_turning_radius_m: car.minTurningRadiusM,
+      })
+      .run();
+
+    console.log(`  車種: ${car.makerName} ${car.modelName} ${car.generationName} (${car.trimName})`);
+  }
+
+  const uniqueModels = new Set(carData.map(c => c.modelSlug)).size;
+  console.log(`車種データ投入完了: ${uniqueModels}モデル, ${carData.length}グレード`);
+
+  // ----------------------------------------------------------
+  // 駐車場データ投入
+  // ----------------------------------------------------------
+  console.log("駐車場データを投入中...");
+
+  for (const parking of parkingData) {
+    // parking_lot
+    const lot = db
+      .insert(parkingLots)
+      .values({
+        name: parking.name,
+        slug: parking.slug,
+        address: parking.address,
+        latitude: parking.latitude,
+        longitude: parking.longitude,
+        parking_type: parking.parkingType,
+        total_spaces: parking.totalSpaces,
+      })
+      .returning({ id: parkingLots.id })
+      .get();
+
+    // vehicle_restrictions
+    for (const r of parking.restrictions) {
+      db.insert(vehicleRestrictions)
+        .values({
+          parking_lot_id: lot.id,
+          restriction_name: r.name,
+          max_length_mm: r.maxLengthMm,
+          max_width_mm: r.maxWidthMm,
+          max_height_mm: r.maxHeightMm,
+          max_weight_kg: r.maxWeightKg,
+          spaces_count: r.spacesCount,
+          notes: r.notes,
+        })
+        .run();
+    }
+
+    // parking_fees
+    for (const f of parking.fees) {
+      db.insert(parkingFees)
+        .values({
+          parking_lot_id: lot.id,
+          fee_type: f.feeType,
+          amount_yen: f.amountYen,
+          duration_minutes: f.durationMinutes,
+          notes: f.notes,
+        })
+        .run();
+    }
+
+    // operating_hours (全曜日分)
+    for (let day = 0; day <= 6; day++) {
+      db.insert(operatingHours)
+        .values({
+          parking_lot_id: lot.id,
+          day_of_week: day,
+          is_24h: parking.is24h,
+          open_time: parking.is24h ? undefined : parking.openTime,
+          close_time: parking.is24h ? undefined : parking.closeTime,
+        })
+        .run();
+    }
+
+    console.log(`  駐車場: ${parking.name} (${parking.restrictions.length}制限, ${parking.fees.length}料金)`);
+  }
+
+  console.log(`駐車場データ投入完了: ${parkingData.length}件`);
+  console.log("--- Seed完了 ---");
+}
+
+// 実行
+try {
+  seed();
+} catch (error) {
+  console.error("Seedエラー:", error);
+  process.exit(1);
+}

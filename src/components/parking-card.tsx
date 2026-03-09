@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { MapPin } from "lucide-react";
 import {
@@ -16,6 +17,13 @@ const parkingTypeLabels: Record<string, string> = {
   self_propelled: "自走式",
   flat: "平面",
   tower: "タワー式",
+};
+
+const parkingTypeImages: Record<string, string> = {
+  mechanical: "/images/parking/mechanical.jpg",
+  self_propelled: "/images/parking/self_propelled.jpg",
+  flat: "/images/parking/flat.jpg",
+  tower: "/images/parking/tower.jpg",
 };
 
 interface ParkingCardProps {
@@ -43,8 +51,19 @@ export function ParkingCard({
 }: ParkingCardProps) {
   return (
     <Link href={`/parking/${slug}`} className="block transition-transform hover:scale-[1.02]">
-      <Card className="h-full">
-        <CardHeader>
+      <Card className="h-full overflow-hidden">
+        {parkingType && parkingTypeImages[parkingType] && (
+          <div className="relative h-32 w-full bg-muted/30">
+            <Image
+              src={parkingTypeImages[parkingType]}
+              alt={parkingTypeLabels[parkingType] ?? parkingType}
+              fill
+              className="object-contain p-2"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          </div>
+        )}
+        <CardHeader className={parkingType && parkingTypeImages[parkingType] ? "pt-3" : ""}>
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="text-base font-semibold">{name}</CardTitle>
             {matchResult && <MatchBadge result={matchResult} />}
