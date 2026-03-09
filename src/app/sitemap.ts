@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { db } from "@/db";
 import { models, parkingLots, makers } from "@/db/schema";
 import { TOKYO_WARDS } from "@/lib/constants";
+import { getArticles } from "@/lib/articles";
 
 const BASE_URL = "https://tomepita.com";
 
@@ -62,5 +63,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   );
 
-  return [...staticPages, ...wardPages, ...carPages, ...parkingPages, ...makerPages, ...areaCarPages];
+  const articles = getArticles();
+  const articlePages: MetadataRoute.Sitemap = articles.map((article) => ({
+    url: `${BASE_URL}/articles/${article.slug}`,
+    lastModified: article.frontmatter.updatedAt
+      ? new Date(article.frontmatter.updatedAt)
+      : new Date(article.frontmatter.date),
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...wardPages, ...carPages, ...parkingPages, ...makerPages, ...areaCarPages, ...articlePages];
 }
