@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Inter, Noto_Sans_JP } from "next/font/google";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { JsonLd } from "@/components/json-ld";
 import "./globals.css";
 
 const GA_ID = "G-Z9J1ERR28F";
@@ -63,6 +64,24 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${notoSansJP.variable} font-sans antialiased`}
       >
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "トメピタ",
+            url: "https://tomepita.com",
+            description:
+              "あなたの車がその駐車場に停められるか、寸法データで即判定。東京23区内の駐車場と車種のマッチングサービス。",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: {
+                "@type": "EntryPoint",
+                urlTemplate: "https://tomepita.com/search?car={search_term_string}",
+              },
+              "query-input": "required name=search_term_string",
+            },
+          }}
+        />
         <Header />
         <main className="min-h-[calc(100dvh-128px)]">{children}</main>
         <Footer />

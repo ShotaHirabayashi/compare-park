@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { MatchBadge } from "@/components/match-badge";
 import { DimensionCompare } from "@/components/dimension-compare";
+import { JsonLd } from "@/components/json-ld";
 import {
   getModelBySlug,
   getDimensionsByModelId,
@@ -105,6 +106,15 @@ export default async function CheckPage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: `${model.maker_name} ${model.name} × ${lot.name} 適合判定`,
+          url: `https://tomepita.com/check?car=${model.slug}&parking=${lot.slug}`,
+          description: `${model.maker_name} ${model.name}が${lot.name}に停められるか寸法比較で判定`,
+        }}
+      />
       <Breadcrumb
         items={[{ label: "トップ", href: "/" }, { label: "判定結果" }]}
       />

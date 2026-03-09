@@ -85,7 +85,7 @@ export default async function Home() {
   return (
     <div>
       {/* セクション1: ヒーロー + 即判定フォーム（統合） */}
-      <section className="relative overflow-hidden pb-12 pt-16 md:pb-16 md:pt-24">
+      <section className="relative overflow-hidden pb-10 pt-12 sm:pb-12 sm:pt-16 md:pb-16 md:pt-24">
         {/* 背景画像 */}
         <Image
           src="/hero-bg.jpg"
@@ -100,14 +100,14 @@ export default async function Home() {
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-5xl">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-5xl">
               あなたの車、その駐車場に停められる？
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
               車種と駐車場を選ぶだけ。OK・ギリギリ・NGを瞬時に判定します。
             </p>
           </div>
-          <div id="check" className="mx-auto mt-8 max-w-4xl rounded-xl border bg-background/95 p-6 shadow-lg backdrop-blur-sm">
+          <div id="check" className="mx-auto mt-6 max-w-4xl rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur-sm sm:mt-8 sm:p-6">
             <InstantCheckForm
               vehicles={vehiclesForSearch}
               parkingLots={parkingLotsForSearch}
@@ -117,9 +117,9 @@ export default async function Home() {
       </section>
 
       {/* セクション2: 車種を探す（人気車種 + メーカー検索をタブ統合） */}
-      <section className="bg-muted/50 py-16">
+      <section className="bg-muted/50 py-10 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-8 text-center text-2xl font-bold text-foreground">
+          <h2 className="mb-6 text-center text-xl font-bold text-foreground sm:mb-8 sm:text-2xl">
             車種を探す
           </h2>
           <CarSearchTabs
@@ -135,9 +135,9 @@ export default async function Home() {
       </section>
 
       {/* セクション3: エリアから探す（pill型チップ） */}
-      <section className="py-16">
+      <section className="py-10 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-2 flex items-center justify-center gap-2 text-2xl font-bold text-foreground">
+          <h2 className="mb-2 flex items-center justify-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
             <MapPin className="size-5 text-muted-foreground" />
             エリアから探す
           </h2>
@@ -159,9 +159,9 @@ export default async function Home() {
       </section>
 
       {/* セクション4: 使い方 */}
-      <section className="bg-muted/50 py-16">
+      <section className="bg-muted/50 py-10 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="mb-10 text-center text-2xl font-bold text-foreground">
+          <h2 className="mb-8 text-center text-xl font-bold text-foreground sm:mb-10 sm:text-2xl">
             使い方
           </h2>
           <div className="grid gap-8 md:grid-cols-3">

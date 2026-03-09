@@ -7,6 +7,7 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { InlineParkingChecker } from "@/components/inline-parking-checker";
 import { VehicleMatchList } from "@/components/vehicle-match-list";
 import type { VehicleMatchItem } from "@/components/vehicle-match-list";
+import { JsonLd } from "@/components/json-ld";
 import {
   getParkingLotBySlug,
   getRestrictionsByParkingLotId,
@@ -160,6 +161,18 @@ export default async function ParkingDetailPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ParkingFacility",
+          name: lot.name,
+          url: `https://tomepita.com/parking/${slug}`,
+          ...(lot.address ? { address: { "@type": "PostalAddress", streetAddress: lot.address, addressLocality: "東京都", addressCountry: "JP" } } : {}),
+          ...(lot.phone ? { telephone: lot.phone } : {}),
+          ...(lot.url ? { sameAs: lot.url } : {}),
+          ...(lot.total_spaces != null ? { maximumAttendeeCapacity: lot.total_spaces } : {}),
+        }}
+      />
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },

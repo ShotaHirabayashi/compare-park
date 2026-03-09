@@ -9,6 +9,7 @@ import { ParkingMatchList } from "@/components/parking-match-list";
 import type { ParkingMatchItem } from "@/components/parking-match-row";
 import { TrimSelector } from "@/components/trim-selector";
 import { AreaSearchMini } from "@/components/area-search-mini";
+import { JsonLd } from "@/components/json-ld";
 import {
   getModelBySlug,
   getAllTrimsWithDimensions,
@@ -154,6 +155,35 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Car",
+          name: model.name,
+          manufacturer: { "@type": "Organization", name: model.maker_name },
+          bodyType: bodyTypeLabels[model.body_type] ?? model.body_type,
+          url: `https://tomepita.com/car/${slug}`,
+          ...(dimension
+            ? {
+                vehicleSpecialUsage: "駐車場適合判定",
+                additionalProperty: [
+                  dimension.length_mm != null
+                    ? { "@type": "PropertyValue", name: "全長", value: dimension.length_mm, unitCode: "MMT" }
+                    : null,
+                  dimension.width_mm != null
+                    ? { "@type": "PropertyValue", name: "全幅", value: dimension.width_mm, unitCode: "MMT" }
+                    : null,
+                  dimension.height_mm != null
+                    ? { "@type": "PropertyValue", name: "全高", value: dimension.height_mm, unitCode: "MMT" }
+                    : null,
+                  dimension.weight_kg != null
+                    ? { "@type": "PropertyValue", name: "重量", value: dimension.weight_kg, unitCode: "KGM" }
+                    : null,
+                ].filter(Boolean),
+              }
+            : {}),
+        }}
+      />
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
