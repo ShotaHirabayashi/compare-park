@@ -1,0 +1,10 @@
+export { makers } from "./makers";
+export { models } from "./models";
+export { generations } from "./generations";
+export { phases } from "./phases";
+export { trims } from "./trims";
+export { dimensions } from "./dimensions";
+export { parkingLots } from "./parking-lots";
+export { vehicleRestrictions } from "./vehicle-restrictions";
+export { parkingFees } from "./parking-fees";
+export { operatingHours } from "./operating-hours";

@@ -1,0 +1,260 @@
+import { db } from "@/db";
+import {
+  makers,
+  models,
+  generations,
+  phases,
+  trims,
+  dimensions,
+  parkingLots,
+  vehicleRestrictions,
+  parkingFees,
+  operatingHours,
+} from "@/db/schema";
+import { eq, and, like } from "drizzle-orm";
+
+// ---------- Makers ----------
+
+export async function getMakers() {
+  return db.select().from(makers).orderBy(makers.display_order, makers.name);
+}
+
+// ---------- Models ----------
+
+export async function getModelsByMaker(makerId: number) {
+  return db.select().from(models).where(eq(models.maker_id, makerId));
+}
+
+export async function getPopularModels() {
+  return db
+    .select({
+      id: models.id,
+      name: models.name,
+      slug: models.slug,
+      body_type: models.body_type,
+      image_url: models.image_url,
+      maker_name: makers.name,
+      maker_slug: makers.slug,
+    })
+    .from(models)
+    .innerJoin(makers, eq(models.maker_id, makers.id))
+    .where(eq(models.is_popular, true))
+    .limit(4);
+}
+
+export async function getModelBySlug(slug: string) {
+  const result = await db
+    .select({
+      id: models.id,
+      name: models.name,
+      slug: models.slug,
+      body_type: models.body_type,
+      image_url: models.image_url,
+      maker_id: models.maker_id,
+      maker_name: makers.name,
+      maker_slug: makers.slug,
+    })
+    .from(models)
+    .innerJoin(makers, eq(models.maker_id, makers.id))
+    .where(eq(models.slug, slug))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+export async function getModelsWithMaker() {
+  return db
+    .select({
+      id: models.id,
+      name: models.name,
+      slug: models.slug,
+      body_type: models.body_type,
+      image_url: models.image_url,
+      maker_name: makers.name,
+      maker_slug: makers.slug,
+    })
+    .from(models)
+    .innerJoin(makers, eq(models.maker_id, makers.id));
+}
+
+// ---------- Dimensions ----------
+
+/**
+ * 指定車種の代表寸法を取得する。
+ * generations -> phases -> trims -> dimensions の最初の1件を返す。
+ */
+export async function getDimensionsByModelId(modelId: number) {
+  const result = await db
+    .select({
+      id: dimensions.id,
+      trim_id: dimensions.trim_id,
+      length_mm: dimensions.length_mm,
+      width_mm: dimensions.width_mm,
+      width_with_mirrors_mm: dimensions.width_with_mirrors_mm,
+      height_mm: dimensions.height_mm,
+      weight_kg: dimensions.weight_kg,
+      min_turning_radius_m: dimensions.min_turning_radius_m,
+      trim_name: trims.name,
+      generation_name: generations.name,
+    })
+    .from(dimensions)
+    .innerJoin(trims, eq(dimensions.trim_id, trims.id))
+    .innerJoin(phases, eq(trims.phase_id, phases.id))
+    .innerJoin(generations, eq(phases.generation_id, generations.id))
+    .where(eq(generations.model_id, modelId))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+export async function getAllDimensions() {
+  return db
+    .select({
+      id: dimensions.id,
+      length_mm: dimensions.length_mm,
+      width_mm: dimensions.width_mm,
+      height_mm: dimensions.height_mm,
+      weight_kg: dimensions.weight_kg,
+      model_id: generations.model_id,
+      model_name: models.name,
+      model_slug: models.slug,
+      body_type: models.body_type,
+      maker_name: makers.name,
+    })
+    .from(dimensions)
+    .innerJoin(trims, eq(dimensions.trim_id, trims.id))
+    .innerJoin(phases, eq(trims.phase_id, phases.id))
+    .innerJoin(generations, eq(phases.generation_id, generations.id))
+    .innerJoin(models, eq(generations.model_id, models.id))
+    .innerJoin(makers, eq(models.maker_id, makers.id));
+}
+
+// ---------- All Trims with Dimensions ----------
+
+/**
+ * 指定モデルの全世代 → 全フェーズ → 全グレード → 寸法を一括取得する。
+ * 世代選択・グレード選択UIに必要な全データを返す。
+ */
+export async function getAllTrimsWithDimensions(modelId: number) {
+  return db
+    .select({
+      generationId: generations.id,
+      generationName: generations.name,
+      startYear: generations.start_year,
+      endYear: generations.end_year,
+      phaseId: phases.id,
+      phaseName: phases.name,
+      trimId: trims.id,
+      trimName: trims.name,
+      driveType: trims.drive_type,
+      transmission: trims.transmission,
+      dimensionId: dimensions.id,
+      lengthMm: dimensions.length_mm,
+      widthMm: dimensions.width_mm,
+      heightMm: dimensions.height_mm,
+      weightKg: dimensions.weight_kg,
+      widthWithMirrorsMm: dimensions.width_with_mirrors_mm,
+      minTurningRadiusM: dimensions.min_turning_radius_m,
+    })
+    .from(dimensions)
+    .innerJoin(trims, eq(dimensions.trim_id, trims.id))
+    .innerJoin(phases, eq(trims.phase_id, phases.id))
+    .innerJoin(generations, eq(phases.generation_id, generations.id))
+    .where(eq(generations.model_id, modelId));
+}
+
+// ---------- Parking Lots ----------
+
+export async function getParkingLots() {
+  return db.select().from(parkingLots);
+}
+
+export async function getParkingLotBySlug(slug: string) {
+  const result = await db
+    .select()
+    .from(parkingLots)
+    .where(eq(parkingLots.slug, slug))
+    .limit(1);
+
+  return result[0] ?? null;
+}
+
+export async function getParkingLotsByWard(ward: string) {
+  return db
+    .select()
+    .from(parkingLots)
+    .where(like(parkingLots.address, `%${ward}%`));
+}
+
+// ---------- Vehicle Restrictions ----------
+
+export async function getRestrictionsByParkingLotId(parkingLotId: number) {
+  return db
+    .select()
+    .from(vehicleRestrictions)
+    .where(eq(vehicleRestrictions.parking_lot_id, parkingLotId));
+}
+
+export async function getAllRestrictions() {
+  return db
+    .select({
+      id: vehicleRestrictions.id,
+      parking_lot_id: vehicleRestrictions.parking_lot_id,
+      restriction_name: vehicleRestrictions.restriction_name,
+      max_length_mm: vehicleRestrictions.max_length_mm,
+      max_width_mm: vehicleRestrictions.max_width_mm,
+      max_height_mm: vehicleRestrictions.max_height_mm,
+      max_weight_kg: vehicleRestrictions.max_weight_kg,
+      spaces_count: vehicleRestrictions.spaces_count,
+      monthly_fee_yen: vehicleRestrictions.monthly_fee_yen,
+      notes: vehicleRestrictions.notes,
+      parking_lot_name: parkingLots.name,
+      parking_lot_slug: parkingLots.slug,
+      parking_lot_address: parkingLots.address,
+      parking_type: parkingLots.parking_type,
+    })
+    .from(vehicleRestrictions)
+    .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id));
+}
+
+export async function getRestrictionsByWard(ward: string) {
+  return db
+    .select({
+      id: vehicleRestrictions.id,
+      parking_lot_id: vehicleRestrictions.parking_lot_id,
+      restriction_name: vehicleRestrictions.restriction_name,
+      max_length_mm: vehicleRestrictions.max_length_mm,
+      max_width_mm: vehicleRestrictions.max_width_mm,
+      max_height_mm: vehicleRestrictions.max_height_mm,
+      max_weight_kg: vehicleRestrictions.max_weight_kg,
+      spaces_count: vehicleRestrictions.spaces_count,
+      monthly_fee_yen: vehicleRestrictions.monthly_fee_yen,
+      notes: vehicleRestrictions.notes,
+      parking_lot_name: parkingLots.name,
+      parking_lot_slug: parkingLots.slug,
+      parking_lot_address: parkingLots.address,
+      parking_type: parkingLots.parking_type,
+    })
+    .from(vehicleRestrictions)
+    .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id))
+    .where(like(parkingLots.address, `%${ward}%`));
+}
+
+// ---------- Parking Fees ----------
+
+export async function getFeesByParkingLotId(parkingLotId: number) {
+  return db
+    .select()
+    .from(parkingFees)
+    .where(eq(parkingFees.parking_lot_id, parkingLotId));
+}
+
+// ---------- Operating Hours ----------
+
+export async function getOperatingHoursByParkingLotId(parkingLotId: number) {
+  return db
+    .select()
+    .from(operatingHours)
+    .where(eq(operatingHours.parking_lot_id, parkingLotId))
+    .orderBy(operatingHours.day_of_week);
+}
