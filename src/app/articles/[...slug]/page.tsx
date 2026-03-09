@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Tag } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -136,6 +137,11 @@ export default async function ArticlePage({ params }: PageProps) {
         <div className="prose prose-gray max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-bold prose-h2:mt-10 prose-h2:border-b prose-h2:pb-2 prose-h3:mt-8 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:marker:text-primary">
           <MDXRemote
             source={article.content}
+            options={{
+              mdxOptions: {
+                remarkPlugins: [remarkGfm],
+              },
+            }}
             components={{
               table: (props) => (
                 <div className="my-6 overflow-x-auto rounded-lg border">
