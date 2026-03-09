@@ -224,12 +224,10 @@ export default async function Home() {
                 key={index}
                 className="group rounded-lg border bg-background"
               >
-                <summary className="cursor-pointer px-4 py-3 text-sm font-medium transition-colors hover:text-primary [&::-webkit-details-marker]:hidden">
-                  <span className="flex items-center justify-between">
-                    {item.question}
-                    <span className="ml-2 shrink-0 text-muted-foreground transition-transform group-open:rotate-180">
-                      ▼
-                    </span>
+                <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:text-primary [&::-webkit-details-marker]:hidden">
+                  <span>{item.question}</span>
+                  <span className="ml-2 shrink-0 text-muted-foreground transition-transform group-open:rotate-180">
+                    ▼
                   </span>
                 </summary>
                 <div className="border-t px-4 py-3 text-sm leading-relaxed text-muted-foreground">
