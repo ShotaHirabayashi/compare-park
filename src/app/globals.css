@@ -145,3 +145,33 @@
     @apply font-sans;
   }
 }
+
+/* prose内テーブルのスタイル */
+.prose table {
+  @apply w-full border-collapse overflow-hidden rounded-lg border text-sm;
+}
+
+.prose thead {
+  @apply bg-muted;
+}
+
+.prose thead th {
+  @apply border-b border-border px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+}
+
+.prose tbody tr {
+  @apply border-b border-border transition-colors hover:bg-muted/50;
+}
+
+.prose tbody tr:last-child {
+  @apply border-b-0;
+}
+
+.prose tbody td {
+  @apply px-4 py-2.5;
+}
+
+/* proseのモバイル対応テーブル */
+.prose .table-wrapper {
+  @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
+}

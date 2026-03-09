@@ -133,8 +133,17 @@ export default async function ArticlePage({ params }: PageProps) {
           )}
         </header>
 
-        <div className="prose prose-gray max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
-          <MDXRemote source={article.content} />
+        <div className="prose prose-gray max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-bold prose-h2:mt-10 prose-h2:border-b prose-h2:pb-2 prose-h3:mt-8 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:marker:text-primary">
+          <MDXRemote
+            source={article.content}
+            components={{
+              table: (props) => (
+                <div className="my-6 overflow-x-auto rounded-lg border">
+                  <table {...props} className="m-0 border-0" />
+                </div>
+              ),
+            }}
+          />
         </div>
       </article>
 
