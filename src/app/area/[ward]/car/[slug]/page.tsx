@@ -13,7 +13,7 @@ import {
   getModelsWithMaker,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
-import { TOKYO_WARDS } from "@/lib/constants";
+import { TOKYO_WARD_MAP, getWardBySlug } from "@/lib/constants";
 
 interface Props {
   params: Promise<{ ward: string; slug: string }>;
@@ -22,8 +22,8 @@ interface Props {
 
 export async function generateStaticParams() {
   const allModels = await getModelsWithMaker();
-  return TOKYO_WARDS.flatMap((ward) =>
-    allModels.map((m) => ({ ward, slug: m.slug }))
+  return TOKYO_WARD_MAP.flatMap((w) =>
+    allModels.map((m) => ({ ward: w.slug, slug: m.slug }))
   );
 }
 
@@ -31,25 +31,27 @@ export const revalidate = 604800; // 7d
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ward, slug } = await params;
-  const decodedWard = decodeURIComponent(ward);
+  const wardInfo = getWardBySlug(ward);
+  if (!wardInfo) return {};
   const model = await getModelBySlug(slug);
   if (!model) return { title: "車種が見つかりません" };
 
   return {
-    title: `${decodedWard}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`,
-    description: `${decodedWard}エリアの駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と駐車場の制限寸法を比較し、停められるかを一目で確認できます。`,
-    alternates: { canonical: `/area/${encodeURIComponent(decodedWard)}/car/${slug}` },
+    title: `${wardInfo.name}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`,
+    description: `${wardInfo.name}エリアの駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と駐車場の制限寸法を比較し、停められるかを一目で確認できます。`,
+    alternates: { canonical: `/area/${wardInfo.slug}/car/${slug}` },
   };
 }
 
 export default async function AreaCarPage({ params, searchParams }: Props) {
   const { ward, slug } = await params;
   const { gen, trim: trimParam } = await searchParams;
-  const decodedWard = decodeURIComponent(ward);
+  const wardInfo = getWardBySlug(ward);
 
-  if (!TOKYO_WARDS.includes(decodedWard as (typeof TOKYO_WARDS)[number])) {
+  if (!wardInfo) {
     notFound();
   }
+  const decodedWard = wardInfo.name;
 
   const model = await getModelBySlug(slug);
   if (!model) notFound();

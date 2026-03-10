@@ -11,7 +11,7 @@ import {
   getRestrictionsByParkingLotId,
   getModelsForSearch,
 } from "@/lib/queries";
-import { TOKYO_WARDS } from "@/lib/constants";
+import { TOKYO_WARD_MAP, getWardBySlug } from "@/lib/constants";
 
 interface Props {
   params: Promise<{ ward: string }>;
@@ -19,31 +19,32 @@ interface Props {
 }
 
 export function generateStaticParams() {
-  return TOKYO_WARDS.map((ward) => ({ ward }));
+  return TOKYO_WARD_MAP.map((w) => ({ ward: w.slug }));
 }
 
 export const revalidate = 86400; // 24h
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { ward } = await params;
-  const decodedWard = decodeURIComponent(ward);
+  const wardInfo = getWardBySlug(ward);
+  if (!wardInfo) return {};
 
   return {
-    title: `${decodedWard}の駐車場一覧 | トメピタ`,
-    description: `${decodedWard}エリアの駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
-    alternates: { canonical: `/area/${encodeURIComponent(decodedWard)}` },
+    title: `${wardInfo.name}の駐車場一覧 | トメピタ`,
+    description: `${wardInfo.name}エリアの駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
+    alternates: { canonical: `/area/${wardInfo.slug}` },
   };
 }
 
 export default async function WardPage({ params, searchParams }: Props) {
   const { ward } = await params;
   const { minHeight, minWidth, minLength } = await searchParams;
-  const decodedWard = decodeURIComponent(ward);
+  const wardInfo = getWardBySlug(ward);
 
-  // 有効な区名かチェック
-  if (!TOKYO_WARDS.includes(decodedWard as (typeof TOKYO_WARDS)[number])) {
+  if (!wardInfo) {
     notFound();
   }
+  const decodedWard = wardInfo.name;
 
   // サイズフィルタの適用（最初に見つかった条件を適用）
   const sizeFilter = minHeight

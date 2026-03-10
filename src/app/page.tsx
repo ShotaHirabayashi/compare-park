@@ -14,7 +14,7 @@ import { JsonLd } from "@/components/json-ld";
 import { db } from "@/db";
 import { models, makers, dimensions, trims, phases, generations } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { TOKYO_WARDS, FAQ_ITEMS } from "@/lib/constants";
+import { TOKYO_WARD_MAP, FAQ_ITEMS } from "@/lib/constants";
 
 export const revalidate = 86400; // 24h
 
@@ -154,13 +154,13 @@ export default async function Home() {
             東京23区の駐車場を探す
           </p>
           <div className="flex flex-wrap justify-center gap-2">
-            {TOKYO_WARDS.map((ward) => (
+            {TOKYO_WARD_MAP.map((w) => (
               <Link
-                key={ward}
-                href={`/area/${ward}`}
+                key={w.slug}
+                href={`/area/${w.slug}`}
                 className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary"
               >
-                {ward}
+                {w.name}
               </Link>
             ))}
           </div>

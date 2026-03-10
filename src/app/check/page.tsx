@@ -12,6 +12,7 @@ import {
   getRestrictionsByParkingLotId,
 } from "@/lib/queries";
 import { calculateMatch } from "@/lib/matching";
+import { getWardSlug } from "@/lib/constants";
 
 interface Props {
   searchParams: Promise<{ car?: string; parking?: string }>;
@@ -59,7 +60,8 @@ export default async function CheckPage({ searchParams }: Props) {
     getRestrictionsByParkingLotId(lot.id),
   ]);
 
-  const ward = extractWard(lot.address);
+  const wardName = extractWard(lot.address);
+  const wardSlug = wardName ? getWardSlug(wardName) : null;
 
   // 全制限でマッチング、最良結果を選択
   let bestMatch = dimension && restrictions.length > 0
@@ -236,14 +238,14 @@ export default async function CheckPage({ searchParams }: Props) {
             <p className="font-medium">この駐車場に入る車種を見る</p>
             <p className="mt-1 text-muted-foreground">{lot.name} の詳細ページへ</p>
           </Link>
-          {ward && (
+          {wardSlug && wardName && (
             <Link
-              href={`/area/${ward}/car/${model.slug}`}
+              href={`/area/${wardSlug}/car/${model.slug}`}
               className="rounded-lg border border-border p-4 text-sm transition-colors hover:bg-muted"
             >
-              <p className="font-medium">{ward}で他の駐車場を探す</p>
+              <p className="font-medium">{wardName}で他の駐車場を探す</p>
               <p className="mt-1 text-muted-foreground">
-                {ward}エリアで{model.name}の適合を確認
+                {wardName}エリアで{model.name}の適合を確認
               </p>
             </Link>
           )}

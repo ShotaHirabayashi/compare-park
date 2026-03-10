@@ -4,7 +4,7 @@ import { MapPin } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { getParkingLots } from "@/lib/queries";
-import { TOKYO_WARDS } from "@/lib/constants";
+import { TOKYO_WARD_MAP } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "エリアから駐車場を探す | トメピタ",
@@ -17,14 +17,14 @@ export default async function AreaPage() {
 
   // 各区の駐車場数をカウント
   const wardCounts = new Map<string, number>();
-  for (const ward of TOKYO_WARDS) {
-    wardCounts.set(ward, 0);
+  for (const w of TOKYO_WARD_MAP) {
+    wardCounts.set(w.name, 0);
   }
   for (const lot of lots) {
     if (!lot.address) continue;
-    for (const ward of TOKYO_WARDS) {
-      if (lot.address.includes(ward)) {
-        wardCounts.set(ward, (wardCounts.get(ward) ?? 0) + 1);
+    for (const w of TOKYO_WARD_MAP) {
+      if (lot.address.includes(w.name)) {
+        wardCounts.set(w.name, (wardCounts.get(w.name) ?? 0) + 1);
         break;
       }
     }
@@ -45,15 +45,15 @@ export default async function AreaPage() {
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {TOKYO_WARDS.map((ward) => {
-          const count = wardCounts.get(ward) ?? 0;
+        {TOKYO_WARD_MAP.map((w) => {
+          const count = wardCounts.get(w.name) ?? 0;
           return (
-            <Link key={ward} href={`/area/${ward}`}>
+            <Link key={w.slug} href={`/area/${w.slug}`}>
               <Card className="h-full transition-transform hover:scale-[1.02]">
                 <CardContent className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <MapPin className="size-4 text-primary" />
-                    <span className="font-medium">{ward}</span>
+                    <span className="font-medium">{w.name}</span>
                   </div>
                   <span className="text-sm text-muted-foreground">
                     {count}件

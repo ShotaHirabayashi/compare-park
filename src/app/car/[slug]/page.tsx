@@ -18,7 +18,7 @@ import {
   getRelatedModelsByMaker,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
-import { TOKYO_WARDS } from "@/lib/constants";
+import { TOKYO_WARD_MAP } from "@/lib/constants";
 
 const bodyTypeLabels: Record<string, string> = {
   sedan: "セダン",
@@ -366,13 +366,13 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
       <section className="mt-10">
         <h2 className="mb-4 text-lg font-bold">エリア別に{model.name}の適合を見る</h2>
         <div className="flex flex-wrap gap-2">
-          {TOKYO_WARDS.map((w) => (
+          {TOKYO_WARD_MAP.map((w) => (
             <Link
-              key={w}
-              href={`/area/${w}/car/${slug}`}
+              key={w.slug}
+              href={`/area/${w.slug}/car/${slug}`}
               className="rounded-lg border border-border px-3 py-1.5 text-sm transition-colors hover:bg-muted"
             >
-              {w}
+              {w.name}
             </Link>
           ))}
         </div>

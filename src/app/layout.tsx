@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   title: "トメピタ - 車種×駐車場マッチングサービス",
   description:
     "機械式駐車場に車が入るか即判定。車種サイズと駐車場の制限寸法を比較し、OK・ギリギリ・NGを瞬時に判定。東京23区内の機械式・タワー式駐車場対応。",
-  metadataBase: new URL("https://tomepita.com"),
+  metadataBase: new URL("https://www.tomepita.com"),
   icons: {
     icon: "/logo.svg",
     apple: "/apple-touch-icon.png",
@@ -75,14 +75,14 @@ export default function RootLayout({
             "@context": "https://schema.org",
             "@type": "WebSite",
             name: "トメピタ",
-            url: "https://tomepita.com",
+            url: "https://www.tomepita.com",
             description:
               "あなたの車がその駐車場に停められるか、寸法データで即判定。東京23区内の駐車場と車種のマッチングサービス。",
             potentialAction: {
               "@type": "SearchAction",
               target: {
                 "@type": "EntryPoint",
-                urlTemplate: "https://tomepita.com/search?car={search_term_string}",
+                urlTemplate: "https://www.tomepita.com/search?car={search_term_string}",
               },
               "query-input": "required name=search_term_string",
             },

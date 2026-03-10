@@ -19,6 +19,7 @@ import {
   getRelatedParkingLotsByWard,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, type MatchResult } from "@/lib/matching";
+import { getWardSlug } from "@/lib/constants";
 
 const parkingTypeLabels: Record<string, string> = {
   mechanical: "機械式",
@@ -77,6 +78,7 @@ export default async function ParkingDetailPage({ params }: Props) {
   ]);
 
   const ward = extractWard(lot.address);
+  const wardSlug = ward ? getWardSlug(ward) : null;
 
   const relatedParkingLots = ward
     ? await getRelatedParkingLotsByWard(ward, lot.id)
@@ -260,7 +262,7 @@ export default async function ParkingDetailPage({ params }: Props) {
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
-          ...(ward ? [{ label: ward, href: `/area/${ward}` }] : []),
+          ...(ward && wardSlug ? [{ label: ward, href: `/area/${wardSlug}` }] : []),
           { label: lot.name },
         ]}
       />

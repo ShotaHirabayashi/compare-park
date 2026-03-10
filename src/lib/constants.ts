@@ -1,31 +1,44 @@
-/** 東京23区 */
-export const TOKYO_WARDS = [
-  "千代田区",
-  "中央区",
-  "港区",
-  "新宿区",
-  "文京区",
-  "台東区",
-  "墨田区",
-  "江東区",
-  "品川区",
-  "目黒区",
-  "大田区",
-  "世田谷区",
-  "渋谷区",
-  "中野区",
-  "杉並区",
-  "豊島区",
-  "北区",
-  "荒川区",
-  "板橋区",
-  "練馬区",
-  "足立区",
-  "葛飾区",
-  "江戸川区",
+/** 東京23区（slug付き） */
+export const TOKYO_WARD_MAP = [
+  { name: "千代田区", slug: "chiyoda" },
+  { name: "中央区", slug: "chuo" },
+  { name: "港区", slug: "minato" },
+  { name: "新宿区", slug: "shinjuku" },
+  { name: "文京区", slug: "bunkyo" },
+  { name: "台東区", slug: "taito" },
+  { name: "墨田区", slug: "sumida" },
+  { name: "江東区", slug: "koto" },
+  { name: "品川区", slug: "shinagawa" },
+  { name: "目黒区", slug: "meguro" },
+  { name: "大田区", slug: "ota" },
+  { name: "世田谷区", slug: "setagaya" },
+  { name: "渋谷区", slug: "shibuya" },
+  { name: "中野区", slug: "nakano" },
+  { name: "杉並区", slug: "suginami" },
+  { name: "豊島区", slug: "toshima" },
+  { name: "北区", slug: "kita" },
+  { name: "荒川区", slug: "arakawa" },
+  { name: "板橋区", slug: "itabashi" },
+  { name: "練馬区", slug: "nerima" },
+  { name: "足立区", slug: "adachi" },
+  { name: "葛飾区", slug: "katsushika" },
+  { name: "江戸川区", slug: "edogawa" },
 ] as const;
 
-export type TokyoWard = (typeof TOKYO_WARDS)[number];
+/** 後方互換: 区名の配列 */
+export const TOKYO_WARDS = TOKYO_WARD_MAP.map((w) => w.name);
+
+export type TokyoWard = (typeof TOKYO_WARD_MAP)[number]["name"];
+
+/** slugから区名を取得 */
+export function getWardBySlug(slug: string) {
+  return TOKYO_WARD_MAP.find((w) => w.slug === slug);
+}
+
+/** 区名からslugを取得 */
+export function getWardSlug(name: string) {
+  return TOKYO_WARD_MAP.find((w) => w.name === name)?.slug;
+}
 
 /** サイズカテゴリ型定義 */
 export interface SizeCategory {

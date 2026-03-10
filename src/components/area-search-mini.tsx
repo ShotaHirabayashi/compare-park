@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TOKYO_WARDS } from "@/lib/constants";
+import { TOKYO_WARD_MAP } from "@/lib/constants";
 
 interface AreaSearchMiniProps {
   carSlug: string;
@@ -32,9 +32,9 @@ export function AreaSearchMini({ carSlug }: AreaSearchMiniProps) {
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
         >
           <option value="">区を選択...</option>
-          {TOKYO_WARDS.map((w) => (
-            <option key={w} value={w}>
-              {w}
+          {TOKYO_WARD_MAP.map((w) => (
+            <option key={w.slug} value={w.slug}>
+              {w.name}
             </option>
           ))}
         </select>

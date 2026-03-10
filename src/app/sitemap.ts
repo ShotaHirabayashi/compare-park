@@ -1,10 +1,10 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/db";
 import { models, parkingLots, makers } from "@/db/schema";
-import { TOKYO_WARDS, SIZE_CATEGORIES } from "@/lib/constants";
+import { TOKYO_WARD_MAP, SIZE_CATEGORIES } from "@/lib/constants";
 import { getArticles } from "@/lib/articles";
 
-const BASE_URL = "https://tomepita.com";
+const BASE_URL = "https://www.tomepita.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -26,8 +26,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/terms`, lastModified: "2025-01-01", changeFrequency: "yearly", priority: 0.2 },
   ];
 
-  const wardPages: MetadataRoute.Sitemap = TOKYO_WARDS.map((ward) => ({
-    url: `${BASE_URL}/area/${encodeURIComponent(ward)}`,
+  const wardPages: MetadataRoute.Sitemap = TOKYO_WARD_MAP.map((w) => ({
+    url: `${BASE_URL}/area/${w.slug}`,
     lastModified: now,
     changeFrequency: "weekly",
     priority: 0.7,
@@ -55,9 +55,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // エリア×車種ページ（ロングテールSEO）
-  const areaCarPages: MetadataRoute.Sitemap = TOKYO_WARDS.flatMap((ward) =>
+  const areaCarPages: MetadataRoute.Sitemap = TOKYO_WARD_MAP.flatMap((w) =>
     allModels.map((m) => ({
-      url: `${BASE_URL}/area/${encodeURIComponent(ward)}/car/${m.slug}`,
+      url: `${BASE_URL}/area/${w.slug}/car/${m.slug}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.6,

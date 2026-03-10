@@ -10,12 +10,12 @@ const siteLinks = [
 ] as const;
 
 const popularWards = [
-  { href: "/area/港区", label: "港区" },
-  { href: "/area/渋谷区", label: "渋谷区" },
-  { href: "/area/新宿区", label: "新宿区" },
-  { href: "/area/千代田区", label: "千代田区" },
-  { href: "/area/中央区", label: "中央区" },
-  { href: "/area/品川区", label: "品川区" },
+  { href: "/area/minato", label: "港区" },
+  { href: "/area/shibuya", label: "渋谷区" },
+  { href: "/area/shinjuku", label: "新宿区" },
+  { href: "/area/chiyoda", label: "千代田区" },
+  { href: "/area/chuo", label: "中央区" },
+  { href: "/area/shinagawa", label: "品川区" },
 ] as const;
 
 export function Footer() {
