@@ -198,6 +198,40 @@ const bentaygaBase = { ...bentleyBase, modelName: "ベンテイガ", modelSlug: 
 const bentaygaEwbBase = { ...bentleyBase, modelName: "ベンテイガ EWB", modelSlug: "bentayga-ewb", bodyType: "suv" as const, generationName: "初代 (2022-)", startYear: 2022 };
 const bentayga1stBase = { ...bentleyBase, modelName: "ベンテイガ", modelSlug: "bentayga", bodyType: "suv" as const, generationName: "前期 (2016-2020)", startYear: 2016, endYear: 2020 };
 
+// --- ランボルギーニ 追加モデル ベース定義 ---
+const aventadorBase = { ...lamborghiniBase, modelName: "アヴェンタドール", modelSlug: "aventador", bodyType: "coupe" as const, generationName: "LP780-4 Ultimae (2021-2022)", startYear: 2021, endYear: 2022 };
+const revueltoBase = { ...lamborghiniBase, modelName: "レヴエルト", modelSlug: "revuelto", bodyType: "coupe" as const, generationName: "初代 (2024-)", startYear: 2024 };
+const huracanBase = { ...lamborghiniBase, modelName: "ウラカン", modelSlug: "huracan", bodyType: "coupe" as const, generationName: "EVO (2019-2024)", startYear: 2019, endYear: 2024 };
+const temerarioBase = { ...lamborghiniBase, modelName: "テメラリオ", modelSlug: "temerario", bodyType: "coupe" as const, generationName: "初代 (2025-)", startYear: 2025 };
+
+// --- ポルシェ 追加モデル ベース定義 ---
+const porsche911Base = { ...porscheBase, modelName: "911", modelSlug: "911", bodyType: "coupe" as const, generationName: "992型 (2019-)", startYear: 2019 };
+
+// --- フェラーリ 追加モデル ベース定義 ---
+const ferrari458Base = { ...ferrariBase, modelName: "458イタリア", modelSlug: "458-italia", bodyType: "coupe" as const, generationName: "初代 (2009-2015)", startYear: 2009, endYear: 2015 };
+const ferrari488Base = { ...ferrariBase, modelName: "488", modelSlug: "488", bodyType: "coupe" as const, generationName: "GTB/Spider (2015-2019)", startYear: 2015, endYear: 2019 };
+const ferrariF8Base = { ...ferrariBase, modelName: "F8トリブート", modelSlug: "f8-tributo", bodyType: "coupe" as const, generationName: "初代 (2019-2024)", startYear: 2019, endYear: 2024 };
+const ferrari296Base = { ...ferrariBase, modelName: "296 GTB", modelSlug: "296-gtb", bodyType: "coupe" as const, generationName: "初代 (2022-)", startYear: 2022 };
+const ferrariRomaBase = { ...ferrariBase, modelName: "ローマ", modelSlug: "roma", bodyType: "coupe" as const, generationName: "初代 (2020-)", startYear: 2020 };
+
+// --- アストンマーティン ベース定義 ---
+const astonMartinBase = { makerName: "アストンマーティン" as const, makerSlug: "aston-martin" as const, country: "イギリス" as const };
+const dbxBase = { ...astonMartinBase, modelName: "DBX", modelSlug: "dbx", bodyType: "suv" as const, generationName: "初代 (2020-)", startYear: 2020 };
+
+// --- ランドローバー ベース定義 ---
+const landRoverBase = { makerName: "ランドローバー" as const, makerSlug: "land-rover" as const, country: "イギリス" as const };
+const rangeRoverBase = { ...landRoverBase, modelName: "レンジローバー", modelSlug: "range-rover", bodyType: "suv" as const, generationName: "5代目 L460 (2022-)", startYear: 2022 };
+const defenderBase = { ...landRoverBase, modelName: "ディフェンダー", modelSlug: "defender", bodyType: "suv" as const, generationName: "L663 (2020-)", startYear: 2020 };
+const rangeRoverSportBase = { ...landRoverBase, modelName: "レンジローバースポーツ", modelSlug: "range-rover-sport", bodyType: "suv" as const, generationName: "3代目 (2022-)", startYear: 2022 };
+const evoqueBase = { ...landRoverBase, modelName: "レンジローバーイヴォーク", modelSlug: "range-rover-evoque", bodyType: "suv" as const, generationName: "2代目 (2019-)", startYear: 2019 };
+const velarBase = { ...landRoverBase, modelName: "レンジローバーヴェラール", modelSlug: "range-rover-velar", bodyType: "suv" as const, generationName: "初代 (2017-)", startYear: 2017 };
+
+// --- Jeep ベース定義 ---
+const jeepBase = { makerName: "Jeep" as const, makerSlug: "jeep" as const, country: "アメリカ" as const };
+const wranglerBase = { ...jeepBase, modelName: "ラングラー", modelSlug: "wrangler", bodyType: "suv" as const, generationName: "JL (2018-)", startYear: 2018 };
+const grandCherokeeBase = { ...jeepBase, modelName: "グランドチェロキー", modelSlug: "grand-cherokee", bodyType: "suv" as const, generationName: "WL (2022-)", startYear: 2022 };
+const grandCherokeeLBase = { ...jeepBase, modelName: "グランドチェロキーL", modelSlug: "grand-cherokee-l", bodyType: "suv" as const, generationName: "WL (2021-)", startYear: 2021 };
+
 // --- ボルボ 追加モデル ベース定義 ---
 const xc90Base = { ...volvoBase, modelName: "XC90", modelSlug: "xc90", bodyType: "suv" as const, generationName: "2代目 (2015-)", startYear: 2015 };
 
@@ -879,6 +913,138 @@ const carData: CarSeed[] = [
   // ============================================================
   t(bentayga1stBase, { trimName: "W12 6.0L ツインターボ", driveType: "AWD", transmission: "8AT", lengthMm: 5140, widthMm: 1998, heightMm: 1742, weightKg: 2530, minTurningRadiusM: 6.0 }),
   t(bentayga1stBase, { trimName: "V8 4.0L ツインターボ", driveType: "AWD", transmission: "8AT", lengthMm: 5140, widthMm: 1998, heightMm: 1742, weightKg: 2440, minTurningRadiusM: 6.0 }),
+
+  // ============================================================
+  // ランボルギーニ アヴェンタドール LP780-4 Ultimae (2021-2022)
+  // ※重量はカーセンサーエッジ記載の整備重量を採用
+  // ============================================================
+  { ...aventadorBase, trimName: "LP780-4 ウルティメ", driveType: "AWD", transmission: "7AMT", lengthMm: 4870, widthMm: 2100, heightMm: 1135, weightKg: 1950, minTurningRadiusM: null },
+
+  // ============================================================
+  // ランボルギーニ レヴエルト (2024-)
+  // ============================================================
+  { ...revueltoBase, trimName: "レヴエルト", driveType: "AWD", transmission: "8DCT", lengthMm: 4947, widthMm: 2033, heightMm: 1160, weightKg: 1772, minTurningRadiusM: null },
+
+  // ============================================================
+  // ランボルギーニ ウラカン EVO (2019-2024)
+  // ============================================================
+  { ...huracanBase, trimName: "EVO", driveType: "AWD", transmission: "7DCT", lengthMm: 4520, widthMm: 1933, heightMm: 1165, weightKg: 1422, minTurningRadiusM: null },
+  t(huracanBase, { trimName: "EVO RWD", driveType: "RWD", transmission: "7DCT", lengthMm: 4520, widthMm: 1933, heightMm: 1165, weightKg: 1389, minTurningRadiusM: null }),
+  t(huracanBase, { trimName: "STO", driveType: "RWD", transmission: "7DCT", lengthMm: 4547, widthMm: 1945, heightMm: 1220, weightKg: 1510, minTurningRadiusM: null }),
+  t(huracanBase, { trimName: "テクニカ", driveType: "RWD", transmission: "7DCT", lengthMm: 4567, widthMm: 1933, heightMm: 1165, weightKg: 1379, minTurningRadiusM: null }),
+
+  // ============================================================
+  // ランボルギーニ テメラリオ (2025-)
+  // ============================================================
+  { ...temerarioBase, trimName: "テメラリオ", driveType: "AWD", transmission: "8DCT", lengthMm: 4706, widthMm: 1996, heightMm: 1201, weightKg: 1690, minTurningRadiusM: null },
+
+  // ============================================================
+  // ポルシェ 911 992型 (2019-)
+  // ※goo-netの最小回転半径は回転直径の誤記のため、公式PDF等から算出した値を使用
+  // ============================================================
+  { ...porsche911Base, trimName: "Carrera", driveType: "RWD", transmission: "8PDK", lengthMm: 4519, widthMm: 1852, heightMm: 1298, weightKg: 1580, minTurningRadiusM: 5.6 },
+  t(porsche911Base, { trimName: "Carrera S", driveType: "RWD", transmission: "8PDK", lengthMm: 4519, widthMm: 1852, heightMm: 1300, weightKg: 1590, minTurningRadiusM: 5.6 }),
+  t(porsche911Base, { trimName: "Carrera 4S", driveType: "AWD", transmission: "8PDK", lengthMm: 4519, widthMm: 1852, heightMm: 1300, weightKg: 1640, minTurningRadiusM: 5.6 }),
+  t(porsche911Base, { trimName: "Turbo", driveType: "AWD", transmission: "8PDK", lengthMm: 4535, widthMm: 1900, heightMm: 1303, weightKg: 1640, minTurningRadiusM: 5.5 }),
+  t(porsche911Base, { trimName: "Turbo S", driveType: "AWD", transmission: "8PDK", lengthMm: 4535, widthMm: 1900, heightMm: 1303, weightKg: 1710, minTurningRadiusM: 5.5 }),
+  t(porsche911Base, { trimName: "GT3", driveType: "RWD", transmission: "7PDK", lengthMm: 4573, widthMm: 1852, heightMm: 1279, weightKg: 1435, minTurningRadiusM: 5.2 }),
+  t(porsche911Base, { trimName: "GT3 RS", driveType: "RWD", transmission: "7PDK", lengthMm: 4572, widthMm: 1900, heightMm: 1322, weightKg: 1450, minTurningRadiusM: 5.25 }),
+
+  // ============================================================
+  // フェラーリ 458イタリア (2009-2015)
+  // ※重量はカーセンサー/MOTA記載の車両重量を採用
+  // ============================================================
+  { ...ferrari458Base, trimName: "458イタリア", driveType: "RWD", transmission: "7DCT", lengthMm: 4527, widthMm: 1937, heightMm: 1213, weightKg: 1580, minTurningRadiusM: null },
+  t(ferrari458Base, { trimName: "458スパイダー", driveType: "RWD", transmission: "7DCT", lengthMm: 4527, widthMm: 1937, heightMm: 1211, weightKg: 1430, minTurningRadiusM: null }),
+  t(ferrari458Base, { trimName: "458スペチアーレ", driveType: "RWD", transmission: "7DCT", lengthMm: 4571, widthMm: 1951, heightMm: 1203, weightKg: 1395, minTurningRadiusM: null }),
+
+  // ============================================================
+  // フェラーリ 488 GTB/Spider (2015-2019)
+  // ============================================================
+  { ...ferrari488Base, trimName: "488 GTB", driveType: "RWD", transmission: "7DCT", lengthMm: 4568, widthMm: 1952, heightMm: 1213, weightKg: 1475, minTurningRadiusM: null },
+  t(ferrari488Base, { trimName: "488 Spider", driveType: "RWD", transmission: "7DCT", lengthMm: 4568, widthMm: 1952, heightMm: 1211, weightKg: 1525, minTurningRadiusM: null }),
+  t(ferrari488Base, { trimName: "488 Pista", driveType: "RWD", transmission: "7DCT", lengthMm: 4605, widthMm: 1975, heightMm: 1206, weightKg: 1280, minTurningRadiusM: null }),
+
+  // ============================================================
+  // フェラーリ F8トリブート (2019-2024)
+  // ============================================================
+  { ...ferrariF8Base, trimName: "F8トリブート", driveType: "RWD", transmission: "7DCT", lengthMm: 4611, widthMm: 1979, heightMm: 1206, weightKg: 1570, minTurningRadiusM: null },
+  t(ferrariF8Base, { trimName: "F8スパイダー", driveType: "RWD", transmission: "7DCT", lengthMm: 4611, widthMm: 1979, heightMm: 1206, weightKg: 1640, minTurningRadiusM: null }),
+
+  // ============================================================
+  // フェラーリ 296 GTB (2022-)
+  // ============================================================
+  { ...ferrari296Base, trimName: "296 GTB", driveType: "RWD", transmission: "8DCT", lengthMm: 4565, widthMm: 1958, heightMm: 1187, weightKg: 1482, minTurningRadiusM: null },
+  t(ferrari296Base, { trimName: "296 GTS", driveType: "RWD", transmission: "8DCT", lengthMm: 4565, widthMm: 1958, heightMm: 1191, weightKg: 1548, minTurningRadiusM: null }),
+
+  // ============================================================
+  // フェラーリ ローマ (2020-)
+  // ============================================================
+  { ...ferrariRomaBase, trimName: "ローマ", driveType: "RWD", transmission: "8DCT", lengthMm: 4656, widthMm: 1974, heightMm: 1301, weightKg: 1570, minTurningRadiusM: null },
+
+  // ============================================================
+  // アストンマーティン DBX (2020-)
+  // ============================================================
+  { ...dbxBase, trimName: "4.0 V8", driveType: "AWD", transmission: "9AT", lengthMm: 5039, widthMm: 1998, heightMm: 1680, weightKg: 2245, minTurningRadiusM: 6.2 },
+  t(dbxBase, { trimName: "707", driveType: "AWD", transmission: "9AT", lengthMm: 5039, widthMm: 1998, heightMm: 1680, weightKg: 2245, minTurningRadiusM: 6.2 }),
+
+  // ============================================================
+  // ランドローバー レンジローバー 5代目 (2022-)
+  // ============================================================
+  { ...rangeRoverBase, trimName: "SE D350 SWB", driveType: "AWD", transmission: "8AT", lengthMm: 5070, widthMm: 2010, heightMm: 1870, weightKg: 2550, minTurningRadiusM: 5.3 },
+  t(rangeRoverBase, { trimName: "Autobiography D350 SWB", driveType: "AWD", transmission: "8AT", lengthMm: 5070, widthMm: 2010, heightMm: 1870, weightKg: 2630, minTurningRadiusM: 5.3 }),
+  t(rangeRoverBase, { trimName: "HSE D350 LWB", driveType: "AWD", transmission: "8AT", lengthMm: 5270, widthMm: 2010, heightMm: 1870, weightKg: 2740, minTurningRadiusM: 5.6 }),
+  t(rangeRoverBase, { trimName: "Autobiography P530 LWB", driveType: "AWD", transmission: "8AT", lengthMm: 5270, widthMm: 2010, heightMm: 1870, weightKg: 2840, minTurningRadiusM: 5.6 }),
+
+  // ============================================================
+  // ランドローバー ディフェンダー (2020-)
+  // ============================================================
+  { ...defenderBase, trimName: "90 P300", driveType: "AWD", transmission: "8AT", lengthMm: 4510, widthMm: 2000, heightMm: 1970, weightKg: 2090, minTurningRadiusM: 5.3 },
+  t(defenderBase, { trimName: "90 V8 P525", driveType: "AWD", transmission: "8AT", lengthMm: 4510, widthMm: 2000, heightMm: 1970, weightKg: 2330, minTurningRadiusM: 5.3 }),
+  t(defenderBase, { trimName: "110 P300", driveType: "AWD", transmission: "8AT", lengthMm: 4950, widthMm: 2000, heightMm: 1970, weightKg: 2280, minTurningRadiusM: 6.1 }),
+  t(defenderBase, { trimName: "110 X D350", driveType: "AWD", transmission: "8AT", lengthMm: 4950, widthMm: 2000, heightMm: 1970, weightKg: 2530, minTurningRadiusM: 6.1 }),
+  t(defenderBase, { trimName: "130 SE D300", driveType: "AWD", transmission: "8AT", lengthMm: 5280, widthMm: 2000, heightMm: 1970, weightKg: 2650, minTurningRadiusM: 6.1 }),
+
+  // ============================================================
+  // ランドローバー レンジローバースポーツ 3代目 (2022-)
+  // ============================================================
+  { ...rangeRoverSportBase, trimName: "Dynamic SE D300", driveType: "AWD", transmission: "8AT", lengthMm: 4960, widthMm: 2010, heightMm: 1820, weightKg: 2490, minTurningRadiusM: 6.1 },
+  t(rangeRoverSportBase, { trimName: "Autobiography P400", driveType: "AWD", transmission: "8AT", lengthMm: 4960, widthMm: 2010, heightMm: 1820, weightKg: 2450, minTurningRadiusM: 6.1 }),
+  t(rangeRoverSportBase, { trimName: "SV P635", driveType: "AWD", transmission: "8AT", lengthMm: 4970, widthMm: 2030, heightMm: 1820, weightKg: 2560, minTurningRadiusM: 5.3 }),
+
+  // ============================================================
+  // ランドローバー レンジローバーイヴォーク 2代目 (2019-)
+  // ============================================================
+  { ...evoqueBase, trimName: "S D200", driveType: "AWD", transmission: "9AT", lengthMm: 4380, widthMm: 1910, heightMm: 1650, weightKg: 1980, minTurningRadiusM: 5.5 },
+  t(evoqueBase, { trimName: "Dynamic SE P200", driveType: "AWD", transmission: "9AT", lengthMm: 4380, widthMm: 1910, heightMm: 1650, weightKg: 1900, minTurningRadiusM: 5.5 }),
+  t(evoqueBase, { trimName: "Autobiography P250", driveType: "AWD", transmission: "9AT", lengthMm: 4380, widthMm: 1910, heightMm: 1650, weightKg: 1920, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // ランドローバー レンジローバーヴェラール (2017-)
+  // ============================================================
+  { ...velarBase, trimName: "S D200", driveType: "AWD", transmission: "8AT", lengthMm: 4820, widthMm: 1930, heightMm: 1690, weightKg: 2070, minTurningRadiusM: 5.6 },
+  t(velarBase, { trimName: "Dynamic SE P250", driveType: "AWD", transmission: "8AT", lengthMm: 4820, widthMm: 1930, heightMm: 1690, weightKg: 2010, minTurningRadiusM: 5.6 }),
+  t(velarBase, { trimName: "S P400e PHEV", driveType: "AWD", transmission: "8AT", lengthMm: 4820, widthMm: 1930, heightMm: 1690, weightKg: 2310, minTurningRadiusM: 5.6 }),
+
+  // ============================================================
+  // Jeep ラングラー JL (2018-)
+  // ============================================================
+  { ...wranglerBase, trimName: "Sport 2ドア", driveType: "4WD", transmission: "8AT", lengthMm: 4320, widthMm: 1930, heightMm: 1840, weightKg: 1960, minTurningRadiusM: 5.3 },
+  t(wranglerBase, { trimName: "Unlimited Sahara", driveType: "4WD", transmission: "8AT", lengthMm: 4870, widthMm: 1895, heightMm: 1845, weightKg: 2000, minTurningRadiusM: 6.2 }),
+  t(wranglerBase, { trimName: "Unlimited Rubicon", driveType: "4WD", transmission: "8AT", lengthMm: 4870, widthMm: 1895, heightMm: 1845, weightKg: 1990, minTurningRadiusM: 6.2 }),
+  t(wranglerBase, { trimName: "Unlimited High Altitude", driveType: "4WD", transmission: "8AT", lengthMm: 4870, widthMm: 1930, heightMm: 1855, weightKg: 2110, minTurningRadiusM: 6.2 }),
+
+  // ============================================================
+  // Jeep グランドチェロキー WL (2022-)
+  // ============================================================
+  { ...grandCherokeeBase, trimName: "Limited", driveType: "AWD", transmission: "8AT", lengthMm: 4900, widthMm: 1980, heightMm: 1810, weightKg: 2070, minTurningRadiusM: 6.0 },
+  t(grandCherokeeBase, { trimName: "Summit", driveType: "AWD", transmission: "8AT", lengthMm: 4900, widthMm: 1980, heightMm: 1810, weightKg: 2070, minTurningRadiusM: 6.0 }),
+
+  // ============================================================
+  // Jeep グランドチェロキーL WL (2021-)
+  // ============================================================
+  { ...grandCherokeeLBase, trimName: "Limited", driveType: "AWD", transmission: "8AT", lengthMm: 5200, widthMm: 1980, heightMm: 1815, weightKg: 2170, minTurningRadiusM: 6.3 },
+  t(grandCherokeeLBase, { trimName: "Summit Reserve", driveType: "AWD", transmission: "8AT", lengthMm: 5200, widthMm: 1980, heightMm: 1795, weightKg: 2250, minTurningRadiusM: 6.3 }),
 ];
 
 // ============================================================
