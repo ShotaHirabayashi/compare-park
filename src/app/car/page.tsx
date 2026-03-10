@@ -60,12 +60,12 @@ export default async function CarListPage() {
       </p>
 
       {/* メーカー クイックジャンプ */}
-      <div className="mb-10 flex flex-wrap gap-2">
+      <div className="mb-8 flex flex-wrap gap-1.5">
         {makerList.map((maker) => (
           <a
             key={maker.slug}
             href={`#maker-${maker.slug}`}
-            className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary"
+            className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium transition-colors hover:bg-primary/10 hover:text-primary"
           >
             {maker.name}
           </a>
@@ -78,8 +78,8 @@ export default async function CarListPage() {
         if (!models || models.length === 0) return null;
 
         return (
-          <section key={maker.slug} id={`maker-${maker.slug}`} className="mb-12">
-            <h2 className="mb-4 text-xl font-bold">
+          <section key={maker.slug} id={`maker-${maker.slug}`} className="mb-8">
+            <h2 className="mb-2 text-lg font-bold">
               <Link
                 href={`/maker/${maker.slug}`}
                 className="transition-colors hover:text-primary"
@@ -87,15 +87,15 @@ export default async function CarListPage() {
                 {maker.name}
               </Link>
             </h2>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {models.map((model) => (
                 <Link
                   key={model.slug}
                   href={`/car/${model.slug}`}
-                  className="rounded-lg border bg-background p-4 transition-colors hover:border-primary/50 hover:bg-muted/50"
+                  className="rounded-md border bg-background px-3 py-2 text-sm transition-colors hover:border-primary/50 hover:bg-muted/50"
                 >
                   <p className="font-medium">{model.name}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground">
                     {model.body_type}
                   </p>
                 </Link>
