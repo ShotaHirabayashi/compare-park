@@ -76,7 +76,7 @@ function SearchModal<T>({
         aria-hidden
       />
 
-      <div className="relative flex h-full flex-col sm:mx-4 sm:h-auto sm:max-h-[70vh] sm:w-full sm:max-w-lg sm:rounded-xl sm:border sm:bg-background sm:shadow-xl">
+      <div className="relative flex h-full flex-col sm:mx-4 sm:h-auto sm:max-h-[80vh] sm:w-full sm:max-w-xl sm:rounded-xl sm:border sm:bg-background sm:shadow-xl">
         {/* ヘッダー + 検索入力 */}
         <div className="flex-none border-b px-4 pb-3 pt-4">
           <div className="mb-3 flex items-center justify-between">
@@ -129,7 +129,7 @@ function SearchModal<T>({
                   <button
                     type="button"
                     onClick={() => onSelect(item)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-3 text-left text-sm transition-colors active:bg-muted sm:py-2 sm:hover:bg-muted"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-3 text-left text-sm transition-colors active:bg-muted sm:py-2.5 sm:hover:bg-muted"
                   >
                     <span className="min-w-0 flex-1">{renderItem(item)}</span>
                     <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
