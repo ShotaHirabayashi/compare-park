@@ -54,7 +54,7 @@ export function CarSearchTabs({ makers, models, popularWithDims }: CarSearchTabs
             className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
               activeTab === "popular"
                 ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-foreground/70 hover:text-foreground"
             }`}
           >
             人気の車種
@@ -64,7 +64,7 @@ export function CarSearchTabs({ makers, models, popularWithDims }: CarSearchTabs
             className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
               activeTab === "maker"
                 ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-foreground/70 hover:text-foreground"
             }`}
           >
             メーカーから探す

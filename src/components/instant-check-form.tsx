@@ -223,7 +223,7 @@ export function InstantCheckForm({
           ) : (
             <div>
               <span className="text-sm text-muted-foreground sm:text-base">車種を選択</span>
-              <p className="text-xs text-muted-foreground/60 sm:text-sm">メーカー名・車種名で検索</p>
+              <p className="text-xs text-muted-foreground sm:text-sm">メーカー名・車種名で検索</p>
             </div>
           )}
         </button>
@@ -242,7 +242,7 @@ export function InstantCheckForm({
           ) : (
             <div>
               <span className="text-sm text-muted-foreground sm:text-base">駐車場を選択（任意）</span>
-              <p className="text-xs text-muted-foreground/60 sm:text-sm">駐車場名・住所で検索</p>
+              <p className="text-xs text-muted-foreground sm:text-sm">駐車場名・住所で検索</p>
             </div>
           )}
         </button>
