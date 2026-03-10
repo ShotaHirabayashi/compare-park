@@ -457,3 +457,34 @@ export async function getOperatingHoursByParkingLotId(parkingLotId: number) {
     .where(eq(operatingHours.parking_lot_id, parkingLotId))
     .orderBy(operatingHours.day_of_week);
 }
+
+// ---------- Related Items (SEO internal links) ----------
+
+/** 同メーカーの他車種を取得（指定車種を除外） */
+export async function getRelatedModelsByMaker(makerId: number, excludeModelId: number) {
+  return db
+    .select({
+      id: models.id,
+      name: models.name,
+      slug: models.slug,
+      body_type: models.body_type,
+    })
+    .from(models)
+    .where(and(eq(models.maker_id, makerId), sql`${models.id} != ${excludeModelId}`))
+    .limit(8);
+}
+
+/** 同エリア（区）の他駐車場を取得（指定駐車場を除外） */
+export async function getRelatedParkingLotsByWard(ward: string, excludeId: number) {
+  return db
+    .select({
+      id: parkingLots.id,
+      name: parkingLots.name,
+      slug: parkingLots.slug,
+      address: parkingLots.address,
+      parking_type: parkingLots.parking_type,
+    })
+    .from(parkingLots)
+    .where(and(like(parkingLots.address, `%${ward}%`), sql`${parkingLots.id} != ${excludeId}`))
+    .limit(8);
+}

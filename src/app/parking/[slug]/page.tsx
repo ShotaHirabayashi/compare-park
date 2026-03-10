@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { MapPin, Clock, Phone, ExternalLink } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import {
   getFeesByParkingLotId,
   getOperatingHoursByParkingLotId,
   getAllDimensions,
+  getRelatedParkingLotsByWard,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, type MatchResult } from "@/lib/matching";
 
@@ -75,6 +77,10 @@ export default async function ParkingDetailPage({ params }: Props) {
   ]);
 
   const ward = extractWard(lot.address);
+
+  const relatedParkingLots = ward
+    ? await getRelatedParkingLotsByWard(ward, lot.id)
+    : [];
 
   // 車種ごとに最良の制限でマッチング判定
   const vehicleMap = new Map<
@@ -168,6 +174,57 @@ export default async function ParkingDetailPage({ params }: Props) {
     max_weight_kg: r.max_weight_kg,
   }));
 
+  // 営業時間のJSON-LD用データ
+  const openingHoursSpec = hours.map((h) => ({
+    "@type": "OpeningHoursSpecification",
+    dayOfWeek: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][h.day_of_week],
+    ...(h.is_24h
+      ? { opens: "00:00", closes: "23:59" }
+      : { opens: h.open_time ?? "00:00", closes: h.close_time ?? "23:59" }),
+  }));
+
+  // 料金表示用テキスト
+  const priceRangeText = fees.length > 0
+    ? fees.map((f) => `${feeTypeLabels[f.fee_type] ?? f.fee_type}: ${f.amount_yen.toLocaleString()}円${f.duration_minutes ? ` / ${f.duration_minutes}分` : ""}`).join("、")
+    : null;
+
+  // FAQ構造化データ
+  const faqItems: { question: string; answer: string }[] = [];
+
+  if (restrictions.length > 0) {
+    const restrictionText = restrictions
+      .map((r) => {
+        const parts: string[] = [];
+        if (r.max_length_mm != null) parts.push(`全長${r.max_length_mm.toLocaleString()}mm`);
+        if (r.max_width_mm != null) parts.push(`全幅${r.max_width_mm.toLocaleString()}mm`);
+        if (r.max_height_mm != null) parts.push(`全高${r.max_height_mm.toLocaleString()}mm`);
+        if (r.max_weight_kg != null) parts.push(`重量${r.max_weight_kg.toLocaleString()}kg`);
+        return `${r.restriction_name}: ${parts.join("、")}`;
+      })
+      .join("。");
+    faqItems.push({
+      question: `${lot.name}のサイズ制限は？`,
+      answer: restrictionText,
+    });
+  }
+
+  if (hours.length > 0) {
+    const hoursText = hours
+      .map((h) => `${dayLabels[h.day_of_week]}: ${h.is_24h ? "24時間" : `${h.open_time ?? "-"} - ${h.close_time ?? "-"}`}`)
+      .join("、");
+    faqItems.push({
+      question: `${lot.name}の営業時間は？`,
+      answer: hoursText,
+    });
+  }
+
+  if (fees.length > 0) {
+    faqItems.push({
+      question: `${lot.name}の料金は？`,
+      answer: priceRangeText!,
+    });
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <JsonLd
@@ -180,8 +237,26 @@ export default async function ParkingDetailPage({ params }: Props) {
           ...(lot.phone ? { telephone: lot.phone } : {}),
           ...(lot.url ? { sameAs: lot.url } : {}),
           ...(lot.total_spaces != null ? { maximumAttendeeCapacity: lot.total_spaces } : {}),
+          ...(openingHoursSpec.length > 0 ? { openingHoursSpecification: openingHoursSpec } : {}),
+          ...(priceRangeText ? { priceRange: priceRangeText } : {}),
         }}
       />
+      {faqItems.length > 0 && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqItems.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          }}
+        />
+      )}
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
@@ -372,6 +447,27 @@ export default async function ParkingDetailPage({ params }: Props) {
           </Card>
         )}
       </section>
+
+      {/* 同エリアの他駐車場 */}
+      {ward && relatedParkingLots.length > 0 && (
+        <section className="mt-10">
+          <h2 className="mb-4 text-lg font-bold">{ward}の他の駐車場</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedParkingLots.map((p) => (
+              <Link
+                key={p.slug}
+                href={`/parking/${p.slug}`}
+                className="rounded-lg border bg-background p-4 transition-colors hover:border-primary/50 hover:bg-muted/50"
+              >
+                <p className="font-medium">{p.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {parkingTypeLabels[p.parking_type ?? ""] ?? p.parking_type}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

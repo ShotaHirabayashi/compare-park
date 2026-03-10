@@ -15,6 +15,7 @@ import {
   getAllTrimsWithDimensions,
   getAllRestrictions,
   getModelsWithMaker,
+  getRelatedModelsByMaker,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
 import { TOKYO_WARDS } from "@/lib/constants";
@@ -59,9 +60,10 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
   const model = await getModelBySlug(slug);
   if (!model) notFound();
 
-  const [allTrims, restrictions] = await Promise.all([
+  const [allTrims, restrictions, relatedModels] = await Promise.all([
     getAllTrimsWithDimensions(model.id),
     getAllRestrictions(),
+    getRelatedModelsByMaker(model.maker_id, model.id),
   ]);
 
   // 選択中のトリムを決定
@@ -162,6 +164,35 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
     reason: formatMatchReason(item.match.details),
   }));
 
+  // FAQ構造化データ生成
+  const okCount = uniqueParkingResults.filter((r) => r.match.result === "ok").length;
+  const faqItems: { question: string; answer: string }[] = [];
+
+  if (dimension) {
+    // Q1: 機械式駐車場に入るか
+    const hasOk = okCount > 0;
+    faqItems.push({
+      question: `${model.name}は機械式駐車場に入りますか？`,
+      answer: hasOk
+        ? `${model.name}は全幅${dimension.width_mm?.toLocaleString() ?? "-"}mm、全高${dimension.height_mm?.toLocaleString() ?? "-"}mmです。登録済み駐車場のうち${okCount}件でOK判定となっています。`
+        : `${model.name}は全幅${dimension.width_mm?.toLocaleString() ?? "-"}mm、全高${dimension.height_mm?.toLocaleString() ?? "-"}mmです。現在登録済みの駐車場ではサイズ制限を超える場合があります。詳しくは各駐車場の制限値をご確認ください。`,
+    });
+
+    // Q2: 寸法
+    faqItems.push({
+      question: `${model.name}の全幅・全高はいくつですか？`,
+      answer: `${model.name}の寸法は全長${dimension.length_mm?.toLocaleString() ?? "-"}mm、全幅${dimension.width_mm?.toLocaleString() ?? "-"}mm、全高${dimension.height_mm?.toLocaleString() ?? "-"}mm、重量${dimension.weight_kg?.toLocaleString() ?? "-"}kgです。`,
+    });
+
+    // Q3: 停められる駐車場
+    faqItems.push({
+      question: `${model.name}が停められる駐車場はどこですか？`,
+      answer: hasOk
+        ? `トメピタに登録されている駐車場のうち${okCount}件で${model.name}が停められます。詳しくはこのページの駐車場適合判定をご確認ください。`
+        : `現在登録済みの駐車場では制限を超える場合があります。ハイルーフ対応や大型車対応の駐車場をお探しください。`,
+    });
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <JsonLd
@@ -193,6 +224,22 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
             : {}),
         }}
       />
+      {faqItems.length > 0 && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: faqItems.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          }}
+        />
+      )}
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
@@ -330,6 +377,27 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
           ))}
         </div>
       </section>
+
+      {/* 同メーカーの他車種 */}
+      {relatedModels.length > 0 && (
+        <section className="mt-10">
+          <h2 className="mb-4 text-lg font-bold">{model.maker_name}の他の車種</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {relatedModels.map((m) => (
+              <Link
+                key={m.slug}
+                href={`/car/${m.slug}`}
+                className="rounded-lg border bg-background p-4 transition-colors hover:border-primary/50 hover:bg-muted/50"
+              >
+                <p className="font-medium">{m.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {bodyTypeLabels[m.body_type] ?? m.body_type}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

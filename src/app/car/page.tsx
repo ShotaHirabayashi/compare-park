@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { JsonLd } from "@/components/json-ld";
 import { getMakers, getModelsWithMaker } from "@/lib/queries";
 
 export const revalidate = 86400; // 24h
@@ -30,6 +31,25 @@ export default async function CarListPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "車種一覧 — サイズ・駐車場適合を確認 | トメピタ",
+          description: "国産車・輸入車の車種一覧。各車種の寸法（全長・全幅・全高・重量）と駐車場への適合判定を確認できます。",
+          url: "https://tomepita.com/car",
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: allModels.length,
+            itemListElement: allModels.slice(0, 50).map((model, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: `https://tomepita.com/car/${model.slug}`,
+              name: `${model.maker_name} ${model.name}`,
+            })),
+          },
+        }}
+      />
       <Breadcrumb
         items={[{ label: "トップ", href: "/" }, { label: "車種一覧" }]}
       />

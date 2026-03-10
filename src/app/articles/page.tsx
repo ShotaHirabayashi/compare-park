@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Calendar } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { JsonLd } from "@/components/json-ld";
 import { getArticles, ARTICLE_CATEGORIES } from "@/lib/articles";
 
 export const revalidate = 86400;
@@ -41,6 +42,25 @@ async function ArticlesContent({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "コラム | トメピタ",
+          description: "機械式駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
+          url: "https://tomepita.com/articles",
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: filteredArticles.length,
+            itemListElement: filteredArticles.slice(0, 20).map((article, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: `https://tomepita.com/articles/${article.slug}`,
+              name: article.frontmatter.title,
+            })),
+          },
+        }}
+      />
       <Breadcrumb
         items={[{ label: "トップ", href: "/" }, { label: "コラム" }]}
       />

@@ -43,6 +43,15 @@ export async function generateMetadata({
     alternates: {
       canonical: `${BASE_URL}/articles/${slugStr}`,
     },
+    openGraph: {
+      type: "article",
+      title: `${article.frontmatter.title} | トメピタ`,
+      description: article.frontmatter.description,
+      url: `${BASE_URL}/articles/${slugStr}`,
+      publishedTime: article.frontmatter.date,
+      modifiedTime: article.frontmatter.updatedAt ?? article.frontmatter.date,
+      siteName: "トメピタ",
+    },
   };
 }
 
