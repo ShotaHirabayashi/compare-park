@@ -76,7 +76,7 @@ function SearchModal<T>({
         aria-hidden
       />
 
-      <div className="relative flex h-full flex-col sm:mx-4 sm:h-auto sm:max-h-[70vh] sm:w-full sm:max-w-md sm:rounded-xl sm:border sm:bg-background sm:shadow-xl">
+      <div className="relative flex h-full flex-col sm:mx-4 sm:h-auto sm:max-h-[70vh] sm:w-full sm:max-w-lg sm:rounded-xl sm:border sm:bg-background sm:shadow-xl">
         {/* ヘッダー + 検索入力 */}
         <div className="flex-none border-b px-4 pb-3 pt-4">
           <div className="mb-3 flex items-center justify-between">
@@ -205,21 +205,26 @@ export function InstantCheckForm({
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-4">
+    <div className="mx-auto w-full max-w-3xl space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         {/* 車種選択トリガー */}
         <button
           type="button"
           onClick={openVehicleModal}
-          className="flex w-full items-center gap-2 rounded-lg border border-border bg-background px-3 py-3 text-left text-sm transition-colors hover:bg-muted sm:py-2.5"
+          className="flex w-full items-center gap-3 rounded-lg border-2 border-border bg-background px-4 py-3.5 text-left transition-colors hover:border-primary/40 hover:bg-muted sm:px-5 sm:py-4 sm:text-base"
         >
-          <Car className="size-4 shrink-0 text-muted-foreground" />
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:size-9">
+            <Car className="size-4 text-primary sm:size-5" />
+          </div>
           {selectedVehicle ? (
             <span className="truncate font-medium">
               {selectedVehicle.makerName} {selectedVehicle.name}
             </span>
           ) : (
-            <span className="text-muted-foreground">車種を選択</span>
+            <div>
+              <span className="text-sm text-muted-foreground sm:text-base">車種を選択</span>
+              <p className="text-xs text-muted-foreground/60 sm:text-sm">メーカー名・車種名で検索</p>
+            </div>
           )}
         </button>
 
@@ -227,13 +232,18 @@ export function InstantCheckForm({
         <button
           type="button"
           onClick={openParkingModal}
-          className="flex w-full items-center gap-2 rounded-lg border border-border bg-background px-3 py-3 text-left text-sm transition-colors hover:bg-muted sm:py-2.5"
+          className="flex w-full items-center gap-3 rounded-lg border-2 border-border bg-background px-4 py-3.5 text-left transition-colors hover:border-primary/40 hover:bg-muted sm:px-5 sm:py-4 sm:text-base"
         >
-          <MapPin className="size-4 shrink-0 text-muted-foreground" />
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 sm:size-9">
+            <MapPin className="size-4 text-primary sm:size-5" />
+          </div>
           {selectedParking ? (
             <span className="truncate font-medium">{selectedParking.name}</span>
           ) : (
-            <span className="text-muted-foreground">駐車場を選択（任意）</span>
+            <div>
+              <span className="text-sm text-muted-foreground sm:text-base">駐車場を選択（任意）</span>
+              <p className="text-xs text-muted-foreground/60 sm:text-sm">駐車場名・住所で検索</p>
+            </div>
           )}
         </button>
       </div>
@@ -241,10 +251,10 @@ export function InstantCheckForm({
       <Button
         onClick={handleCheck}
         disabled={!selectedVehicle}
-        className="w-full"
+        className="w-full text-base sm:py-6 sm:text-lg"
         size="lg"
       >
-        <Search className="mr-2 size-4" />
+        <Search className="mr-2 size-4 sm:size-5" />
         {selectedVehicle && selectedParking
           ? "判定する"
           : selectedVehicle
