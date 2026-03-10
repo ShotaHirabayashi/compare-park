@@ -6,6 +6,7 @@ type MatchResult = "ok" | "ng" | "caution";
 interface MatchBadgeProps {
   result: MatchResult;
   className?: string;
+  compact?: boolean;
 }
 
 const config: Record<
@@ -13,6 +14,7 @@ const config: Record<
   {
     icon: React.ElementType;
     label: string;
+    shortLabel: string;
     bg: string;
     text: string;
     border: string;
@@ -21,6 +23,7 @@ const config: Record<
   ok: {
     icon: CircleCheck,
     label: "駐車可能",
+    shortLabel: "OK",
     bg: "bg-match-ok/10",
     text: "text-match-ok",
     border: "border-match-ok border-solid",
@@ -28,6 +31,7 @@ const config: Record<
   ng: {
     icon: CircleX,
     label: "駐車不可",
+    shortLabel: "NG",
     bg: "bg-match-ng/10",
     text: "text-match-ng",
     border: "border-match-ng border-dashed",
@@ -35,27 +39,29 @@ const config: Record<
   caution: {
     icon: TriangleAlert,
     label: "要確認",
+    shortLabel: "注意",
     bg: "bg-match-caution/10",
     text: "text-match-caution",
     border: "border-match-caution border-dotted",
   },
 };
 
-export function MatchBadge({ result, className }: MatchBadgeProps) {
-  const { icon: Icon, label, bg, text, border } = config[result];
+export function MatchBadge({ result, className, compact }: MatchBadgeProps) {
+  const { icon: Icon, label, shortLabel, bg, text, border } = config[result];
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium",
+        "inline-flex items-center gap-1.5 rounded-full border font-medium",
+        compact ? "px-2 py-0.5 text-xs" : "px-3 py-1 text-sm",
         bg,
         text,
         border,
         className
       )}
     >
-      <Icon className="size-4" aria-hidden="true" />
-      {label}
+      <Icon className={compact ? "size-3.5" : "size-4"} aria-hidden="true" />
+      {compact ? shortLabel : label}
     </span>
   );
 }

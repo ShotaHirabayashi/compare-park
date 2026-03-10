@@ -40,11 +40,11 @@ export function ParkingMatchRow({ item }: ParkingMatchRowProps) {
             href={`/parking/${item.parkingLotSlug}`}
             className="group block"
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
+              <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                 {item.parkingLotName}
               </span>
-              <MatchBadge result={item.result} className="shrink-0" />
+              <MatchBadge result={item.result} className="shrink-0 self-start sm:self-auto" />
             </div>
             <p className="mt-0.5 text-sm text-muted-foreground truncate">
               {item.parkingLotAddress}

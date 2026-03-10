@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { MatchBadge } from "@/components/match-badge";
-import { DimensionCompare } from "@/components/dimension-compare";
 import { JsonLd } from "@/components/json-ld";
 import {
   getModelBySlug,
@@ -157,87 +156,62 @@ export default async function CheckPage({ searchParams }: Props) {
         </CardContent>
       </Card>
 
-      {/* 寸法比較テーブル */}
+      {/* 寸法比較カード */}
       {bestMatch && bestMatch.details.length > 0 && (
         <section className="mb-8">
           <h2 className="mb-4 text-lg font-bold">寸法比較</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {bestMatch.details.map((d) => {
+              const diff = d.limit - d.value;
+              const unit = d.dimension === "weight" ? "kg" : "mm";
+              const status =
+                d.ratio <= 0.95
+                  ? "ok"
+                  : d.ratio <= 1.0
+                    ? "caution"
+                    : "ng";
+              const ratio = Math.min((d.value / d.limit) * 100, 100);
+              const barColor = {
+                ok: "bg-match-ok",
+                caution: "bg-match-caution",
+                ng: "bg-match-ng",
+              }[status];
 
-          {/* テーブル表示 */}
-          <div className="mb-6 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-3 py-2 text-left font-medium text-muted-foreground">
-                    項目
-                  </th>
-                  <th className="px-3 py-2 text-right font-medium text-muted-foreground">
-                    車のサイズ
-                  </th>
-                  <th className="px-3 py-2 text-right font-medium text-muted-foreground">
-                    制限値
-                  </th>
-                  <th className="px-3 py-2 text-right font-medium text-muted-foreground">
-                    余裕
-                  </th>
-                  <th className="px-3 py-2 text-center font-medium text-muted-foreground">
-                    判定
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {bestMatch.details.map((d) => {
-                  const diff = d.limit - d.value;
-                  const unit = d.dimension === "weight" ? "kg" : "mm";
-                  const status =
-                    d.ratio <= 0.95
-                      ? "ok"
-                      : d.ratio <= 1.0
-                        ? "caution"
-                        : "ng";
-                  return (
-                    <tr key={d.dimension} className="border-b last:border-b-0">
-                      <td className="px-3 py-2 font-medium">{d.label}</td>
-                      <td className="px-3 py-2 text-right">
-                        {d.value.toLocaleString()}
-                        {unit}
-                      </td>
-                      <td className="px-3 py-2 text-right">
-                        {d.limit.toLocaleString()}
-                        {unit}
-                      </td>
-                      <td
-                        className={`px-3 py-2 text-right font-medium ${
-                          status === "ok"
-                            ? "text-match-ok"
-                            : status === "caution"
-                              ? "text-match-caution"
-                              : "text-match-ng"
-                        }`}
-                      >
-                        {diff >= 0 ? `+${diff}` : diff}
-                        {unit}
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        <MatchBadge result={status} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* バー表示 */}
-          <div className="space-y-4">
-            {bestMatch.details.map((d) => (
-              <DimensionCompare
-                key={d.dimension}
-                label={d.label}
-                value={d.value}
-                limit={d.limit}
-                unit={d.dimension === "weight" ? "kg" : "mm"}
-              />
-            ))}
+              return (
+                <Card key={d.dimension}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-foreground">{d.label}</span>
+                      <MatchBadge result={status} compact />
+                    </div>
+                    <div className="mt-2 flex items-baseline gap-1 text-sm">
+                      <span className="font-semibold">{d.value.toLocaleString()}{unit}</span>
+                      <span className="text-muted-foreground">→</span>
+                      <span className="text-muted-foreground">制限 {d.limit.toLocaleString()}{unit}</span>
+                    </div>
+                    <div className="mt-2">
+                      <div className="relative h-2.5 overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full rounded-full transition-all ${barColor}`}
+                          style={{ width: `${ratio}%` }}
+                        />
+                      </div>
+                    </div>
+                    <p
+                      className={`mt-1.5 text-sm font-medium ${
+                        status === "ok"
+                          ? "text-match-ok"
+                          : status === "caution"
+                            ? "text-match-caution"
+                            : "text-match-ng"
+                      }`}
+                    >
+                      余裕: {diff >= 0 ? `+${diff}` : diff}{unit}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </section>
       )}
