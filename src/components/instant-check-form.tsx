@@ -68,7 +68,7 @@ function SearchModal<T>({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-background sm:items-center sm:justify-start sm:bg-black/10 sm:pt-[10vh] sm:supports-backdrop-filter:backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex flex-col bg-background sm:items-center sm:justify-center sm:bg-black/40 sm:supports-backdrop-filter:backdrop-blur-sm">
       {/* PC: 背景クリックで閉じる */}
       <div
         className="hidden sm:fixed sm:inset-0 sm:block"
@@ -76,21 +76,21 @@ function SearchModal<T>({
         aria-hidden
       />
 
-      <div className="relative flex h-full flex-col sm:mx-4 sm:h-auto sm:max-h-[80vh] sm:w-full sm:max-w-xl sm:rounded-xl sm:border sm:bg-background sm:shadow-xl">
+      <div className="relative flex h-full flex-col sm:mx-4 sm:h-[min(600px,80vh)] sm:w-full sm:max-w-2xl sm:rounded-2xl sm:border sm:bg-background sm:shadow-2xl">
         {/* ヘッダー + 検索入力 */}
-        <div className="flex-none border-b px-4 pb-3 pt-4">
+        <div className="flex-none border-b px-4 pb-4 pt-5 sm:px-6">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold">{title}</h2>
+            <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
             <button
               type="button"
               onClick={onClose}
-              className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:size-9"
             >
               <X className="size-5" />
             </button>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2.5">
-            <Search className="size-4 shrink-0 text-muted-foreground" />
+          <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2.5 sm:px-4 sm:py-3">
+            <Search className="size-4 shrink-0 text-muted-foreground sm:size-5" />
             <input
               ref={inputRef}
               type="text"
@@ -102,7 +102,7 @@ function SearchModal<T>({
               placeholder={placeholder}
               value={search}
               onChange={(e) => onSearch(e.target.value)}
-              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground sm:text-base"
             />
             {search && (
               <button
@@ -117,7 +117,7 @@ function SearchModal<T>({
         </div>
 
         {/* 候補リスト */}
-        <div className="flex-1 overflow-y-auto overscroll-contain px-2 py-1">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-2 py-1 sm:px-3 sm:py-2">
           {items.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               {emptyMessage}
@@ -129,7 +129,7 @@ function SearchModal<T>({
                   <button
                     type="button"
                     onClick={() => onSelect(item)}
-                    className="flex w-full items-center gap-2 rounded-lg px-3 py-3 text-left text-sm transition-colors active:bg-muted sm:py-2.5 sm:hover:bg-muted"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-3 text-left text-sm transition-colors active:bg-muted sm:px-4 sm:py-3 sm:text-base sm:hover:bg-muted"
                   >
                     <span className="min-w-0 flex-1">{renderItem(item)}</span>
                     <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
