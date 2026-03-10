@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Car, Search, CheckCircle, MapPin } from "lucide-react";
+import { Car, Search, CheckCircle, MapPin, Ruler } from "lucide-react";
 import {
   getMakers,
   getPopularModels,
@@ -167,7 +167,50 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* セクション4: 使い方 */}
+      {/* セクション4: サイズ条件で探す */}
+      <section className="py-10 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <h2 className="mb-2 flex items-center justify-center gap-2 text-xl font-bold text-foreground sm:text-2xl">
+            <Ruler className="size-5 text-muted-foreground" />
+            サイズ条件で探す
+          </h2>
+          <p className="mb-6 text-center text-sm text-muted-foreground">
+            ハイルーフ対応・大型車対応など、サイズ条件から駐車場を探す
+          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <h3 className="mb-2 text-sm font-semibold text-muted-foreground">全高</h3>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/parking/size/height-1550" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">普通車対応</Link>
+                <Link href="/parking/size/height-1800" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">ハイルーフ対応</Link>
+                <Link href="/parking/size/height-2000" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">大型車対応</Link>
+              </div>
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-semibold text-muted-foreground">全幅</h3>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/parking/size/width-1850" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">1,850mm+</Link>
+                <Link href="/parking/size/width-1950" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">1,950mm+</Link>
+                <Link href="/parking/size/width-2050" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">2,050mm+</Link>
+              </div>
+            </div>
+            <div>
+              <h3 className="mb-2 text-sm font-semibold text-muted-foreground">全長</h3>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/parking/size/length-5000" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">5,000mm+</Link>
+                <Link href="/parking/size/length-5300" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">5,300mm+</Link>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 text-center">
+            <Link href="/parking/size" className="text-sm font-medium text-primary hover:underline">
+              すべてのサイズ条件を見る →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* セクション5: 使い方 */}
       <section className="bg-muted/50 py-10 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h2 className="mb-8 text-center text-xl font-bold text-foreground sm:mb-10 sm:text-2xl">
@@ -205,7 +248,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* セクション5: FAQ */}
+      {/* セクション6: FAQ */}
       <section className="py-10 sm:py-16">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <JsonLd

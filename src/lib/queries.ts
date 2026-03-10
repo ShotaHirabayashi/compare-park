@@ -11,7 +11,7 @@ import {
   parkingFees,
   operatingHours,
 } from "@/db/schema";
-import { eq, and, like, sql } from "drizzle-orm";
+import { eq, and, like, gte, sql } from "drizzle-orm";
 
 // ---------- Makers ----------
 
@@ -238,6 +238,125 @@ export async function getRestrictionsByWard(ward: string) {
     .from(vehicleRestrictions)
     .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id))
     .where(like(parkingLots.address, `%${ward}%`));
+}
+
+// ---------- Size Condition Queries ----------
+
+/**
+ * サイズ条件で駐車場を検索する。
+ * vehicle_restrictionsの該当カラム >= 閾値でフィルタし、駐車場情報をJOIN。
+ * JS側でparking_lot_idの重複排除を行う。
+ */
+export async function getParkingLotsBySizeCondition(
+  dimension: "height" | "width" | "length",
+  thresholdMm: number
+) {
+  const columnMap = {
+    height: vehicleRestrictions.max_height_mm,
+    width: vehicleRestrictions.max_width_mm,
+    length: vehicleRestrictions.max_length_mm,
+  } as const;
+
+  const column = columnMap[dimension];
+
+  const rows = await db
+    .select({
+      id: parkingLots.id,
+      name: parkingLots.name,
+      slug: parkingLots.slug,
+      address: parkingLots.address,
+      parking_type: parkingLots.parking_type,
+      restriction_name: vehicleRestrictions.restriction_name,
+      max_length_mm: vehicleRestrictions.max_length_mm,
+      max_width_mm: vehicleRestrictions.max_width_mm,
+      max_height_mm: vehicleRestrictions.max_height_mm,
+      max_weight_kg: vehicleRestrictions.max_weight_kg,
+    })
+    .from(vehicleRestrictions)
+    .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id))
+    .where(gte(column, thresholdMm));
+
+  // 駐車場ごとに重複排除（最初のrestrictionを代表値とする）
+  const seen = new Set<number>();
+  return rows.filter((row) => {
+    if (seen.has(row.id)) return false;
+    seen.add(row.id);
+    return true;
+  });
+}
+
+/**
+ * エリア+サイズ条件で駐車場を検索する。
+ */
+export async function getParkingLotsByWardAndSize(
+  ward: string,
+  dimension: "height" | "width" | "length",
+  thresholdMm: number
+) {
+  const columnMap = {
+    height: vehicleRestrictions.max_height_mm,
+    width: vehicleRestrictions.max_width_mm,
+    length: vehicleRestrictions.max_length_mm,
+  } as const;
+
+  const column = columnMap[dimension];
+
+  const rows = await db
+    .select({
+      id: parkingLots.id,
+      name: parkingLots.name,
+      slug: parkingLots.slug,
+      address: parkingLots.address,
+      parking_type: parkingLots.parking_type,
+      restriction_name: vehicleRestrictions.restriction_name,
+      max_length_mm: vehicleRestrictions.max_length_mm,
+      max_width_mm: vehicleRestrictions.max_width_mm,
+      max_height_mm: vehicleRestrictions.max_height_mm,
+      max_weight_kg: vehicleRestrictions.max_weight_kg,
+    })
+    .from(vehicleRestrictions)
+    .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id))
+    .where(and(like(parkingLots.address, `%${ward}%`), gte(column, thresholdMm)));
+
+  const seen = new Set<number>();
+  return rows.filter((row) => {
+    if (seen.has(row.id)) return false;
+    seen.add(row.id);
+    return true;
+  });
+}
+
+/**
+ * サイズ条件ごとの駐車場件数を一括取得する。
+ */
+export async function getSizeConditionCounts() {
+  const conditions = [
+    { dimension: "height" as const, column: vehicleRestrictions.max_height_mm },
+    { dimension: "width" as const, column: vehicleRestrictions.max_width_mm },
+    { dimension: "length" as const, column: vehicleRestrictions.max_length_mm },
+  ];
+
+  const thresholds = {
+    height: [1550, 1800, 2000],
+    width: [1850, 1950, 2050],
+    length: [5000, 5300],
+  };
+
+  const counts: Record<string, number> = {};
+
+  for (const { dimension, column } of conditions) {
+    for (const threshold of thresholds[dimension]) {
+      const rows = await db
+        .select({ parking_lot_id: vehicleRestrictions.parking_lot_id })
+        .from(vehicleRestrictions)
+        .where(gte(column, threshold));
+
+      const uniqueIds = new Set(rows.map((r) => r.parking_lot_id));
+      counts[`${dimension}-${threshold}`] = uniqueIds.size;
+    }
+  }
+
+  return counts;
 }
 
 // ---------- Maker helpers ----------

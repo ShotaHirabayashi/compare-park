@@ -4,8 +4,10 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingCard } from "@/components/parking-card";
 import { VehicleComboboxNav } from "@/components/vehicle-combobox-nav";
+import { SizeFilter } from "@/components/size-filter";
 import {
   getParkingLotsByWard,
+  getParkingLotsByWardAndSize,
   getRestrictionsByParkingLotId,
   getModelsForSearch,
 } from "@/lib/queries";
@@ -13,6 +15,7 @@ import { TOKYO_WARDS } from "@/lib/constants";
 
 interface Props {
   params: Promise<{ ward: string }>;
+  searchParams: Promise<{ minHeight?: string; minWidth?: string; minLength?: string }>;
 }
 
 export function generateStaticParams() {
@@ -32,8 +35,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function WardPage({ params }: Props) {
+export default async function WardPage({ params, searchParams }: Props) {
   const { ward } = await params;
+  const { minHeight, minWidth, minLength } = await searchParams;
   const decodedWard = decodeURIComponent(ward);
 
   // 有効な区名かチェック
@@ -41,19 +45,54 @@ export default async function WardPage({ params }: Props) {
     notFound();
   }
 
-  const [lots, vehiclesForSearch] = await Promise.all([
-    getParkingLotsByWard(decodedWard),
-    getModelsForSearch(),
-  ]);
+  // サイズフィルタの適用（最初に見つかった条件を適用）
+  const sizeFilter = minHeight
+    ? { dimension: "height" as const, threshold: Number(minHeight) }
+    : minWidth
+      ? { dimension: "width" as const, threshold: Number(minWidth) }
+      : minLength
+        ? { dimension: "length" as const, threshold: Number(minLength) }
+        : null;
 
-  // 各駐車場の代表制限値を取得
-  const lotsWithRestrictions = await Promise.all(
-    lots.map(async (lot) => {
-      const restrictions = await getRestrictionsByParkingLotId(lot.id);
-      const firstRestriction = restrictions[0] ?? null;
-      return { lot, restriction: firstRestriction };
-    })
-  );
+  const hasSizeFilter = sizeFilter && !isNaN(sizeFilter.threshold);
+
+  let lotsWithRestrictions: Array<{
+    lot: { id: number; name: string; slug: string; address: string | null; parking_type: string | null };
+    restriction: {
+      max_length_mm: number | null;
+      max_width_mm: number | null;
+      max_height_mm: number | null;
+      max_weight_kg: number | null;
+    } | null;
+  }>;
+
+  const vehiclesForSearch = await getModelsForSearch();
+
+  if (hasSizeFilter) {
+    const filteredLots = await getParkingLotsByWardAndSize(
+      decodedWard,
+      sizeFilter.dimension,
+      sizeFilter.threshold
+    );
+    lotsWithRestrictions = filteredLots.map((lot) => ({
+      lot: { id: lot.id, name: lot.name, slug: lot.slug, address: lot.address, parking_type: lot.parking_type },
+      restriction: {
+        max_length_mm: lot.max_length_mm,
+        max_width_mm: lot.max_width_mm,
+        max_height_mm: lot.max_height_mm,
+        max_weight_kg: lot.max_weight_kg,
+      },
+    }));
+  } else {
+    const lots = await getParkingLotsByWard(decodedWard);
+    lotsWithRestrictions = await Promise.all(
+      lots.map(async (lot) => {
+        const restrictions = await getRestrictionsByParkingLotId(lot.id);
+        const firstRestriction = restrictions[0] ?? null;
+        return { lot, restriction: firstRestriction };
+      })
+    );
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -67,8 +106,17 @@ export default async function WardPage({ params }: Props) {
 
       <h1 className="mb-2 text-3xl font-bold">{decodedWard}の駐車場</h1>
       <p className="mb-8 text-muted-foreground">
-        {decodedWard}エリアの駐車場一覧 ({lots.length}件)
+        {decodedWard}エリアの駐車場一覧 ({lotsWithRestrictions.length}件)
       </p>
+
+      {/* サイズフィルタ */}
+      <div className="mb-4">
+        <SizeFilter
+          currentMinHeight={minHeight}
+          currentMinWidth={minWidth}
+          currentMinLength={minLength}
+        />
+      </div>
 
       {/* 車種選択で適合確認 */}
       <div className="mb-8 rounded-lg border bg-muted/30 p-4">
