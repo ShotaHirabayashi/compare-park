@@ -12,6 +12,7 @@ const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
+  preload: true,
 });
 
 const notoSansJP = Noto_Sans_JP({
@@ -19,6 +20,7 @@ const notoSansJP = Noto_Sans_JP({
   subsets: ["latin"],
   weight: ["400", "700"],
   display: "swap",
+  preload: false,
 });
 
 export const viewport: Viewport = {
@@ -56,9 +58,9 @@ export default function RootLayout({
       <head>
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="gtag-init" strategy="afterInteractive">
+        <Script id="gtag-init" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
