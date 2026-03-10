@@ -213,6 +213,7 @@ const ferrari488Base = { ...ferrariBase, modelName: "488", modelSlug: "488", bod
 const ferrariF8Base = { ...ferrariBase, modelName: "F8トリブート", modelSlug: "f8-tributo", bodyType: "coupe" as const, generationName: "初代 (2019-2024)", startYear: 2019, endYear: 2024 };
 const ferrari296Base = { ...ferrariBase, modelName: "296 GTB", modelSlug: "296-gtb", bodyType: "coupe" as const, generationName: "初代 (2022-)", startYear: 2022 };
 const ferrariRomaBase = { ...ferrariBase, modelName: "ローマ", modelSlug: "roma", bodyType: "coupe" as const, generationName: "初代 (2020-)", startYear: 2020 };
+const ferrari12CilindriBase = { ...ferrariBase, modelName: "12チリンドリ", modelSlug: "12-cilindri", bodyType: "coupe" as const, generationName: "初代 (2024-)", startYear: 2024 };
 
 // --- アストンマーティン ベース定義 ---
 const astonMartinBase = { makerName: "アストンマーティン" as const, makerSlug: "aston-martin" as const, country: "イギリス" as const };
@@ -981,6 +982,12 @@ const carData: CarSeed[] = [
   // フェラーリ ローマ (2020-)
   // ============================================================
   { ...ferrariRomaBase, trimName: "ローマ", driveType: "RWD", transmission: "8DCT", lengthMm: 4656, widthMm: 1974, heightMm: 1301, weightKg: 1570, minTurningRadiusM: null },
+
+  // ============================================================
+  // フェラーリ 12チリンドリ (2024-)
+  // ※全幅2,176mmはgoo-netカタログ値、重量1,560kgは乾燥重量
+  // ============================================================
+  { ...ferrari12CilindriBase, trimName: "12チリンドリ", driveType: "RWD", transmission: "8DCT", lengthMm: 4733, widthMm: 2176, heightMm: 1292, weightKg: 1560, minTurningRadiusM: null },
 
   // ============================================================
   // アストンマーティン DBX (2020-)
