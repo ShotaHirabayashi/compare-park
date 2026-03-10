@@ -53,6 +53,7 @@ const harrier80Base = { ...toyotaBase, modelName: "ハリアー", modelSlug: "ha
 const harrier60Base = { ...toyotaBase, modelName: "ハリアー", modelSlug: "harrier", bodyType: "suv" as const, generationName: "60系 (2013-2020)", startYear: 2013, endYear: 2020 };
 const rav4Base = { ...toyotaBase, modelName: "RAV4", modelSlug: "rav4", bodyType: "suv" as const, generationName: "5代目 (2019-)", startYear: 2019 };
 const yarisBase = { ...toyotaBase, modelName: "ヤリス", modelSlug: "yaris", bodyType: "compact" as const, generationName: "初代 (2020-)", startYear: 2020 };
+const yarisCrossBase = { ...toyotaBase, modelName: "ヤリスクロス", modelSlug: "yaris-cross", bodyType: "suv" as const, generationName: "初代 (2020-)", startYear: 2020 };
 const prius60Base = { ...toyotaBase, modelName: "プリウス", modelSlug: "prius", bodyType: "sedan" as const, generationName: "60系 5代目 (2023-)", startYear: 2023 };
 const prius50Base = { ...toyotaBase, modelName: "プリウス", modelSlug: "prius", bodyType: "sedan" as const, generationName: "50系 4代目 (2015-2022)", startYear: 2015, endYear: 2022 };
 const lc300Base = { ...toyotaBase, modelName: "ランドクルーザー300", modelSlug: "land-cruiser-300", bodyType: "suv" as const, generationName: "300系 (2021-)", startYear: 2021 };
@@ -279,6 +280,22 @@ const carData: CarSeed[] = [
   t(yarisBase, { trimName: "Z HV", driveType: "2WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1050, minTurningRadiusM: 5.1 }),
   t(yarisBase, { trimName: "Z HV", driveType: "4WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1110, minTurningRadiusM: 5.1 }),
   t(yarisBase, { trimName: "GR SPORT 1.5L", driveType: "2WD", transmission: "CVT", lengthMm: 3940, widthMm: 1695, heightMm: 1500, weightKg: 1040, minTurningRadiusM: 5.1 }),
+
+  // ============================================================
+  // トヨタ ヤリスクロス 初代 (2020-)
+  // ============================================================
+  { ...yarisCrossBase, trimName: "X 1.5L ガソリン", driveType: "2WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1110, minTurningRadiusM: 5.3 },
+  t(yarisCrossBase, { trimName: "G 1.5L ガソリン", driveType: "2WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1120, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "G 1.5L ガソリン", driveType: "4WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1180, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "Z 1.5L ガソリン", driveType: "2WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1140, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "Z 1.5L ガソリン", driveType: "4WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1200, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "Z Adventure 1.5L ガソリン", driveType: "2WD", transmission: "CVT", lengthMm: 4200, widthMm: 1765, heightMm: 1590, weightKg: 1150, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "Z Adventure 1.5L ガソリン", driveType: "4WD", transmission: "CVT", lengthMm: 4200, widthMm: 1765, heightMm: 1590, weightKg: 1210, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "G HV", driveType: "2WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1160, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "G HV E-Four", driveType: "4WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1250, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "Z HV", driveType: "2WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1190, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "Z HV E-Four", driveType: "4WD", transmission: "CVT", lengthMm: 4180, widthMm: 1765, heightMm: 1590, weightKg: 1260, minTurningRadiusM: 5.3 }),
+  t(yarisCrossBase, { trimName: "GR SPORT 1.5L HV", driveType: "2WD", transmission: "CVT", lengthMm: 4185, widthMm: 1765, heightMm: 1580, weightKg: 1190, minTurningRadiusM: 5.3 }),
 
   // ============================================================
   // トヨタ プリウス 60系 5代目 (2023-)
