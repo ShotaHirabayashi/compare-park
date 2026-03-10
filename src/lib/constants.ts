@@ -81,6 +81,16 @@ export const SIZE_CATEGORIES: SizeCategory[] = [
     seoTitle: "全幅1,850mm以上OKの駐車場一覧",
   },
   {
+    slug: "width-1900",
+    dimension: "width",
+    thresholdMm: 1900,
+    label: "全幅1,900mm以上OK",
+    shortLabel: "全幅1,900mm以上",
+    description:
+      "全幅制限1,900mm以上の駐車場一覧。ワイドボディのSUVや輸入車が停められる駐車場を探せます。",
+    seoTitle: "全幅1,900mm以上OKの駐車場一覧",
+  },
+  {
     slug: "width-1950",
     dimension: "width",
     thresholdMm: 1950,

@@ -190,6 +190,7 @@ export default async function Home() {
               <h3 className="mb-2 text-sm font-semibold text-muted-foreground">全幅</h3>
               <div className="flex flex-wrap gap-2">
                 <Link href="/parking/size/width-1850" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">1,850mm+</Link>
+                <Link href="/parking/size/width-1900" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">1,900mm+</Link>
                 <Link href="/parking/size/width-1950" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">1,950mm+</Link>
                 <Link href="/parking/size/width-2050" className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary">2,050mm+</Link>
               </div>

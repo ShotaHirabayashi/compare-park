@@ -338,7 +338,7 @@ export async function getSizeConditionCounts() {
 
   const thresholds = {
     height: [1550, 1800, 2000],
-    width: [1850, 1950, 2050],
+    width: [1850, 1900, 1950, 2050],
     length: [5000, 5300],
   };
 

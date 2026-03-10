@@ -16,6 +16,7 @@ const FILTER_PRESETS = {
     label: "全幅",
     options: [
       { value: "1850", label: "1,850mm+" },
+      { value: "1900", label: "1,900mm+" },
       { value: "1950", label: "1,950mm+" },
       { value: "2050", label: "2,050mm+" },
     ],
