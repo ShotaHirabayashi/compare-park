@@ -191,6 +191,12 @@ const cullinanBase = { ...rollsRoyceBase, modelName: "カリナン", modelSlug: 
 const ferrariBase = { makerName: "フェラーリ" as const, makerSlug: "ferrari" as const, country: "イタリア" as const };
 const purosangueBase = { ...ferrariBase, modelName: "プロサングエ", modelSlug: "purosangue", bodyType: "suv" as const, generationName: "初代 (2023-)", startYear: 2023 };
 
+// --- ベントレー ベース定義 ---
+const bentleyBase = { makerName: "ベントレー" as const, makerSlug: "bentley" as const, country: "イギリス" as const };
+const bentaygaBase = { ...bentleyBase, modelName: "ベンテイガ", modelSlug: "bentayga", bodyType: "suv" as const, generationName: "後期 (2020-)", startYear: 2020 };
+const bentaygaEwbBase = { ...bentleyBase, modelName: "ベンテイガ EWB", modelSlug: "bentayga-ewb", bodyType: "suv" as const, generationName: "初代 (2022-)", startYear: 2022 };
+const bentayga1stBase = { ...bentleyBase, modelName: "ベンテイガ", modelSlug: "bentayga", bodyType: "suv" as const, generationName: "前期 (2016-2020)", startYear: 2016, endYear: 2020 };
+
 // --- ボルボ 追加モデル ベース定義 ---
 const xc90Base = { ...volvoBase, modelName: "XC90", modelSlug: "xc90", bodyType: "suv" as const, generationName: "2代目 (2015-)", startYear: 2015 };
 
@@ -835,6 +841,27 @@ const carData: CarSeed[] = [
   // ============================================================
   { ...xc90Base, trimName: "B5 AWD Momentum", driveType: "AWD", transmission: "8AT", lengthMm: 4950, widthMm: 1931, heightMm: 1776, weightKg: 2100, minTurningRadiusM: 5.9 },
   t(xc90Base, { trimName: "Recharge T8 PHEV", driveType: "AWD", transmission: "8AT", lengthMm: 4950, widthMm: 1931, heightMm: 1776, weightKg: 2340, minTurningRadiusM: 6.0 }),
+
+  // ============================================================
+  // ベントレー ベンテイガ 後期 (2020-)
+  // ============================================================
+  { ...bentaygaBase, trimName: "V8 4.0L ツインターボ", driveType: "AWD", transmission: "8AT", lengthMm: 5125, widthMm: 2010, heightMm: 1728, weightKg: 2412, minTurningRadiusM: 6.0 },
+  t(bentaygaBase, { trimName: "Azure V8", driveType: "AWD", transmission: "8AT", lengthMm: 5125, widthMm: 2010, heightMm: 1728, weightKg: 2430, minTurningRadiusM: 6.0 }),
+  t(bentaygaBase, { trimName: "S V8", driveType: "AWD", transmission: "8AT", lengthMm: 5125, widthMm: 2010, heightMm: 1710, weightKg: 2395, minTurningRadiusM: 6.0 }),
+  t(bentaygaBase, { trimName: "Speed V8", driveType: "AWD", transmission: "8AT", lengthMm: 5125, widthMm: 2010, heightMm: 1710, weightKg: 2419, minTurningRadiusM: 6.0 }),
+  t(bentaygaBase, { trimName: "Hybrid V6 3.0L PHEV", driveType: "AWD", transmission: "8AT", lengthMm: 5125, widthMm: 2010, heightMm: 1710, weightKg: 2510, minTurningRadiusM: 6.0 }),
+
+  // ============================================================
+  // ベントレー ベンテイガ EWB (2022-)
+  // ============================================================
+  { ...bentaygaEwbBase, trimName: "EWB V8", driveType: "AWD", transmission: "8AT", lengthMm: 5305, widthMm: 2010, heightMm: 1739, weightKg: 2520, minTurningRadiusM: 6.3 },
+  t(bentaygaEwbBase, { trimName: "EWB Azure V8", driveType: "AWD", transmission: "8AT", lengthMm: 5305, widthMm: 2010, heightMm: 1739, weightKg: 2540, minTurningRadiusM: 6.3 }),
+
+  // ============================================================
+  // ベントレー ベンテイガ 前期 (2016-2020)
+  // ============================================================
+  t(bentayga1stBase, { trimName: "W12 6.0L ツインターボ", driveType: "AWD", transmission: "8AT", lengthMm: 5140, widthMm: 1998, heightMm: 1742, weightKg: 2530, minTurningRadiusM: 6.0 }),
+  t(bentayga1stBase, { trimName: "V8 4.0L ツインターボ", driveType: "AWD", transmission: "8AT", lengthMm: 5140, widthMm: 1998, heightMm: 1742, weightKg: 2440, minTurningRadiusM: 6.0 }),
 ];
 
 // ============================================================
@@ -2435,6 +2462,7 @@ async function seed() {
 
   // 全テーブル削除 (外部キー依存順)
   console.log("既存データを削除中...");
+  await db.run(sql`PRAGMA foreign_keys = OFF`);
   await db.run(sql`DELETE FROM operating_hours`);
   await db.run(sql`DELETE FROM parking_fees`);
   await db.run(sql`DELETE FROM vehicle_restrictions`);
@@ -2445,6 +2473,7 @@ async function seed() {
   await db.run(sql`DELETE FROM generations`);
   await db.run(sql`DELETE FROM models`);
   await db.run(sql`DELETE FROM makers`);
+  await db.run(sql`PRAGMA foreign_keys = ON`);
   console.log("削除完了");
 
   // ----------------------------------------------------------
