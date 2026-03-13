@@ -37,14 +37,14 @@ export default async function CarListPage() {
           "@type": "CollectionPage",
           name: "車種一覧 — サイズ・駐車場適合を確認 | トメピタ",
           description: "国産車・輸入車の車種一覧。各車種の寸法（全長・全幅・全高・重量）と駐車場への適合判定を確認できます。",
-          url: "https://tomepita.com/car",
+          url: "https://www.tomepita.com/car",
           mainEntity: {
             "@type": "ItemList",
             numberOfItems: allModels.length,
             itemListElement: allModels.slice(0, 50).map((model, index) => ({
               "@type": "ListItem",
               position: index + 1,
-              url: `https://tomepita.com/car/${model.slug}`,
+              url: `https://www.tomepita.com/car/${model.slug}`,
               name: `${model.maker_name} ${model.name}`,
             })),
           },

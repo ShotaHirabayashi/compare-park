@@ -17,8 +17,8 @@ export default function AboutPage() {
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "トメピタ",
-          url: "https://tomepita.com",
-          logo: "https://tomepita.com/logo.svg",
+          url: "https://www.tomepita.com",
+          logo: "https://www.tomepita.com/logo.svg",
         }}
       />
       <Breadcrumb

@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/check", "/api/"],
     },
-    sitemap: "https://tomepita.com/sitemap.xml",
+    sitemap: "https://www.tomepita.com/sitemap.xml",
   };
 }

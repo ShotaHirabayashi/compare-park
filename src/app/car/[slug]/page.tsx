@@ -202,7 +202,7 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
           name: model.name,
           manufacturer: { "@type": "Organization", name: model.maker_name },
           bodyType: bodyTypeLabels[model.body_type] ?? model.body_type,
-          url: `https://tomepita.com/car/${slug}`,
+          url: `https://www.tomepita.com/car/${slug}`,
           ...(dimension
             ? {
                 vehicleSpecialUsage: "駐車場適合判定",

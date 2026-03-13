@@ -13,7 +13,7 @@ import {
   ARTICLE_CATEGORIES,
 } from "@/lib/articles";
 
-const BASE_URL = "https://tomepita.com";
+const BASE_URL = "https://www.tomepita.com";
 
 export const revalidate = 86400;
 

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description:
     "機械式駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
   alternates: {
-    canonical: "https://tomepita.com/articles",
+    canonical: "https://www.tomepita.com/articles",
   },
 };
 
@@ -48,14 +48,14 @@ async function ArticlesContent({
           "@type": "CollectionPage",
           name: "コラム | トメピタ",
           description: "機械式駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
-          url: "https://tomepita.com/articles",
+          url: "https://www.tomepita.com/articles",
           mainEntity: {
             "@type": "ItemList",
             numberOfItems: filteredArticles.length,
             itemListElement: filteredArticles.slice(0, 20).map((article, index) => ({
               "@type": "ListItem",
               position: index + 1,
-              url: `https://tomepita.com/articles/${article.slug}`,
+              url: `https://www.tomepita.com/articles/${article.slug}`,
               name: article.frontmatter.title,
             })),
           },

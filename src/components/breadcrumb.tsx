@@ -11,7 +11,7 @@ interface BreadcrumbProps {
   items: BreadcrumbItem[];
 }
 
-const BASE_URL = "https://tomepita.com";
+const BASE_URL = "https://www.tomepita.com";
 
 export function Breadcrumb({ items }: BreadcrumbProps) {
   const jsonLdData = {

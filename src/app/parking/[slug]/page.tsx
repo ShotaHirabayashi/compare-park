@@ -234,7 +234,7 @@ export default async function ParkingDetailPage({ params }: Props) {
           "@context": "https://schema.org",
           "@type": "ParkingFacility",
           name: lot.name,
-          url: `https://tomepita.com/parking/${slug}`,
+          url: `https://www.tomepita.com/parking/${slug}`,
           ...(lot.address ? { address: { "@type": "PostalAddress", streetAddress: lot.address, addressLocality: "東京都", addressCountry: "JP" } } : {}),
           ...(lot.phone ? { telephone: lot.phone } : {}),
           ...(lot.url ? { sameAs: lot.url } : {}),

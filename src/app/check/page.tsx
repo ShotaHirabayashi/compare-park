@@ -114,7 +114,7 @@ export default async function CheckPage({ searchParams }: Props) {
           "@context": "https://schema.org",
           "@type": "WebPage",
           name: `${model.maker_name} ${model.name} × ${lot.name} 適合判定`,
-          url: `https://tomepita.com/check?car=${model.slug}&parking=${lot.slug}`,
+          url: `https://www.tomepita.com/check?car=${model.slug}&parking=${lot.slug}`,
           description: `${model.maker_name} ${model.name}が${lot.name}に停められるか寸法比較で判定`,
         }}
       />

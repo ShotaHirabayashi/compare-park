@@ -65,7 +65,7 @@ export default async function SizeCategoryPage({ params }: Props) {
             "@type": "ListItem",
             position: index + 1,
             name: lot.name,
-            url: `https://tomepita.com/parking/${lot.slug}`,
+            url: `https://www.tomepita.com/parking/${lot.slug}`,
           })),
         }}
       />
