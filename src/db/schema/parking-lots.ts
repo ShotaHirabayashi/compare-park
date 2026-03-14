@@ -16,6 +16,7 @@ export const parkingLots = sqliteTable("parking_lots", {
   phone: text("phone"),
   url: text("url"),
   notes: text("notes"),
+  source_url: text("source_url"),
   created_at: text("created_at")
     .notNull()
     .default(sql`(datetime('now'))`),

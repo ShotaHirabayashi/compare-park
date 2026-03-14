@@ -1,0 +1,4 @@
+name,slug,address,latitude,longitude,parking_type,total_spaces,is_24h,open_time,close_time,fee_type,amount_yen,duration_minutes,fee_notes,restriction_name,max_length_mm,max_width_mm,max_height_mm,max_weight_kg,spaces_count,restriction_notes,source_url
+サンプルタワーパーキング,sample-tower-parking,東京都港区東新橋1-6-2,35.6625,139.7615,tower,30,TRUE,,,hourly,200,15,8-24時,普通車,5300,1950,1550,2300,15,,https://example.com/parking/1
+,,,,,,,,,,,,,,ハイルーフ,5300,1950,2100,2300,15,,
+サンプル機械式駐車場,sample-mechanical-parking,東京都中央区銀座4-9-13,35.6695,139.7670,mechanical,50,FALSE,07:30,22:00,hourly,330,30,,標準,5300,1950,1550,2300,50,,https://example.com/parking/2
