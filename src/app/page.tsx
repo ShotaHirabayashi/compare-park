@@ -12,8 +12,8 @@ import { InstantCheckForm } from "@/components/instant-check-form";
 import { CarSearchTabs } from "@/components/car-search-tabs";
 import { JsonLd } from "@/components/json-ld";
 import { db } from "@/db";
-import { models, makers, dimensions, trims, phases, generations } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { models, makers, dimensions, trims, phases, generations, parkingLots } from "@/db/schema";
+import { eq, count } from "drizzle-orm";
 import { TOKYO_WARD_MAP, FAQ_ITEMS } from "@/lib/constants";
 
 export const revalidate = 86400; // 24h
@@ -29,6 +29,8 @@ export default async function Home() {
     vehiclesForSearch,
     parkingLotsForSearch,
     allModelsWithDims,
+    parkingCount,
+    modelCount,
   ] = await Promise.all([
     getMakers(),
     getPopularModels(),
@@ -53,6 +55,8 @@ export default async function Home() {
       .leftJoin(phases, eq(phases.generation_id, generations.id))
       .leftJoin(trims, eq(trims.phase_id, phases.id))
       .leftJoin(dimensions, eq(dimensions.trim_id, trims.id)),
+    db.select({ count: count() }).from(parkingLots).get(),
+    db.select({ count: count() }).from(models).get(),
   ]);
 
   // 車種ごとに最初の寸法のみ保持（重複排除）
@@ -115,6 +119,20 @@ export default async function Home() {
             <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
               車種と駐車場を選ぶだけ。OK・ギリギリ・NGを瞬時に判定します。
             </p>
+            <div className="mx-auto mt-4 flex items-center justify-center gap-6 sm:gap-10">
+              <div className="text-center">
+                <span className="text-2xl font-bold text-primary sm:text-3xl">
+                  {parkingCount?.count.toLocaleString()}
+                </span>
+                <span className="ml-1 text-sm text-muted-foreground">駐車場</span>
+              </div>
+              <div className="text-center">
+                <span className="text-2xl font-bold text-primary sm:text-3xl">
+                  {modelCount?.count.toLocaleString()}
+                </span>
+                <span className="ml-1 text-sm text-muted-foreground">車種</span>
+              </div>
+            </div>
           </div>
           <div id="check" className="mx-auto mt-6 max-w-4xl rounded-xl border bg-background/95 p-4 shadow-lg backdrop-blur-sm sm:mt-8 sm:p-6">
             <InstantCheckForm
