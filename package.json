@@ -14,7 +14,8 @@
     "db:seed": "npx tsx src/db/seed/index.ts",
     "db:import-csv": "npx tsx src/scripts/import-csv.ts",
     "scrape:times": "npx tsx src/scripts/scrape-times.ts",
-    "scrape:repark": "npx tsx src/scripts/scrape-repark.ts"
+    "scrape:repark": "npx tsx src/scripts/scrape-repark.ts",
+    "db:backfill-facility-type": "npx tsx src/scripts/backfill-facility-type.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

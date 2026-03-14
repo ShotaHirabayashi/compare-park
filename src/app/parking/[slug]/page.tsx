@@ -309,6 +309,25 @@ export default async function ParkingDetailPage({ params }: Props) {
           )}
           {lot.notes && <p>{lot.notes}</p>}
         </div>
+
+        {/* Googleマップ */}
+        {(lot.latitude && lot.longitude) || lot.address ? (
+          <div className="mt-4 overflow-hidden rounded-lg border">
+            <iframe
+              title={`${lot.name}の地図`}
+              width="100%"
+              height="300"
+              style={{ border: 0 }}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              src={
+                lot.latitude && lot.longitude
+                  ? `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${lot.latitude},${lot.longitude}&zoom=16`
+                  : `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(lot.address!)}&zoom=16`
+              }
+            />
+          </div>
+        ) : null}
       </div>
 
       {/* 営業時間 */}
