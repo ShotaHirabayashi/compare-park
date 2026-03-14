@@ -331,6 +331,134 @@ const ioniq5Base = { ...hyundaiBase, modelName: "IONIQ 5", modelSlug: "ioniq-5",
 // --- ボルボ EX30 ベース定義 ---
 const ex30Base = { ...volvoBase, modelName: "EX30", modelSlug: "ex30", bodyType: "suv" as const, generationName: "初代 (2024-)", startYear: 2024 };
 
+// ============================================================
+// 追加車種ベース定義 (2026-03 追加分)
+// ============================================================
+
+// --- トヨタ 追加モデル ---
+const granaceBase = { ...toyotaBase, modelName: "グランエース", modelSlug: "granace", bodyType: "minivan" as const, generationName: "初代 (2019-2024)", startYear: 2019, endYear: 2024 };
+const lc70Base = { ...toyotaBase, modelName: "ランドクルーザー70", modelSlug: "land-cruiser-70", bodyType: "suv" as const, generationName: "復刻版 (2023-)", startYear: 2023 };
+const crownEstateBase = { ...toyotaBase, modelName: "クラウン エステート", modelSlug: "crown-estate", bodyType: "wagon" as const, generationName: "初代 (2025-)", startYear: 2025 };
+const raizeBase = { ...toyotaBase, modelName: "ライズ", modelSlug: "raize", bodyType: "suv" as const, generationName: "初代 (2019-)", startYear: 2019 };
+const roomyBase = { ...toyotaBase, modelName: "ルーミー", modelSlug: "roomy", bodyType: "compact" as const, generationName: "初代 (2016-)", startYear: 2016 };
+const corollaBase = { ...toyotaBase, modelName: "カローラ", modelSlug: "corolla", bodyType: "sedan" as const, generationName: "12代目 E210 (2019-)", startYear: 2019 };
+const corollaTouringBase = { ...toyotaBase, modelName: "カローラ ツーリング", modelSlug: "corolla-touring", bodyType: "wagon" as const, generationName: "初代 (2019-)", startYear: 2019 };
+const corollaCrossBase = { ...toyotaBase, modelName: "カローラ クロス", modelSlug: "corolla-cross", bodyType: "suv" as const, generationName: "初代 (2021-)", startYear: 2021 };
+const corollaSportBase = { ...toyotaBase, modelName: "カローラ スポーツ", modelSlug: "corolla-sport", bodyType: "compact" as const, generationName: "初代 (2018-)", startYear: 2018 };
+const grYarisBase = { ...toyotaBase, modelName: "GRヤリス", modelSlug: "gr-yaris", bodyType: "compact" as const, generationName: "初代 (2020-)", startYear: 2020 };
+
+// --- 日産 追加モデル ---
+const elgrandBase = { ...nissanBase, modelName: "エルグランド", modelSlug: "elgrand", bodyType: "minivan" as const, generationName: "E52 (2010-)", startYear: 2010 };
+const noteBase = { ...nissanBase, modelName: "ノート", modelSlug: "note", bodyType: "compact" as const, generationName: "E13 (2020-)", startYear: 2020 };
+const noteAuraBase = { ...nissanBase, modelName: "ノート オーラ", modelSlug: "note-aura", bodyType: "compact" as const, generationName: "FE13 (2021-)", startYear: 2021 };
+const rooxBase = { ...nissanBase, modelName: "ルークス", modelSlug: "roox", bodyType: "compact" as const, generationName: "B44A/B45A/B47A/B48A (2020-)", startYear: 2020 };
+
+// --- ホンダ 追加モデル ---
+const fitBase = { ...hondaBase, modelName: "フィット", modelSlug: "fit", bodyType: "compact" as const, generationName: "4代目 GR系 (2020-)", startYear: 2020 };
+const civicBase = { ...hondaBase, modelName: "シビック", modelSlug: "civic", bodyType: "sedan" as const, generationName: "11代目 FL系 (2021-)", startYear: 2021 };
+const civicTypeRBase = { ...hondaBase, modelName: "シビック タイプR", modelSlug: "civic-type-r", bodyType: "compact" as const, generationName: "FL5 (2022-)", startYear: 2022 };
+
+// --- スバル 追加モデル ---
+const levorgBase = { ...subaruBase, modelName: "レヴォーグ", modelSlug: "levorg", bodyType: "wagon" as const, generationName: "2代目 VN5 (2020-)", startYear: 2020 };
+const levorgLaybackBase = { ...subaruBase, modelName: "レヴォーグ レイバック", modelSlug: "levorg-layback", bodyType: "suv" as const, generationName: "初代 (2023-)", startYear: 2023 };
+
+// --- マツダ 追加モデル ---
+const mazda2Base = { ...mazdaBase, modelName: "MAZDA2", modelSlug: "mazda2", bodyType: "compact" as const, generationName: "DJ系 (2014-)", startYear: 2014 };
+const mazda3FbBase = { ...mazdaBase, modelName: "MAZDA3 ファストバック", modelSlug: "mazda3-fastback", bodyType: "compact" as const, generationName: "BP系 (2019-)", startYear: 2019 };
+const mazda3SedanBase = { ...mazdaBase, modelName: "MAZDA3 セダン", modelSlug: "mazda3-sedan", bodyType: "sedan" as const, generationName: "BP系 (2019-)", startYear: 2019 };
+
+// --- スズキ 追加モデル ---
+const spaciaBase = { ...suzukiBase, modelName: "スペーシア", modelSlug: "spacia", bodyType: "compact" as const, generationName: "3代目 MK系 (2023-)", startYear: 2023 };
+const hustlerBase = { ...suzukiBase, modelName: "ハスラー", modelSlug: "hustler", bodyType: "compact" as const, generationName: "2代目 MR系 (2020-)", startYear: 2020 };
+const wagonRBase = { ...suzukiBase, modelName: "ワゴンR", modelSlug: "wagon-r", bodyType: "compact" as const, generationName: "6代目 MH系 (2017-)", startYear: 2017 };
+const altoBase = { ...suzukiBase, modelName: "アルト", modelSlug: "alto", bodyType: "compact" as const, generationName: "9代目 HA37S/HA97S (2021-)", startYear: 2021 };
+
+// --- ダイハツ 追加モデル ---
+const tantoBase = { ...daihatsuBase, modelName: "タント", modelSlug: "tanto", bodyType: "compact" as const, generationName: "4代目 LA650S/LA660S (2019-)", startYear: 2019 };
+const moveBase = { ...daihatsuBase, modelName: "ムーヴ", modelSlug: "move", bodyType: "compact" as const, generationName: "新型 (2025-)", startYear: 2025 };
+const taftBase = { ...daihatsuBase, modelName: "タフト", modelSlug: "taft", bodyType: "compact" as const, generationName: "初代 LA900S/LA910S (2020-)", startYear: 2020 };
+
+// --- メルセデス・ベンツ 追加モデル ---
+const gleBase = { ...mbBase, modelName: "GLE", modelSlug: "gle", bodyType: "suv" as const, generationName: "W167 (2019-)", startYear: 2019 };
+const gleCoupeBase = { ...mbBase, modelName: "GLE クーペ", modelSlug: "gle-coupe", bodyType: "suv" as const, generationName: "C167 (2020-)", startYear: 2020 };
+const eqsSuvBase = { ...mbBase, modelName: "EQS SUV", modelSlug: "eqs-suv", bodyType: "suv" as const, generationName: "初代 (2023-)", startYear: 2023 };
+const eqeSuvBase = { ...mbBase, modelName: "EQE SUV", modelSlug: "eqe-suv", bodyType: "suv" as const, generationName: "初代 (2024-)", startYear: 2024 };
+const eClassBase = { ...mbBase, modelName: "Eクラス", modelSlug: "e-class", bodyType: "sedan" as const, generationName: "W214 (2024-)", startYear: 2024 };
+const aClassBase = { ...mbBase, modelName: "Aクラス", modelSlug: "a-class", bodyType: "compact" as const, generationName: "W177 (2018-)", startYear: 2018 };
+const bClassBase = { ...mbBase, modelName: "Bクラス", modelSlug: "b-class", bodyType: "compact" as const, generationName: "W247 (2019-)", startYear: 2019 };
+const glaBase = { ...mbBase, modelName: "GLA", modelSlug: "gla", bodyType: "suv" as const, generationName: "H247 (2020-)", startYear: 2020 };
+const glbBase = { ...mbBase, modelName: "GLB", modelSlug: "glb", bodyType: "suv" as const, generationName: "X247 (2020-)", startYear: 2020 };
+
+// --- BMW 追加モデル ---
+const bmw7Base = { ...bmwBase, modelName: "7シリーズ", modelSlug: "7-series", bodyType: "sedan" as const, generationName: "G70 (2022-)", startYear: 2022 };
+const x6Base = { ...bmwBase, modelName: "X6", modelSlug: "x6", bodyType: "suv" as const, generationName: "G06 (2019-)", startYear: 2019 };
+const ixBase = { ...bmwBase, modelName: "iX", modelSlug: "ix", bodyType: "suv" as const, generationName: "初代 (2022-)", startYear: 2022 };
+const x1Base = { ...bmwBase, modelName: "X1", modelSlug: "x1", bodyType: "suv" as const, generationName: "U11 (2022-)", startYear: 2022 };
+const bmw1Base = { ...bmwBase, modelName: "1シリーズ", modelSlug: "1-series", bodyType: "compact" as const, generationName: "F70 (2025-)", startYear: 2025 };
+const bmw2gcBase = { ...bmwBase, modelName: "2シリーズ グランクーペ", modelSlug: "2-series-gran-coupe", bodyType: "sedan" as const, generationName: "F74 (2025-)", startYear: 2025 };
+const bmw2atBase = { ...bmwBase, modelName: "2シリーズ アクティブツアラー", modelSlug: "2-series-active-tourer", bodyType: "minivan" as const, generationName: "U06 (2022-)", startYear: 2022 };
+
+// --- アウディ 追加モデル ---
+const q8Base = { ...audiBase, modelName: "Q8", modelSlug: "q8", bodyType: "suv" as const, generationName: "初代 (2019-)", startYear: 2019 };
+const q8EtronBase = { ...audiBase, modelName: "Q8 e-tron", modelSlug: "q8-e-tron", bodyType: "suv" as const, generationName: "初代 (2023-)", startYear: 2023 };
+const a8Base = { ...audiBase, modelName: "A8", modelSlug: "a8", bodyType: "sedan" as const, generationName: "D5 (2018-)", startYear: 2018 };
+const etronGtBase = { ...audiBase, modelName: "e-tron GT", modelSlug: "e-tron-gt", bodyType: "sedan" as const, generationName: "初代 (2022-)", startYear: 2022 };
+const a3Base = { ...audiBase, modelName: "A3", modelSlug: "a3", bodyType: "compact" as const, generationName: "8Y (2021-)", startYear: 2021 };
+
+// --- キャデラック ベース定義 ---
+const cadillacBase = { makerName: "キャデラック" as const, makerSlug: "cadillac" as const, country: "アメリカ" as const };
+const escaladeBase = { ...cadillacBase, modelName: "エスカレード", modelSlug: "escalade", bodyType: "suv" as const, generationName: "5代目 (2021-)", startYear: 2021 };
+
+// --- レクサス 追加モデル ---
+const lsBase = { ...lexusBase, modelName: "LS", modelSlug: "ls", bodyType: "sedan" as const, generationName: "5代目 (2017-)", startYear: 2017 };
+const esBase = { ...lexusBase, modelName: "ES", modelSlug: "es", bodyType: "sedan" as const, generationName: "7代目 AXZH10 (2018-)", startYear: 2018 };
+
+// --- マセラティ 追加モデル ---
+const levanteBase = { ...maseratiBase, modelName: "レヴァンテ", modelSlug: "levante", bodyType: "suv" as const, generationName: "初代 (2016-2024)", startYear: 2016, endYear: 2024 };
+
+// --- ランボルギーニ 追加モデル ---
+const urusSeBase = { ...lamborghiniBase, modelName: "ウルス SE", modelSlug: "urus-se", bodyType: "suv" as const, generationName: "SE (2024-)", startYear: 2024 };
+
+// --- フォルクスワーゲン 追加モデル ---
+const tiguanBase = { ...vwBase, modelName: "ティグアン", modelSlug: "tiguan", bodyType: "suv" as const, generationName: "3代目 (2024-)", startYear: 2024 };
+const poloBase = { ...vwBase, modelName: "ポロ", modelSlug: "polo", bodyType: "compact" as const, generationName: "AW (2018-)", startYear: 2018 };
+const tCrossBase = { ...vwBase, modelName: "T-Cross", modelSlug: "t-cross", bodyType: "suv" as const, generationName: "初代 (2019-)", startYear: 2019 };
+const passatBase = { ...vwBase, modelName: "パサート", modelSlug: "passat", bodyType: "wagon" as const, generationName: "B9 (2024-)", startYear: 2024 };
+
+// --- ボルボ 追加モデル ---
+const xc40Base = { ...volvoBase, modelName: "XC40", modelSlug: "xc40", bodyType: "suv" as const, generationName: "初代 (2018-)", startYear: 2018 };
+const v60Base = { ...volvoBase, modelName: "V60", modelSlug: "v60", bodyType: "wagon" as const, generationName: "2代目 (2018-)", startYear: 2018 };
+const v60ccBase = { ...volvoBase, modelName: "V60 クロスカントリー", modelSlug: "v60-cross-country", bodyType: "wagon" as const, generationName: "2代目 (2019-)", startYear: 2019 };
+
+// --- プジョー ベース定義 ---
+const peugeotBase = { makerName: "プジョー" as const, makerSlug: "peugeot" as const, country: "フランス" as const };
+const peugeot208Base = { ...peugeotBase, modelName: "208", modelSlug: "208", bodyType: "compact" as const, generationName: "2代目 (2020-)", startYear: 2020 };
+const peugeot2008Base = { ...peugeotBase, modelName: "2008", modelSlug: "2008", bodyType: "suv" as const, generationName: "2代目 (2020-)", startYear: 2020 };
+const peugeot308Base = { ...peugeotBase, modelName: "308", modelSlug: "308", bodyType: "compact" as const, generationName: "P5 (2022-)", startYear: 2022 };
+const peugeot3008Base = { ...peugeotBase, modelName: "3008", modelSlug: "3008", bodyType: "suv" as const, generationName: "新型 (2025-)", startYear: 2025 };
+
+// --- シトロエン ベース定義 ---
+const citroenBase = { makerName: "シトロエン" as const, makerSlug: "citroen" as const, country: "フランス" as const };
+const c3Base = { ...citroenBase, modelName: "C3", modelSlug: "c3", bodyType: "compact" as const, generationName: "新型 (2025-)", startYear: 2025 };
+
+// --- ルノー 追加モデル ---
+const luteciaBase = { ...renaultBase, modelName: "ルーテシア", modelSlug: "lutecia", bodyType: "compact" as const, generationName: "5代目 (2020-)", startYear: 2020 };
+const capturBase = { ...renaultBase, modelName: "キャプチャー", modelSlug: "captur", bodyType: "suv" as const, generationName: "2代目 (2021-)", startYear: 2021 };
+const arkanaBase = { ...renaultBase, modelName: "アルカナ", modelSlug: "arkana", bodyType: "suv" as const, generationName: "初代 (2022-)", startYear: 2022 };
+
+// --- アルファロメオ ベース定義 ---
+const alfaRomeoBase = { makerName: "アルファロメオ" as const, makerSlug: "alfa-romeo" as const, country: "イタリア" as const };
+const tonaleBase = { ...alfaRomeoBase, modelName: "トナーレ", modelSlug: "tonale", bodyType: "suv" as const, generationName: "初代 (2023-)", startYear: 2023 };
+
+// --- ヒョンデ 追加モデル ---
+const konaBase = { ...hyundaiBase, modelName: "コナ", modelSlug: "kona", bodyType: "suv" as const, generationName: "2代目 (2023-)", startYear: 2023 };
+
+// --- MINI ベース定義 ---
+const miniBase = { makerName: "MINI" as const, makerSlug: "mini" as const, country: "イギリス" as const };
+const mini3doorBase = { ...miniBase, modelName: "MINI 3ドア", modelSlug: "mini-3door", bodyType: "compact" as const, generationName: "F66 (2024-)", startYear: 2024 };
+const mini5doorBase = { ...miniBase, modelName: "MINI 5ドア", modelSlug: "mini-5door", bodyType: "compact" as const, generationName: "F65 (2024-)", startYear: 2024 };
+const miniCountrymanBase = { ...miniBase, modelName: "MINI カントリーマン", modelSlug: "mini-countryman", bodyType: "suv" as const, generationName: "U25 (2024-)", startYear: 2024 };
+
 const carData: CarSeed[] = [
   // ============================================================
   // トヨタ アルファード 40系 (2023-)
@@ -1384,6 +1512,453 @@ const carData: CarSeed[] = [
   // ============================================================
   { ...ex30Base, trimName: "Single Motor", driveType: "RWD", transmission: "1速固定", lengthMm: 4235, widthMm: 1835, heightMm: 1550, weightKg: 1770, minTurningRadiusM: 5.4 },
   t(ex30Base, { trimName: "Twin Motor", driveType: "AWD", transmission: "1速固定", lengthMm: 4235, widthMm: 1835, heightMm: 1550, weightKg: 1880, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // トヨタ グランエース (2019-2024) 生産終了
+  // ============================================================
+  { ...granaceBase, trimName: "Premium 6人乗り", driveType: "2WD", transmission: "6AT", lengthMm: 5300, widthMm: 1970, heightMm: 1990, weightKg: 2740, minTurningRadiusM: 5.9 },
+  t(granaceBase, { trimName: "G 8人乗り", driveType: "2WD", transmission: "6AT", lengthMm: 5300, widthMm: 1970, heightMm: 1990, weightKg: 2770, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // トヨタ ランドクルーザー70 復刻版 (2023-)
+  // ============================================================
+  { ...lc70Base, trimName: "AX", driveType: "4WD", transmission: "6AT", lengthMm: 4890, widthMm: 1870, heightMm: 1920, weightKg: 2300, minTurningRadiusM: 6.3 },
+
+  // ============================================================
+  // トヨタ クラウン エステート (2025-)
+  // ============================================================
+  { ...crownEstateBase, trimName: "Z HEV", driveType: "2WD", transmission: "CVT", lengthMm: 4930, widthMm: 1880, heightMm: 1625, weightKg: 1890, minTurningRadiusM: 5.4 },
+  t(crownEstateBase, { trimName: "RS PHEV", driveType: "4WD", transmission: "CVT", lengthMm: 4930, widthMm: 1880, heightMm: 1625, weightKg: 2080, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // トヨタ ライズ (2019-)
+  // ============================================================
+  { ...raizeBase, trimName: "Z ガソリン", driveType: "2WD", transmission: "CVT", lengthMm: 3995, widthMm: 1695, heightMm: 1620, weightKg: 980, minTurningRadiusM: 4.9 },
+  t(raizeBase, { trimName: "Z ガソリン", driveType: "4WD", transmission: "CVT", lengthMm: 3995, widthMm: 1695, heightMm: 1620, weightKg: 1050, minTurningRadiusM: 4.9 }),
+  t(raizeBase, { trimName: "Z HEV", driveType: "2WD", transmission: "CVT", lengthMm: 3995, widthMm: 1695, heightMm: 1620, weightKg: 1070, minTurningRadiusM: 4.9 }),
+
+  // ============================================================
+  // トヨタ ルーミー (2016-)
+  // ============================================================
+  { ...roomyBase, trimName: "G", driveType: "2WD", transmission: "CVT", lengthMm: 3700, widthMm: 1670, heightMm: 1735, weightKg: 1080, minTurningRadiusM: 4.7 },
+  t(roomyBase, { trimName: "G", driveType: "4WD", transmission: "CVT", lengthMm: 3700, widthMm: 1670, heightMm: 1735, weightKg: 1130, minTurningRadiusM: 4.7 }),
+  t(roomyBase, { trimName: "カスタムG-T ターボ", driveType: "2WD", transmission: "CVT", lengthMm: 3705, widthMm: 1670, heightMm: 1735, weightKg: 1100, minTurningRadiusM: 4.7 }),
+
+  // ============================================================
+  // トヨタ カローラ セダン (2019-)
+  // ============================================================
+  { ...corollaBase, trimName: "G HEV", driveType: "2WD", transmission: "CVT", lengthMm: 4495, widthMm: 1745, heightMm: 1435, weightKg: 1350, minTurningRadiusM: 5.0 },
+  t(corollaBase, { trimName: "G HEV", driveType: "4WD", transmission: "CVT", lengthMm: 4495, widthMm: 1745, heightMm: 1435, weightKg: 1410, minTurningRadiusM: 5.0 }),
+
+  // ============================================================
+  // トヨタ カローラ ツーリング (2019-)
+  // ============================================================
+  { ...corollaTouringBase, trimName: "G HEV", driveType: "2WD", transmission: "CVT", lengthMm: 4495, widthMm: 1745, heightMm: 1460, weightKg: 1370, minTurningRadiusM: 5.0 },
+  t(corollaTouringBase, { trimName: "G HEV", driveType: "4WD", transmission: "CVT", lengthMm: 4495, widthMm: 1745, heightMm: 1460, weightKg: 1430, minTurningRadiusM: 5.0 }),
+
+  // ============================================================
+  // トヨタ カローラ クロス (2021-)
+  // ============================================================
+  { ...corollaCrossBase, trimName: "Z HEV", driveType: "2WD", transmission: "CVT", lengthMm: 4490, widthMm: 1825, heightMm: 1620, weightKg: 1400, minTurningRadiusM: 5.2 },
+  t(corollaCrossBase, { trimName: "Z HEV", driveType: "4WD", transmission: "CVT", lengthMm: 4490, widthMm: 1825, heightMm: 1620, weightKg: 1490, minTurningRadiusM: 5.2 }),
+  t(corollaCrossBase, { trimName: "GR SPORT HEV", driveType: "2WD", transmission: "CVT", lengthMm: 4460, widthMm: 1825, heightMm: 1600, weightKg: 1500, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // トヨタ カローラ スポーツ (2018-)
+  // ============================================================
+  { ...corollaSportBase, trimName: "G HEV", driveType: "2WD", transmission: "CVT", lengthMm: 4375, widthMm: 1790, heightMm: 1460, weightKg: 1360, minTurningRadiusM: 5.0 },
+  t(corollaSportBase, { trimName: "G Z HEV", driveType: "2WD", transmission: "CVT", lengthMm: 4375, widthMm: 1790, heightMm: 1460, weightKg: 1390, minTurningRadiusM: 5.0 }),
+
+  // ============================================================
+  // トヨタ GRヤリス (2020-)
+  // ============================================================
+  { ...grYarisBase, trimName: "RZ", driveType: "4WD", transmission: "6MT", lengthMm: 3995, widthMm: 1805, heightMm: 1455, weightKg: 1280, minTurningRadiusM: 5.6 },
+  t(grYarisBase, { trimName: "RZ", driveType: "4WD", transmission: "8AT", lengthMm: 3995, widthMm: 1805, heightMm: 1455, weightKg: 1300, minTurningRadiusM: 5.6 }),
+
+  // ============================================================
+  // 日産 エルグランド E52 (2010-)
+  // ============================================================
+  { ...elgrandBase, trimName: "250 ハイウェイスター", driveType: "2WD", transmission: "CVT", lengthMm: 4965, widthMm: 1850, heightMm: 1815, weightKg: 1940, minTurningRadiusM: 5.7 },
+  t(elgrandBase, { trimName: "250 ハイウェイスター", driveType: "4WD", transmission: "CVT", lengthMm: 4965, widthMm: 1850, heightMm: 1815, weightKg: 2010, minTurningRadiusM: 5.7 }),
+  t(elgrandBase, { trimName: "350 ハイウェイスター", driveType: "2WD", transmission: "7AT", lengthMm: 4965, widthMm: 1850, heightMm: 1815, weightKg: 2050, minTurningRadiusM: 5.7 }),
+  t(elgrandBase, { trimName: "350 ハイウェイスター", driveType: "4WD", transmission: "7AT", lengthMm: 4965, widthMm: 1850, heightMm: 1815, weightKg: 2110, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // 日産 ノート E13 (2020-)
+  // ============================================================
+  { ...noteBase, trimName: "X e-POWER", driveType: "2WD", transmission: "e-POWER", lengthMm: 4045, widthMm: 1695, heightMm: 1520, weightKg: 1230, minTurningRadiusM: 4.9 },
+  t(noteBase, { trimName: "X FOUR e-POWER", driveType: "4WD", transmission: "e-POWER", lengthMm: 4045, widthMm: 1695, heightMm: 1520, weightKg: 1340, minTurningRadiusM: 4.9 }),
+
+  // ============================================================
+  // 日産 ノート オーラ FE13 (2021-)
+  // ============================================================
+  { ...noteAuraBase, trimName: "G e-POWER", driveType: "2WD", transmission: "e-POWER", lengthMm: 4045, widthMm: 1735, heightMm: 1525, weightKg: 1260, minTurningRadiusM: 5.2 },
+  t(noteAuraBase, { trimName: "G FOUR e-POWER", driveType: "4WD", transmission: "e-POWER", lengthMm: 4045, widthMm: 1735, heightMm: 1525, weightKg: 1370, minTurningRadiusM: 5.2 }),
+  t(noteAuraBase, { trimName: "NISMO", driveType: "2WD", transmission: "e-POWER", lengthMm: 4120, widthMm: 1735, heightMm: 1505, weightKg: 1270, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // 日産 ルークス (2020-)
+  // ============================================================
+  { ...rooxBase, trimName: "ハイウェイスター", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1780, weightKg: 970, minTurningRadiusM: 4.5 },
+  t(rooxBase, { trimName: "ハイウェイスター", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1800, weightKg: 1030, minTurningRadiusM: 4.5 }),
+  t(rooxBase, { trimName: "ハイウェイスター ProPILOT", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1785, weightKg: 990, minTurningRadiusM: 4.5 }),
+
+  // ============================================================
+  // ホンダ フィット 4代目 GR系 (2020-)
+  // ============================================================
+  { ...fitBase, trimName: "ベーシック e:HEV", driveType: "2WD", transmission: "e:HEV", lengthMm: 3995, widthMm: 1695, heightMm: 1515, weightKg: 1180, minTurningRadiusM: 4.9 },
+  t(fitBase, { trimName: "ホーム e:HEV", driveType: "2WD", transmission: "e:HEV", lengthMm: 3995, widthMm: 1695, heightMm: 1540, weightKg: 1200, minTurningRadiusM: 4.9 }),
+  t(fitBase, { trimName: "CROSSTAR e:HEV", driveType: "2WD", transmission: "e:HEV", lengthMm: 4095, widthMm: 1725, heightMm: 1565, weightKg: 1210, minTurningRadiusM: 5.2 }),
+  t(fitBase, { trimName: "CROSSTAR e:HEV", driveType: "4WD", transmission: "e:HEV", lengthMm: 4095, widthMm: 1725, heightMm: 1570, weightKg: 1280, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // ホンダ シビック FL系 (2021-)
+  // ============================================================
+  { ...civicBase, trimName: "EX ガソリン", driveType: "2WD", transmission: "CVT", lengthMm: 4550, widthMm: 1800, heightMm: 1415, weightKg: 1370, minTurningRadiusM: 5.7 },
+  t(civicBase, { trimName: "e:HEV", driveType: "2WD", transmission: "e:HEV", lengthMm: 4560, widthMm: 1800, heightMm: 1410, weightKg: 1460, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // ホンダ シビック タイプR FL5 (2022-)
+  // ============================================================
+  { ...civicTypeRBase, trimName: "タイプR", driveType: "2WD", transmission: "6MT", lengthMm: 4595, widthMm: 1890, heightMm: 1405, weightKg: 1430, minTurningRadiusM: 5.9 },
+
+  // ============================================================
+  // スバル レヴォーグ 2代目 VN5 (2020-)
+  // ============================================================
+  { ...levorgBase, trimName: "GT-H 1.8L", driveType: "AWD", transmission: "CVT", lengthMm: 4755, widthMm: 1795, heightMm: 1500, weightKg: 1580, minTurningRadiusM: 5.5 },
+  t(levorgBase, { trimName: "STI Sport 1.8L", driveType: "AWD", transmission: "CVT", lengthMm: 4755, widthMm: 1795, heightMm: 1500, weightKg: 1600, minTurningRadiusM: 5.5 }),
+  t(levorgBase, { trimName: "STI Sport R 2.4L", driveType: "AWD", transmission: "CVT", lengthMm: 4755, widthMm: 1795, heightMm: 1500, weightKg: 1640, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // スバル レヴォーグ レイバック (2023-)
+  // ============================================================
+  { ...levorgLaybackBase, trimName: "Limited EX 1.8L", driveType: "AWD", transmission: "CVT", lengthMm: 4770, widthMm: 1820, heightMm: 1570, weightKg: 1600, minTurningRadiusM: 5.5 },
+
+  // ============================================================
+  // マツダ MAZDA2 DJ系 (2014-)
+  // ============================================================
+  { ...mazda2Base, trimName: "15C 2WD", driveType: "2WD", transmission: "6AT", lengthMm: 4080, widthMm: 1695, heightMm: 1500, weightKg: 1080, minTurningRadiusM: 4.7 },
+  t(mazda2Base, { trimName: "15C 4WD", driveType: "4WD", transmission: "6AT", lengthMm: 4080, widthMm: 1695, heightMm: 1550, weightKg: 1170, minTurningRadiusM: 4.7 }),
+  t(mazda2Base, { trimName: "XD 1.5D", driveType: "2WD", transmission: "6AT", lengthMm: 4080, widthMm: 1695, heightMm: 1525, weightKg: 1130, minTurningRadiusM: 4.7 }),
+
+  // ============================================================
+  // マツダ MAZDA3 ファストバック BP系 (2019-)
+  // ============================================================
+  { ...mazda3FbBase, trimName: "20S 2.0L", driveType: "2WD", transmission: "6AT", lengthMm: 4460, widthMm: 1795, heightMm: 1440, weightKg: 1360, minTurningRadiusM: 5.3 },
+  t(mazda3FbBase, { trimName: "XD 1.8D", driveType: "2WD", transmission: "6AT", lengthMm: 4460, widthMm: 1795, heightMm: 1440, weightKg: 1420, minTurningRadiusM: 5.3 }),
+  t(mazda3FbBase, { trimName: "XD 1.8D", driveType: "4WD", transmission: "6AT", lengthMm: 4460, widthMm: 1795, heightMm: 1440, weightKg: 1480, minTurningRadiusM: 5.3 }),
+
+  // ============================================================
+  // マツダ MAZDA3 セダン BP系 (2019-)
+  // ============================================================
+  { ...mazda3SedanBase, trimName: "20S 2.0L", driveType: "2WD", transmission: "6AT", lengthMm: 4660, widthMm: 1795, heightMm: 1445, weightKg: 1380, minTurningRadiusM: 5.3 },
+
+  // ============================================================
+  // スズキ スペーシア 3代目 (2023-)
+  // ============================================================
+  { ...spaciaBase, trimName: "HYBRID G", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1785, weightKg: 860, minTurningRadiusM: 4.4 },
+  t(spaciaBase, { trimName: "HYBRID G", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1785, weightKg: 920, minTurningRadiusM: 4.4 }),
+  t(spaciaBase, { trimName: "カスタム HYBRID GS ターボ", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1785, weightKg: 910, minTurningRadiusM: 4.4 }),
+
+  // ============================================================
+  // スズキ ハスラー 2代目 (2020-)
+  // ============================================================
+  { ...hustlerBase, trimName: "HYBRID G", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1680, weightKg: 820, minTurningRadiusM: 4.6 },
+  t(hustlerBase, { trimName: "HYBRID G", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1680, weightKg: 870, minTurningRadiusM: 4.6 }),
+  t(hustlerBase, { trimName: "HYBRID Gターボ", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1680, weightKg: 840, minTurningRadiusM: 4.6 }),
+
+  // ============================================================
+  // スズキ ワゴンR 6代目 (2017-)
+  // ============================================================
+  { ...wagonRBase, trimName: "HYBRID FX", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1650, weightKg: 780, minTurningRadiusM: 4.4 },
+  t(wagonRBase, { trimName: "HYBRID FX", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1650, weightKg: 830, minTurningRadiusM: 4.4 }),
+
+  // ============================================================
+  // スズキ アルト 9代目 (2021-)
+  // ============================================================
+  { ...altoBase, trimName: "HYBRID S", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1525, weightKg: 700, minTurningRadiusM: 4.4 },
+  t(altoBase, { trimName: "HYBRID S", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1525, weightKg: 740, minTurningRadiusM: 4.4 }),
+
+  // ============================================================
+  // ダイハツ タント 4代目 (2019-)
+  // ============================================================
+  { ...tantoBase, trimName: "X", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1755, weightKg: 900, minTurningRadiusM: 4.4 },
+  t(tantoBase, { trimName: "X", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1775, weightKg: 950, minTurningRadiusM: 4.4 }),
+  t(tantoBase, { trimName: "カスタムRS ターボ", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1755, weightKg: 920, minTurningRadiusM: 4.4 }),
+
+  // ============================================================
+  // ダイハツ ムーヴ 新型 (2025-)
+  // ============================================================
+  { ...moveBase, trimName: "X", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1655, weightKg: 860, minTurningRadiusM: 4.4 },
+  t(moveBase, { trimName: "X", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1655, weightKg: 910, minTurningRadiusM: 4.4 }),
+
+  // ============================================================
+  // ダイハツ タフト (2020-)
+  // ============================================================
+  { ...taftBase, trimName: "G", driveType: "2WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1630, weightKg: 830, minTurningRadiusM: 4.8 },
+  t(taftBase, { trimName: "Gターボ", driveType: "4WD", transmission: "CVT", lengthMm: 3395, widthMm: 1475, heightMm: 1630, weightKg: 890, minTurningRadiusM: 4.8 }),
+
+  // ============================================================
+  // メルセデス・ベンツ GLE W167 (2019-)
+  // ============================================================
+  { ...gleBase, trimName: "GLE 300d 4MATIC", driveType: "4WD", transmission: "9AT", lengthMm: 4925, widthMm: 2020, heightMm: 1795, weightKg: 2320, minTurningRadiusM: 5.9 },
+  t(gleBase, { trimName: "GLE 450d 4MATIC スポーツ", driveType: "4WD", transmission: "9AT", lengthMm: 4925, widthMm: 2020, heightMm: 1780, weightKg: 2480, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // メルセデス・ベンツ GLE クーペ C167 (2020-)
+  // ============================================================
+  { ...gleCoupeBase, trimName: "GLE 450d 4MATIC クーペ", driveType: "4WD", transmission: "9AT", lengthMm: 4955, widthMm: 2020, heightMm: 1715, weightKg: 2370, minTurningRadiusM: 5.9 },
+
+  // ============================================================
+  // メルセデス・ベンツ EQS SUV (2023-)
+  // ============================================================
+  { ...eqsSuvBase, trimName: "EQS 450 4MATIC SUV", driveType: "4WD", transmission: "1速固定", lengthMm: 5130, widthMm: 2035, heightMm: 1725, weightKg: 2880, minTurningRadiusM: 5.9 },
+
+  // ============================================================
+  // メルセデス・ベンツ EQE SUV (2024-)
+  // ============================================================
+  { ...eqeSuvBase, trimName: "EQE 350 4MATIC SUV", driveType: "4WD", transmission: "1速固定", lengthMm: 4880, widthMm: 2030, heightMm: 1670, weightKg: 2630, minTurningRadiusM: 5.6 },
+
+  // ============================================================
+  // メルセデス・ベンツ Eクラス W214 (2024-)
+  // ============================================================
+  { ...eClassBase, trimName: "E 200 アバンギャルド", driveType: "2WD", transmission: "9AT", lengthMm: 4960, widthMm: 1880, heightMm: 1475, weightKg: 1790, minTurningRadiusM: 5.5 },
+  t(eClassBase, { trimName: "E 220d スポーツ", driveType: "2WD", transmission: "9AT", lengthMm: 4960, widthMm: 1880, heightMm: 1475, weightKg: 1890, minTurningRadiusM: 5.5 }),
+  t(eClassBase, { trimName: "E 350e スポーツ PHEV", driveType: "2WD", transmission: "9AT", lengthMm: 4960, widthMm: 1880, heightMm: 1485, weightKg: 2170, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // メルセデス・ベンツ Aクラス W177 (2018-)
+  // ============================================================
+  { ...aClassBase, trimName: "A 180", driveType: "2WD", transmission: "7DCT", lengthMm: 4440, widthMm: 1800, heightMm: 1420, weightKg: 1380, minTurningRadiusM: 5.2 },
+
+  // ============================================================
+  // メルセデス・ベンツ Bクラス W247 (2019-)
+  // ============================================================
+  { ...bClassBase, trimName: "B 180", driveType: "2WD", transmission: "7DCT", lengthMm: 4425, widthMm: 1795, heightMm: 1565, weightKg: 1470, minTurningRadiusM: 5.2 },
+  t(bClassBase, { trimName: "B 200d", driveType: "2WD", transmission: "8DCT", lengthMm: 4425, widthMm: 1795, heightMm: 1565, weightKg: 1550, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // メルセデス・ベンツ GLA H247 (2020-)
+  // ============================================================
+  { ...glaBase, trimName: "GLA 180", driveType: "2WD", transmission: "7DCT", lengthMm: 4415, widthMm: 1835, heightMm: 1620, weightKg: 1550, minTurningRadiusM: 5.4 },
+  t(glaBase, { trimName: "GLA 200d 4MATIC", driveType: "4WD", transmission: "8DCT", lengthMm: 4415, widthMm: 1835, heightMm: 1620, weightKg: 1710, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // メルセデス・ベンツ GLB X247 (2020-)
+  // ============================================================
+  { ...glbBase, trimName: "GLB 180", driveType: "2WD", transmission: "7DCT", lengthMm: 4660, widthMm: 1845, heightMm: 1700, weightKg: 1670, minTurningRadiusM: 5.5 },
+  t(glbBase, { trimName: "GLB 200d 4MATIC", driveType: "4WD", transmission: "8DCT", lengthMm: 4660, widthMm: 1845, heightMm: 1700, weightKg: 1820, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // BMW 7シリーズ G70 (2022-)
+  // ============================================================
+  { ...bmw7Base, trimName: "740i エクセレンス", driveType: "2WD", transmission: "8AT", lengthMm: 5390, widthMm: 1950, heightMm: 1545, weightKg: 2120, minTurningRadiusM: 6.0 },
+  t(bmw7Base, { trimName: "740d xDrive Mスポーツ", driveType: "AWD", transmission: "8AT", lengthMm: 5390, widthMm: 1950, heightMm: 1545, weightKg: 2230, minTurningRadiusM: 6.0 }),
+
+  // ============================================================
+  // BMW X6 G06 (2019-)
+  // ============================================================
+  { ...x6Base, trimName: "xDrive 35d Mスポーツ", driveType: "AWD", transmission: "8AT", lengthMm: 4955, widthMm: 2005, heightMm: 1695, weightKg: 2270, minTurningRadiusM: 5.9 },
+  t(x6Base, { trimName: "M60i xDrive", driveType: "AWD", transmission: "8AT", lengthMm: 4955, widthMm: 2005, heightMm: 1695, weightKg: 2340, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // BMW iX (2022-)
+  // ============================================================
+  { ...ixBase, trimName: "xDrive60 Mスポーツ", driveType: "AWD", transmission: "1速固定", lengthMm: 4965, widthMm: 1965, heightMm: 1695, weightKg: 2500, minTurningRadiusM: 5.9 },
+  t(ixBase, { trimName: "M70 xDrive", driveType: "AWD", transmission: "1速固定", lengthMm: 4965, widthMm: 1965, heightMm: 1695, weightKg: 2640, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // BMW X1 U11 (2022-)
+  // ============================================================
+  { ...x1Base, trimName: "sDrive18i Mスポーツ", driveType: "2WD", transmission: "7DCT", lengthMm: 4500, widthMm: 1835, heightMm: 1625, weightKg: 1575, minTurningRadiusM: 5.4 },
+  t(x1Base, { trimName: "xDrive20d Mスポーツ", driveType: "AWD", transmission: "7DCT", lengthMm: 4500, widthMm: 1845, heightMm: 1620, weightKg: 1740, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // BMW 1シリーズ F70 (2025-)
+  // ============================================================
+  { ...bmw1Base, trimName: "120 Mスポーツ", driveType: "2WD", transmission: "7DCT", lengthMm: 4370, widthMm: 1800, heightMm: 1465, weightKg: 1460, minTurningRadiusM: 5.4 },
+  t(bmw1Base, { trimName: "M135 xDrive", driveType: "AWD", transmission: "8AT", lengthMm: 4370, widthMm: 1800, heightMm: 1450, weightKg: 1570, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // BMW 2シリーズ グランクーペ F74 (2025-)
+  // ============================================================
+  { ...bmw2gcBase, trimName: "220 Mスポーツ", driveType: "2WD", transmission: "7DCT", lengthMm: 4550, widthMm: 1800, heightMm: 1435, weightKg: 1490, minTurningRadiusM: 5.4 },
+  t(bmw2gcBase, { trimName: "M235 xDrive", driveType: "AWD", transmission: "8AT", lengthMm: 4550, widthMm: 1800, heightMm: 1435, weightKg: 1590, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // BMW 2シリーズ アクティブツアラー U06 (2022-)
+  // ============================================================
+  { ...bmw2atBase, trimName: "218i Exclusive", driveType: "2WD", transmission: "7DCT", lengthMm: 4385, widthMm: 1825, heightMm: 1580, weightKg: 1460, minTurningRadiusM: 5.4 },
+  t(bmw2atBase, { trimName: "218i M Sport", driveType: "2WD", transmission: "7DCT", lengthMm: 4385, widthMm: 1825, heightMm: 1565, weightKg: 1460, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // アウディ Q8 (2019-)
+  // ============================================================
+  { ...q8Base, trimName: "55 TFSI クワトロ S line", driveType: "AWD", transmission: "8AT", lengthMm: 4995, widthMm: 1995, heightMm: 1705, weightKg: 2140, minTurningRadiusM: 5.9 },
+
+  // ============================================================
+  // アウディ Q8 e-tron (2023-)
+  // ============================================================
+  { ...q8EtronBase, trimName: "50 クワトロ S line", driveType: "AWD", transmission: "1速固定", lengthMm: 4915, widthMm: 1935, heightMm: 1635, weightKg: 2520, minTurningRadiusM: 5.9 },
+  t(q8EtronBase, { trimName: "55 クワトロ S line", driveType: "AWD", transmission: "1速固定", lengthMm: 4915, widthMm: 1935, heightMm: 1619, weightKg: 2640, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // アウディ A8 D5 (2018-)
+  // ============================================================
+  { ...a8Base, trimName: "55 TFSI クワトロ", driveType: "AWD", transmission: "8AT", lengthMm: 5170, widthMm: 1945, heightMm: 1470, weightKg: 2040, minTurningRadiusM: 5.9 },
+  t(a8Base, { trimName: "A8 L 60 TFSI クワトロ", driveType: "AWD", transmission: "8AT", lengthMm: 5300, widthMm: 1945, heightMm: 1485, weightKg: 2170, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // アウディ e-tron GT (2022-)
+  // ============================================================
+  { ...etronGtBase, trimName: "S e-tron GT", driveType: "AWD", transmission: "2速AT", lengthMm: 4990, widthMm: 1965, heightMm: 1415, weightKg: 2280, minTurningRadiusM: 5.6 },
+  t(etronGtBase, { trimName: "RS e-tron GT", driveType: "AWD", transmission: "2速AT", lengthMm: 4990, widthMm: 1965, heightMm: 1395, weightKg: 2320, minTurningRadiusM: 5.6 }),
+
+  // ============================================================
+  // アウディ A3 8Y (2021-)
+  // ============================================================
+  { ...a3Base, trimName: "Sportback 30 TFSI", driveType: "2WD", transmission: "7DCT", lengthMm: 4340, widthMm: 1820, heightMm: 1430, weightKg: 1350, minTurningRadiusM: 5.1 },
+  t(a3Base, { trimName: "Sportback 35 TFSI S line", driveType: "2WD", transmission: "7DCT", lengthMm: 4340, widthMm: 1820, heightMm: 1430, weightKg: 1400, minTurningRadiusM: 5.1 }),
+
+  // ============================================================
+  // キャデラック エスカレード 5代目 (2021-)
+  // ============================================================
+  { ...escaladeBase, trimName: "プラチナム", driveType: "4WD", transmission: "10AT", lengthMm: 5400, widthMm: 2065, heightMm: 1930, weightKg: 2780, minTurningRadiusM: 6.4 },
+  t(escaladeBase, { trimName: "スポーツ", driveType: "4WD", transmission: "10AT", lengthMm: 5400, widthMm: 2065, heightMm: 1930, weightKg: 2780, minTurningRadiusM: 6.4 }),
+
+  // ============================================================
+  // レクサス LS 5代目 (2017-)
+  // ============================================================
+  { ...lsBase, trimName: "LS 500h", driveType: "2WD", transmission: "CVT", lengthMm: 5235, widthMm: 1900, heightMm: 1450, weightKg: 2270, minTurningRadiusM: 5.6 },
+  t(lsBase, { trimName: "LS 500h", driveType: "AWD", transmission: "CVT", lengthMm: 5235, widthMm: 1900, heightMm: 1460, weightKg: 2320, minTurningRadiusM: 5.9 }),
+
+  // ============================================================
+  // レクサス ES 7代目 (2018-)
+  // ============================================================
+  { ...esBase, trimName: "ES 300h", driveType: "2WD", transmission: "CVT", lengthMm: 4975, widthMm: 1865, heightMm: 1445, weightKg: 1680, minTurningRadiusM: 5.8 },
+  t(esBase, { trimName: "ES 300h F SPORT", driveType: "2WD", transmission: "CVT", lengthMm: 4975, widthMm: 1865, heightMm: 1445, weightKg: 1730, minTurningRadiusM: 5.8 }),
+
+  // ============================================================
+  // マセラティ レヴァンテ (2016-2024) 生産終了
+  // ============================================================
+  { ...levanteBase, trimName: "GT ハイブリッド", driveType: "AWD", transmission: "8AT", lengthMm: 5020, widthMm: 1981, heightMm: 1698, weightKg: 2109, minTurningRadiusM: 6.0 },
+  t(levanteBase, { trimName: "トロフェオ V8", driveType: "AWD", transmission: "8AT", lengthMm: 5020, widthMm: 1981, heightMm: 1693, weightKg: 2340, minTurningRadiusM: 6.0 }),
+
+  // ============================================================
+  // ランボルギーニ ウルス SE (2024-)
+  // ============================================================
+  { ...urusSeBase, trimName: "SE PHEV", driveType: "AWD", transmission: "8AT", lengthMm: 5123, widthMm: 2022, heightMm: 1638, weightKg: 2450, minTurningRadiusM: 6.0 },
+
+  // ============================================================
+  // フォルクスワーゲン ティグアン 3代目 (2024-)
+  // ============================================================
+  { ...tiguanBase, trimName: "eTSI エレガンス", driveType: "2WD", transmission: "7DCT", lengthMm: 4545, widthMm: 1840, heightMm: 1655, weightKg: 1600, minTurningRadiusM: 5.4 },
+  t(tiguanBase, { trimName: "TDI 4MOTION Rライン", driveType: "4WD", transmission: "7DCT", lengthMm: 4545, widthMm: 1860, heightMm: 1655, weightKg: 1750, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // フォルクスワーゲン ポロ AW (2018-)
+  // ============================================================
+  { ...poloBase, trimName: "TSI コンフォートライン", driveType: "2WD", transmission: "7DCT", lengthMm: 4085, widthMm: 1750, heightMm: 1450, weightKg: 1170, minTurningRadiusM: 5.1 },
+  t(poloBase, { trimName: "GTI", driveType: "2WD", transmission: "7DCT", lengthMm: 4085, widthMm: 1750, heightMm: 1450, weightKg: 1280, minTurningRadiusM: 5.1 }),
+
+  // ============================================================
+  // フォルクスワーゲン T-Cross (2019-)
+  // ============================================================
+  { ...tCrossBase, trimName: "TSI アクティブ", driveType: "2WD", transmission: "7DCT", lengthMm: 4115, widthMm: 1760, heightMm: 1580, weightKg: 1260, minTurningRadiusM: 5.1 },
+
+  // ============================================================
+  // フォルクスワーゲン パサート B9 (2024-)
+  // ============================================================
+  { ...passatBase, trimName: "TSI エレガンス", driveType: "2WD", transmission: "7DCT", lengthMm: 4915, widthMm: 1850, heightMm: 1500, weightKg: 1570, minTurningRadiusM: 5.5 },
+  t(passatBase, { trimName: "TDI 4MOTION Rライン", driveType: "4WD", transmission: "7DCT", lengthMm: 4915, widthMm: 1850, heightMm: 1500, weightKg: 1830, minTurningRadiusM: 5.5 }),
+
+  // ============================================================
+  // ボルボ XC40 (2018-)
+  // ============================================================
+  { ...xc40Base, trimName: "B3", driveType: "2WD", transmission: "8AT", lengthMm: 4425, widthMm: 1875, heightMm: 1660, weightKg: 1660, minTurningRadiusM: 5.7 },
+  t(xc40Base, { trimName: "B4 AWD", driveType: "AWD", transmission: "8AT", lengthMm: 4425, widthMm: 1875, heightMm: 1655, weightKg: 1720, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // ボルボ V60 2代目 (2018-)
+  // ============================================================
+  { ...v60Base, trimName: "Plus B4", driveType: "2WD", transmission: "8AT", lengthMm: 4780, widthMm: 1850, heightMm: 1435, weightKg: 1690, minTurningRadiusM: 5.7 },
+  t(v60Base, { trimName: "T6 PHV AWD", driveType: "AWD", transmission: "8AT", lengthMm: 4780, widthMm: 1850, heightMm: 1430, weightKg: 2050, minTurningRadiusM: 5.7 }),
+
+  // ============================================================
+  // ボルボ V60 クロスカントリー (2019-)
+  // ============================================================
+  { ...v60ccBase, trimName: "ウルトラ B5 AWD", driveType: "AWD", transmission: "8AT", lengthMm: 4785, widthMm: 1895, heightMm: 1505, weightKg: 1830, minTurningRadiusM: 5.7 },
+
+  // ============================================================
+  // プジョー 208 2代目 (2020-)
+  // ============================================================
+  { ...peugeot208Base, trimName: "アリュール", driveType: "2WD", transmission: "8AT", lengthMm: 4095, widthMm: 1745, heightMm: 1445, weightKg: 1170, minTurningRadiusM: 5.4 },
+  t(peugeot208Base, { trimName: "e-208 GT", driveType: "2WD", transmission: "1速固定", lengthMm: 4095, widthMm: 1745, heightMm: 1465, weightKg: 1530, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // プジョー 2008 2代目 (2020-)
+  // ============================================================
+  { ...peugeot2008Base, trimName: "GT", driveType: "2WD", transmission: "8AT", lengthMm: 4305, widthMm: 1770, heightMm: 1550, weightKg: 1320, minTurningRadiusM: 5.4 },
+  t(peugeot2008Base, { trimName: "e-2008 GT", driveType: "2WD", transmission: "1速固定", lengthMm: 4305, widthMm: 1770, heightMm: 1580, weightKg: 1610, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // プジョー 308 P5 (2022-)
+  // ============================================================
+  { ...peugeot308Base, trimName: "GT", driveType: "2WD", transmission: "8AT", lengthMm: 4420, widthMm: 1850, heightMm: 1475, weightKg: 1350, minTurningRadiusM: 5.4 },
+  t(peugeot308Base, { trimName: "GT PHEV", driveType: "2WD", transmission: "8AT", lengthMm: 4420, widthMm: 1850, heightMm: 1475, weightKg: 1660, minTurningRadiusM: 5.4 }),
+
+  // ============================================================
+  // プジョー 3008 新型 (2025-)
+  // ============================================================
+  { ...peugeot3008Base, trimName: "GT", driveType: "2WD", transmission: "7DCT", lengthMm: 4565, widthMm: 1895, heightMm: 1665, weightKg: 1620, minTurningRadiusM: 5.5 },
+
+  // ============================================================
+  // シトロエン C3 新型 (2025-)
+  // ============================================================
+  { ...c3Base, trimName: "ハイブリッド", driveType: "2WD", transmission: "6DCT", lengthMm: 4015, widthMm: 1755, heightMm: 1590, weightKg: 1270, minTurningRadiusM: 5.4 },
+
+  // ============================================================
+  // ルノー ルーテシア 5代目 (2020-)
+  // ============================================================
+  { ...luteciaBase, trimName: "インテンス テックパック", driveType: "2WD", transmission: "7DCT", lengthMm: 4075, widthMm: 1725, heightMm: 1470, weightKg: 1300, minTurningRadiusM: 5.2 },
+
+  // ============================================================
+  // ルノー キャプチャー 2代目 (2021-)
+  // ============================================================
+  { ...capturBase, trimName: "E-TECH ハイブリッド", driveType: "2WD", transmission: "DCT", lengthMm: 4240, widthMm: 1795, heightMm: 1590, weightKg: 1420, minTurningRadiusM: 5.4 },
+
+  // ============================================================
+  // ルノー アルカナ (2022-)
+  // ============================================================
+  { ...arkanaBase, trimName: "E-TECH ハイブリッド", driveType: "2WD", transmission: "DCT", lengthMm: 4570, widthMm: 1820, heightMm: 1580, weightKg: 1470, minTurningRadiusM: 5.5 },
+
+  // ============================================================
+  // アルファロメオ トナーレ (2023-)
+  // ============================================================
+  { ...tonaleBase, trimName: "Ti ハイブリッド", driveType: "2WD", transmission: "7DCT", lengthMm: 4530, widthMm: 1835, heightMm: 1600, weightKg: 1630, minTurningRadiusM: 5.7 },
+
+  // ============================================================
+  // ヒョンデ コナ EV (2023-)
+  // ============================================================
+  { ...konaBase, trimName: "Lounge EV", driveType: "2WD", transmission: "1速固定", lengthMm: 4355, widthMm: 1825, heightMm: 1590, weightKg: 1770, minTurningRadiusM: 5.4 },
+
+  // ============================================================
+  // MINI 3ドア F66 (2024-)
+  // ============================================================
+  { ...mini3doorBase, trimName: "クーパーC", driveType: "2WD", transmission: "7DCT", lengthMm: 3875, widthMm: 1745, heightMm: 1455, weightKg: 1280, minTurningRadiusM: 5.2 },
+  t(mini3doorBase, { trimName: "クーパーS", driveType: "2WD", transmission: "7DCT", lengthMm: 3875, widthMm: 1745, heightMm: 1455, weightKg: 1320, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // MINI 5ドア F65 (2024-)
+  // ============================================================
+  { ...mini5doorBase, trimName: "クーパーC", driveType: "2WD", transmission: "7DCT", lengthMm: 4035, widthMm: 1745, heightMm: 1470, weightKg: 1340, minTurningRadiusM: 5.2 },
+  t(mini5doorBase, { trimName: "クーパーS", driveType: "2WD", transmission: "7DCT", lengthMm: 4035, widthMm: 1745, heightMm: 1470, weightKg: 1380, minTurningRadiusM: 5.2 }),
+
+  // ============================================================
+  // MINI カントリーマン U25 (2024-)
+  // ============================================================
+  { ...miniCountrymanBase, trimName: "カントリーマンC", driveType: "2WD", transmission: "7DCT", lengthMm: 4445, widthMm: 1845, heightMm: 1660, weightKg: 1520, minTurningRadiusM: 5.5 },
+  t(miniCountrymanBase, { trimName: "カントリーマンS ALL4", driveType: "AWD", transmission: "7DCT", lengthMm: 4445, widthMm: 1845, heightMm: 1660, weightKg: 1640, minTurningRadiusM: 5.5 }),
 ];
 
 // ============================================================
