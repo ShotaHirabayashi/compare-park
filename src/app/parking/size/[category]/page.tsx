@@ -3,12 +3,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingCard } from "@/components/parking-card";
+import { Pagination } from "@/components/pagination";
 import { JsonLd } from "@/components/json-ld";
 import { SIZE_CATEGORIES, getSizeCategoryBySlug } from "@/lib/constants";
 import { getParkingLotsBySizeCondition } from "@/lib/queries";
 
+const PER_PAGE = 50;
+
 interface Props {
   params: Promise<{ category: string }>;
+  searchParams: Promise<{ page?: string }>;
 }
 
 export function generateStaticParams() {
@@ -29,20 +33,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function SizeCategoryPage({ params }: Props) {
+export default async function SizeCategoryPage({ params, searchParams }: Props) {
   const { category } = await params;
+  const { page: pageParam } = await searchParams;
   const cat = getSizeCategoryBySlug(category);
 
   if (!cat) {
     notFound();
   }
 
-  const lots = await getParkingLotsBySizeCondition(cat.dimension, cat.thresholdMm);
+  const allLots = await getParkingLotsBySizeCondition(cat.dimension, cat.thresholdMm);
+  const totalCount = allLots.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PER_PAGE));
+  const currentPage = Math.min(Math.max(1, Number(pageParam) || 1), totalPages);
+  const lots = allLots.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
 
   // 条件を緩められるカテゴリを計算
   const sameDimensionCategories = SIZE_CATEGORIES.filter(
     (c) => c.dimension === cat.dimension && c.slug !== cat.slug
   );
+
+  // JSON-LDは現在のページの駐車場のみ
+  const offset = (currentPage - 1) * PER_PAGE;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -60,10 +72,10 @@ export default async function SizeCategoryPage({ params }: Props) {
           "@type": "ItemList",
           name: cat.seoTitle,
           description: cat.description,
-          numberOfItems: lots.length,
+          numberOfItems: totalCount,
           itemListElement: lots.map((lot, index) => ({
             "@type": "ListItem",
-            position: index + 1,
+            position: offset + index + 1,
             name: lot.name,
             url: `https://www.tomepita.com/parking/${lot.slug}`,
           })),
@@ -72,25 +84,34 @@ export default async function SizeCategoryPage({ params }: Props) {
 
       <h1 className="mb-2 text-3xl font-bold">{cat.seoTitle}</h1>
       <p className="mb-8 text-muted-foreground">
-        {cat.description}（{lots.length}件）
+        {cat.description}（{totalCount.toLocaleString()}件）
       </p>
 
       {lots.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {lots.map((lot) => (
-            <ParkingCard
-              key={lot.id}
-              slug={lot.slug}
-              name={lot.name}
-              address={lot.address}
-              parkingType={lot.parking_type}
-              maxLengthMm={lot.max_length_mm}
-              maxWidthMm={lot.max_width_mm}
-              maxHeightMm={lot.max_height_mm}
-              maxWeightKg={lot.max_weight_kg}
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {lots.map((lot) => (
+              <ParkingCard
+                key={lot.id}
+                slug={lot.slug}
+                name={lot.name}
+                address={lot.address}
+                parkingType={lot.parking_type}
+                maxLengthMm={lot.max_length_mm}
+                maxWidthMm={lot.max_width_mm}
+                maxHeightMm={lot.max_height_mm}
+                maxWeightKg={lot.max_weight_kg}
+              />
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              basePath={`/parking/size/${cat.slug}`}
             />
-          ))}
-        </div>
+          )}
+        </>
       ) : (
         <div className="rounded-lg border bg-muted/30 py-12 text-center">
           <p className="mb-4 text-muted-foreground">
