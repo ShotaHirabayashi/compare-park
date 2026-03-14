@@ -44,6 +44,7 @@ async function insertParkingLot(parking: ParsedParkingLot) {
       longitude: parking.longitude,
       parking_type: parking.parkingType,
       total_spaces: parking.totalSpaces,
+      facility_type: parking.facilityType as any,
       source_url: parking.sourceUrl,
     })
     .returning({ id: parkingLots.id })

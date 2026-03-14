@@ -36,6 +36,7 @@ export interface ParsedParkingLot {
   is24h: boolean;
   openTime?: string;
   closeTime?: string;
+  facilityType?: string;
   sourceUrl?: string;
   restrictions: {
     name: string;
@@ -147,6 +148,7 @@ export function parseCsvFile(filePath: string): ParsedParkingLot[] {
         is24h: is24hRaw === "TRUE" || is24hRaw === "1" || is24hRaw === "YES",
         openTime: getField(fields, "open_time") || undefined,
         closeTime: getField(fields, "close_time") || undefined,
+        facilityType: getField(fields, "facility_type") || undefined,
         sourceUrl: sourceUrl || undefined,
         restrictions: [],
         fees: [],
