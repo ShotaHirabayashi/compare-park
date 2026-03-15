@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${maker.name}の車種一覧 — 駐車場サイズ適合 | トメピタ`,
-    description: `${maker.name}の車種一覧。各車種の寸法と駐車場への適合判定を確認できます。`,
+    description: `${maker.name}の車種一覧。各車種の寸法と機械式・立体駐車場への適合判定を確認できます。`,
     alternates: { canonical: `/maker/${slug}` },
   };
 }
@@ -51,6 +51,7 @@ export default async function MakerPage({ params }: Props) {
           { label: "車種一覧", href: "/car" },
           { label: maker.name },
         ]}
+        currentPath={`/maker/${maker.slug}`}
       />
 
       <h1 className="mb-2 text-3xl font-bold">{maker.name}の車種一覧</h1>

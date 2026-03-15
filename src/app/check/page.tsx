@@ -120,6 +120,7 @@ export default async function CheckPage({ searchParams }: Props) {
       />
       <Breadcrumb
         items={[{ label: "トップ", href: "/" }, { label: "判定結果" }]}
+        currentPath="/check"
       />
 
       {/* メインカード */}

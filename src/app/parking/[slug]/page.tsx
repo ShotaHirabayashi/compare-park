@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${lot.name} の制限寸法と対応車種 | トメピタ`,
-    description: `${lot.name}(${lot.address ?? ""})の制限寸法を確認。対応する車種の一覧と適合判定も表示します。`,
+    description: `${lot.name}(${lot.address ?? ""})の制限寸法を確認。機械式・立体駐車場に入る車種の一覧と適合判定も表示します。`,
     alternates: { canonical: `/parking/${slug}` },
   };
 }
@@ -265,6 +265,7 @@ export default async function ParkingDetailPage({ params }: Props) {
           ...(ward && wardSlug ? [{ label: ward, href: `/area/${wardSlug}` }] : []),
           { label: lot.name },
         ]}
+        currentPath={`/parking/${slug}`}
       />
 
       {/* 駐車場基本情報 */}

@@ -17,6 +17,7 @@ import {
   getModelsWithMaker,
   getRelatedModelsByMaker,
 } from "@/lib/queries";
+import { getArticlesByCarSlug } from "@/lib/articles";
 import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
 import { TOKYO_WARD_MAP } from "@/lib/constants";
 
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`,
-    description: `${model.maker_name} ${model.name}の全長・全幅・全高・重量を一覧表示。東京23区内の駐車場への適合判定も確認できます。`,
+    description: `${model.maker_name} ${model.name}の全長・全幅・全高・重量を一覧表示。機械式・立体駐車場に入るかの適合判定も確認できます。`,
     alternates: { canonical: `/car/${slug}` },
   };
 }
@@ -65,6 +66,8 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
     getAllRestrictions(),
     getRelatedModelsByMaker(model.maker_id, model.id),
   ]);
+
+  const relatedArticles = getArticlesByCarSlug(slug);
 
   // 選択中のトリムを決定
   const genId = gen ? Number(gen) : null;
@@ -169,13 +172,13 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
   const faqItems: { question: string; answer: string }[] = [];
 
   if (dimension) {
-    // Q1: 機械式駐車場に入るか
+    // Q1: 機械式・立体駐車場に入るか
     const hasOk = okCount > 0;
     faqItems.push({
-      question: `${model.name}は機械式駐車場に入りますか？`,
+      question: `${model.name}は機械式駐車場・立体駐車場に入りますか？`,
       answer: hasOk
-        ? `${model.name}は全幅${dimension.width_mm?.toLocaleString() ?? "-"}mm、全高${dimension.height_mm?.toLocaleString() ?? "-"}mmです。登録済み駐車場のうち${okCount}件でOK判定となっています。`
-        : `${model.name}は全幅${dimension.width_mm?.toLocaleString() ?? "-"}mm、全高${dimension.height_mm?.toLocaleString() ?? "-"}mmです。現在登録済みの駐車場ではサイズ制限を超える場合があります。詳しくは各駐車場の制限値をご確認ください。`,
+        ? `${model.name}は全幅${dimension.width_mm?.toLocaleString() ?? "-"}mm、全高${dimension.height_mm?.toLocaleString() ?? "-"}mmです。登録済みの機械式・立体駐車場のうち${okCount}件でOK判定となっています。`
+        : `${model.name}は全幅${dimension.width_mm?.toLocaleString() ?? "-"}mm、全高${dimension.height_mm?.toLocaleString() ?? "-"}mmです。現在登録済みの機械式・立体駐車場ではサイズ制限を超える場合があります。詳しくは各駐車場の制限値をご確認ください。`,
     });
 
     // Q2: 寸法
@@ -186,10 +189,10 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
 
     // Q3: 停められる駐車場
     faqItems.push({
-      question: `${model.name}が停められる駐車場はどこですか？`,
+      question: `${model.name}が停められる機械式・立体駐車場はどこですか？`,
       answer: hasOk
-        ? `トメピタに登録されている駐車場のうち${okCount}件で${model.name}が停められます。詳しくはこのページの駐車場適合判定をご確認ください。`
-        : `現在登録済みの駐車場では制限を超える場合があります。ハイルーフ対応や大型車対応の駐車場をお探しください。`,
+        ? `トメピタに登録されている機械式・立体駐車場のうち${okCount}件で${model.name}が停められます。詳しくはこのページの駐車場適合判定をご確認ください。`
+        : `現在登録済みの機械式・立体駐車場では制限を超える場合があります。ハイルーフ対応や大型車対応の駐車場をお探しください。`,
     });
   }
 
@@ -247,6 +250,7 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
           { label: model.maker_name, href: `/maker/${model.maker_slug}` },
           { label: model.name },
         ]}
+        currentPath={`/car/${model.slug}`}
       />
 
       {/* 車種基本情報 */}
@@ -377,6 +381,29 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
           ))}
         </div>
       </section>
+
+      {/* 関連コラム記事 */}
+      {relatedArticles.length > 0 && (
+        <section className="mt-10">
+          <h2 className="mb-4 text-lg font-bold">{model.name}の関連コラム</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {relatedArticles.map((article) => (
+              <Link
+                key={article.slug}
+                href={`/articles/${article.slug}`}
+                className="group rounded-lg border bg-background p-4 transition-colors hover:border-primary/50 hover:bg-muted/50"
+              >
+                <p className="font-medium group-hover:text-primary">
+                  {article.frontmatter.title}
+                </p>
+                <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                  {article.frontmatter.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 同メーカーの他車種 */}
       {relatedModels.length > 0 && (

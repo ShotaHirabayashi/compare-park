@@ -5,6 +5,7 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingCard } from "@/components/parking-card";
 import { VehicleComboboxNav } from "@/components/vehicle-combobox-nav";
 import { SizeFilter } from "@/components/size-filter";
+import { JsonLd } from "@/components/json-ld";
 import {
   getParkingLotsByWard,
   getParkingLotsByWardAndSize,
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${wardInfo.name}の駐車場一覧 | トメピタ`,
-    description: `${wardInfo.name}エリアの駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
+    description: `${wardInfo.name}エリアの機械式・立体駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
     alternates: { canonical: `/area/${wardInfo.slug}` },
   };
 }
@@ -97,12 +98,32 @@ export default async function WardPage({ params, searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: `${decodedWard}の駐車場一覧 | トメピタ`,
+          description: `${decodedWard}エリアの機械式・立体駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
+          url: `https://www.tomepita.com/area/${ward}`,
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: lotsWithRestrictions.length,
+            itemListElement: lotsWithRestrictions.slice(0, 50).map(({ lot }, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: `https://www.tomepita.com/parking/${lot.slug}`,
+              name: lot.name,
+            })),
+          },
+        }}
+      />
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
           { label: "エリアから探す", href: "/area" },
           { label: decodedWard },
         ]}
+        currentPath={`/area/${ward}`}
       />
 
       <h1 className="mb-2 text-3xl font-bold">{decodedWard}の駐車場</h1>

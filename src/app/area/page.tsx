@@ -9,7 +9,7 @@ import { TOKYO_WARD_MAP } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "エリアから駐車場を探す | トメピタ",
   description:
-    "東京23区からエリアを選んで駐車場を検索。各区の駐車場数も一覧表示します。",
+    "東京23区からエリアを選んで機械式・立体駐車場を検索。各区の駐車場数やサイズ制限も一覧表示します。",
 };
 
 export default async function AreaPage() {
@@ -37,6 +37,7 @@ export default async function AreaPage() {
           { label: "トップ", href: "/" },
           { label: "エリアから探す" },
         ]}
+        currentPath="/area"
       />
 
       <h1 className="mb-8 text-3xl font-bold">エリアから駐車場を探す</h1>

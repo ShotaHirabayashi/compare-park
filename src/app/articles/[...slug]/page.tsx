@@ -104,6 +104,7 @@ export default async function ArticlePage({ params }: PageProps) {
           { label: categoryLabel, href: `/articles?category=${article.frontmatter.category}` },
           { label: article.frontmatter.title },
         ]}
+        currentPath={`/articles/${slugStr}`}
       />
 
       <article>

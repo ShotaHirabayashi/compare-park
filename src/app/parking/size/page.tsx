@@ -16,7 +16,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "サイズ条件で駐車場を探す | トメピタ",
   description:
-    "ハイルーフ対応・全幅1,950mm以上・全長5,000mm以上など、サイズ条件から停められる駐車場を探せます。",
+    "ハイルーフ対応・全幅1,950mm以上・全長5,000mm以上など、サイズ条件から停められる機械式・立体駐車場を探せます。",
   alternates: { canonical: "/parking/size" },
 };
 
@@ -51,6 +51,7 @@ export default async function SizeIndexPage() {
           { label: "トップ", href: "/" },
           { label: "サイズ条件で探す" },
         ]}
+        currentPath="/parking/size"
       />
 
       <h1 className="mb-2 text-3xl font-bold">サイズ条件で駐車場を探す</h1>

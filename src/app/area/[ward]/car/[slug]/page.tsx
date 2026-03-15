@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${wardInfo.name}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`,
-    description: `${wardInfo.name}エリアの駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と駐車場の制限寸法を比較し、停められるかを一目で確認できます。`,
+    description: `${wardInfo.name}エリアの機械式・立体駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と制限寸法を比較し、停められるかを一目で確認できます。`,
     alternates: { canonical: `/area/${wardInfo.slug}/car/${slug}` },
   };
 }
@@ -148,6 +148,7 @@ export default async function AreaCarPage({ params, searchParams }: Props) {
           { label: decodedWard, href: `/area/${ward}` },
           { label: model.name },
         ]}
+        currentPath={`/area/${ward}/car/${slug}`}
       />
 
       <div className="mb-8">

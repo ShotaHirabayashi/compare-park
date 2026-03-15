@@ -74,6 +74,10 @@ export function getArticlesByCategory(category: string): Article[] {
   return getArticles().filter((a) => a.frontmatter.category === category);
 }
 
+export function getArticlesByCarSlug(carSlug: string): Article[] {
+  return getArticles().filter((a) => a.frontmatter.carSlug === carSlug);
+}
+
 export const ARTICLE_CATEGORIES: Record<string, string> = {
   cars: "車種別ガイド",
   "size-guide": "サイズ規格別",

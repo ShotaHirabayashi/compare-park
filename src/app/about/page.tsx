@@ -5,7 +5,7 @@ import { JsonLd } from "@/components/json-ld";
 export const metadata: Metadata = {
   title: "トメピタについて | トメピタ",
   description:
-    "トメピタは車種の寸法と駐車場の制限サイズを比較し、停められるかどうかを判定するサービスです。",
+    "トメピタは車種の寸法と機械式・立体駐車場の制限サイズを比較し、停められるかどうかを判定するサービスです。",
   alternates: { canonical: "/about" },
 };
 
@@ -26,6 +26,7 @@ export default function AboutPage() {
           { label: "トップ", href: "/" },
           { label: "トメピタについて" },
         ]}
+        currentPath="/about"
       />
 
       <h1 className="mb-8 text-3xl font-bold">トメピタについて</h1>

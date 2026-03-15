@@ -9,20 +9,29 @@ interface BreadcrumbItem {
 
 interface BreadcrumbProps {
   items: BreadcrumbItem[];
+  currentPath?: string;
 }
 
 const BASE_URL = "https://www.tomepita.com";
 
-export function Breadcrumb({ items }: BreadcrumbProps) {
+export function Breadcrumb({ items, currentPath }: BreadcrumbProps) {
   const jsonLdData = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.label,
-      ...(item.href ? { item: `${BASE_URL}${item.href}` } : {}),
-    })),
+    itemListElement: items.map((item, index) => {
+      const isLast = index === items.length - 1;
+      const url = item.href
+        ? `${BASE_URL}${item.href}`
+        : isLast && currentPath
+          ? `${BASE_URL}${currentPath}`
+          : undefined;
+      return {
+        "@type": "ListItem" as const,
+        position: index + 1,
+        name: item.label,
+        ...(url ? { item: url } : {}),
+      };
+    }),
   };
 
   return (

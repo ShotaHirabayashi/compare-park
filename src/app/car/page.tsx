@@ -9,7 +9,7 @@ export const revalidate = 86400; // 24h
 export const metadata: Metadata = {
   title: "車種一覧 — サイズ・駐車場適合を確認 | トメピタ",
   description:
-    "国産車・輸入車の車種一覧。各車種の寸法（全長・全幅・全高・重量）と駐車場への適合判定を確認できます。",
+    "国産車・輸入車の車種一覧。各車種の寸法（全長・全幅・全高・重量）と機械式・立体駐車場への適合判定を確認できます。",
   alternates: { canonical: "/car" },
 };
 
@@ -36,7 +36,7 @@ export default async function CarListPage() {
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: "車種一覧 — サイズ・駐車場適合を確認 | トメピタ",
-          description: "国産車・輸入車の車種一覧。各車種の寸法（全長・全幅・全高・重量）と駐車場への適合判定を確認できます。",
+          description: "国産車・輸入車の車種一覧。各車種の寸法（全長・全幅・全高・重量）と機械式・立体駐車場への適合判定を確認できます。",
           url: "https://www.tomepita.com/car",
           mainEntity: {
             "@type": "ItemList",
@@ -52,6 +52,7 @@ export default async function CarListPage() {
       />
       <Breadcrumb
         items={[{ label: "トップ", href: "/" }, { label: "車種一覧" }]}
+        currentPath="/car"
       />
 
       <h1 className="mb-2 text-3xl font-bold">車種一覧</h1>

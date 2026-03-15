@@ -10,7 +10,7 @@ export const revalidate = 86400;
 export const metadata: Metadata = {
   title: "コラム | トメピタ",
   description:
-    "機械式駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
+    "機械式・立体駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
   alternates: {
     canonical: "https://www.tomepita.com/articles",
   },
@@ -47,7 +47,7 @@ async function ArticlesContent({
           "@context": "https://schema.org",
           "@type": "CollectionPage",
           name: "コラム | トメピタ",
-          description: "機械式駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
+          description: "機械式・立体駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
           url: "https://www.tomepita.com/articles",
           mainEntity: {
             "@type": "ItemList",
@@ -63,6 +63,7 @@ async function ArticlesContent({
       />
       <Breadcrumb
         items={[{ label: "トップ", href: "/" }, { label: "コラム" }]}
+        currentPath="/articles"
       />
 
       <h1 className="mb-8 text-3xl font-bold">コラム</h1>

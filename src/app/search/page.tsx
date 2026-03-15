@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
   return {
     title: `${parts.length > 0 ? parts.join(" x ") + " の" : ""}検索結果 | トメピタ`,
-    description: "車種とエリアで絞り込んだ駐車場の適合判定結果を表示します。",
+    description: "車種とエリアで絞り込んだ機械式・立体駐車場の適合判定結果を表示します。",
   };
 }
 
@@ -121,6 +121,7 @@ export default async function SearchPage({ searchParams }: Props) {
           { label: "トップ", href: "/" },
           { label: "検索結果" },
         ]}
+        currentPath="/search"
       />
 
       <h1 className="mb-2 text-3xl font-bold">検索結果</h1>

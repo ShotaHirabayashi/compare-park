@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "トメピタ - 車種×駐車場マッチングサービス",
   description:
-    "機械式駐車場に車が入るか即判定。車種サイズと駐車場の制限寸法を比較し、OK・ギリギリ・NGを瞬時に判定。東京23区内の機械式・タワー式駐車場対応。",
+    "機械式・立体駐車場に車が入るか即判定。車種サイズと駐車場の制限寸法を比較し、OK・ギリギリ・NGを瞬時に判定。東京23区内の機械式・タワー式・立体駐車場対応。",
   metadataBase: new URL("https://www.tomepita.com"),
   icons: {
     icon: "/logo.svg",
@@ -79,7 +79,7 @@ export default function RootLayout({
             name: "トメピタ",
             url: "https://www.tomepita.com",
             description:
-              "あなたの車がその駐車場に停められるか、寸法データで即判定。東京23区内の駐車場と車種のマッチングサービス。",
+              "あなたの車がその機械式・立体駐車場に停められるか、寸法データで即判定。東京23区内の駐車場と車種のマッチングサービス。",
             potentialAction: {
               "@type": "SearchAction",
               target: {

@@ -64,6 +64,7 @@ export default async function SizeCategoryPage({ params, searchParams }: Props) 
           { label: "サイズ条件で探す", href: "/parking/size" },
           { label: cat.shortLabel },
         ]}
+        currentPath={`/parking/size/${category}`}
       />
 
       <JsonLd
