@@ -52,6 +52,11 @@ export async function generateMetadata({
       modifiedTime: article.frontmatter.updatedAt ?? article.frontmatter.date,
       siteName: "トメピタ",
     },
+    twitter: {
+      card: "summary",
+      title: `${article.frontmatter.title} | トメピタ`,
+      description: article.frontmatter.description,
+    },
   };
 }
 
@@ -86,6 +91,10 @@ export default async function ArticlePage({ params }: PageProps) {
       "@type": "Organization",
       name: "トメピタ",
       url: BASE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${BASE_URL}/logo.svg`,
+      },
     },
     mainEntityOfPage: {
       "@type": "WebPage",

@@ -119,6 +119,205 @@ export function formatMatchReason(details: DimensionDetail[]): string | null {
   return null;
 }
 
+/** 駐車場制限レコードの共通型 */
+export interface RestrictionRecord {
+  id: number;
+  parking_lot_id: number;
+  parking_lot_name: string;
+  parking_lot_slug: string;
+  parking_lot_address: string | null;
+  parking_type: string | null;
+  max_length_mm: number | null;
+  max_width_mm: number | null;
+  max_height_mm: number | null;
+  max_weight_kg: number | null;
+}
+
+/** ParkingMatchList に渡すデータ */
+export interface ParkingMatchItem {
+  restrictionId: number;
+  parkingLotName: string;
+  parkingLotSlug: string;
+  parkingLotAddress: string;
+  parkingType: string;
+  result: MatchResult;
+  details: DimensionDetail[];
+  reason: string | null;
+}
+
+/**
+ * 車種の寸法と駐車場制限のリストからマッチング判定を行い、
+ * 同一駐車場の最良結果でグルーピングした結果を返す。
+ *
+ * car/[slug] と area/[ward]/car/[slug] の共通パイプライン。
+ */
+export function buildParkingMatchItems(
+  dimension: {
+    length_mm: number | null;
+    width_mm: number | null;
+    height_mm: number | null;
+    weight_kg: number | null;
+  } | null,
+  restrictions: RestrictionRecord[],
+): { items: ParkingMatchItem[]; matchDetails: MatchDetail[] } {
+  if (!dimension) {
+    return { items: [], matchDetails: [] };
+  }
+
+  const matchResults = restrictions.map((r) => {
+    const match = calculateMatch(
+      {
+        length_mm: dimension.length_mm,
+        width_mm: dimension.width_mm,
+        height_mm: dimension.height_mm,
+        weight_kg: dimension.weight_kg,
+      },
+      {
+        max_length_mm: r.max_length_mm,
+        max_width_mm: r.max_width_mm,
+        max_height_mm: r.max_height_mm,
+        max_weight_kg: r.max_weight_kg,
+      },
+    );
+    return { restriction: r, match };
+  });
+
+  matchResults.sort(
+    (a, b) => matchSortOrder(a.match.result) - matchSortOrder(b.match.result),
+  );
+
+  // 同一駐車場で複数制限がある場合、最良の結果のみ
+  const parkingResultMap = new Map<number, (typeof matchResults)[number]>();
+  for (const mr of matchResults) {
+    const existing = parkingResultMap.get(mr.restriction.parking_lot_id);
+    if (
+      !existing ||
+      matchSortOrder(mr.match.result) < matchSortOrder(existing.match.result)
+    ) {
+      parkingResultMap.set(mr.restriction.parking_lot_id, mr);
+    }
+  }
+
+  const uniqueResults = Array.from(parkingResultMap.values()).sort(
+    (a, b) => matchSortOrder(a.match.result) - matchSortOrder(b.match.result),
+  );
+
+  const items: ParkingMatchItem[] = uniqueResults.map((item) => ({
+    restrictionId: item.restriction.id,
+    parkingLotName: item.restriction.parking_lot_name,
+    parkingLotSlug: item.restriction.parking_lot_slug,
+    parkingLotAddress: item.restriction.parking_lot_address ?? "",
+    parkingType: item.restriction.parking_type ?? "",
+    result: item.match.result,
+    details: item.match.details,
+    reason: formatMatchReason(item.match.details),
+  }));
+
+  const matchDetails = uniqueResults.map((r) => r.match);
+
+  return { items, matchDetails };
+}
+
+/**
+ * エリア×車種ページ用の判定サマリー文を生成。
+ * 車種名・寸法・判定結果をもとに、ページごとにユニークなテキストを返す。
+ */
+export function generateMatchSummary(
+  carName: string,
+  makerName: string,
+  areaName: string,
+  dimension: {
+    length_mm: number | null;
+    width_mm: number | null;
+    height_mm: number | null;
+    weight_kg: number | null;
+  } | null,
+  results: { result: MatchResult; details: DimensionDetail[] }[],
+  totalParkingCount: number,
+): string[] {
+  if (!dimension) {
+    return [`${makerName} ${carName}の寸法データはまだ登録されていないため、${areaName}の駐車場との適合判定ができません。`];
+  }
+
+  const okCount = results.filter((r) => r.result === "ok").length;
+  const cautionCount = results.filter((r) => r.result === "caution").length;
+  const ngCount = results.filter((r) => r.result === "ng").length;
+  const lines: string[] = [];
+
+  // 判定結果サマリー
+  if (totalParkingCount === 0) {
+    lines.push(`${areaName}にはまだ駐車場データが登録されていません。`);
+    return lines;
+  }
+
+  if (okCount > 0) {
+    lines.push(
+      `${makerName} ${carName}は、${areaName}の駐車場${totalParkingCount}件中${okCount}件で駐車可能（OK判定）です。`
+    );
+  } else {
+    lines.push(
+      `${makerName} ${carName}は、${areaName}に登録されている駐車場${totalParkingCount}件のうち、OK判定の駐車場はありません。`
+    );
+  }
+
+  if (cautionCount > 0) {
+    lines.push(
+      `${cautionCount}件はギリギリ（制限値に近い）の判定で、駐車場の実測値によっては駐車できる可能性があります。`
+    );
+  }
+
+  // 寸法ごとのボトルネック分析
+  const ngDetails = results
+    .filter((r) => r.result === "ng")
+    .flatMap((r) => r.details.filter((d) => d.ratio > 1.0));
+
+  if (ngDetails.length > 0) {
+    // どの寸法がNGの原因か集計
+    const dimCounts = new Map<string, number>();
+    for (const d of ngDetails) {
+      dimCounts.set(d.label, (dimCounts.get(d.label) ?? 0) + 1);
+    }
+    const sorted = [...dimCounts.entries()].sort((a, b) => b[1] - a[1]);
+    const topCause = sorted[0];
+
+    if (topCause) {
+      const dimValue = ngDetails.find((d) => d.label === topCause[0]);
+      if (dimValue) {
+        const unit = dimValue.dimension === "weight" ? "kg" : "mm";
+        lines.push(
+          `NG判定の主な原因は${topCause[0]}（${dimValue.value.toLocaleString()}${unit}）で、${ngCount}件中${topCause[1]}件がこの寸法で制限を超えています。`
+        );
+      }
+    }
+  }
+
+  // 必要な駐車場条件の提示
+  const conditions: string[] = [];
+  if (dimension.height_mm != null && dimension.height_mm > 1550) {
+    if (dimension.height_mm > 2000) {
+      conditions.push("全高2,000mm超対応");
+    } else if (dimension.height_mm > 1800) {
+      conditions.push("ハイルーフ対応（全高1,800mm以上）");
+    } else {
+      conditions.push("全高1,550mm超対応");
+    }
+  }
+  if (dimension.width_mm != null && dimension.width_mm > 1850) {
+    conditions.push(`全幅${dimension.width_mm.toLocaleString()}mm以上対応`);
+  }
+  if (dimension.weight_kg != null && dimension.weight_kg > 2000) {
+    conditions.push(`重量${dimension.weight_kg.toLocaleString()}kg以上対応`);
+  }
+
+  if (conditions.length > 0) {
+    lines.push(
+      `${carName}を停めるには、${conditions.join("・")}の駐車場を選ぶ必要があります。`
+    );
+  }
+
+  return lines;
+}
+
 /** マッチング結果のソート順 (OK -> CAUTION -> NG) */
 export function matchSortOrder(result: MatchResult): number {
   switch (result) {

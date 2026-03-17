@@ -4,15 +4,15 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { JsonLd } from "@/components/json-ld";
 import { ParkingMatchList } from "@/components/parking-match-list";
-import type { ParkingMatchItem } from "@/components/parking-match-row";
 import {
   getModelBySlug,
   getAllTrimsWithDimensions,
   getRestrictionsByWard,
   getModelsWithMaker,
 } from "@/lib/queries";
-import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
+import { buildParkingMatchItems, generateMatchSummary } from "@/lib/matching";
 import { TOKYO_WARD_MAP, getWardBySlug } from "@/lib/constants";
 
 interface Props {
@@ -36,10 +36,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const model = await getModelBySlug(slug);
   if (!model) return { title: "車種が見つかりません" };
 
+  const title = `${wardInfo.name}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`;
+  const description = `${wardInfo.name}エリアの機械式・立体駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と制限寸法を比較し、停められるかを一目で確認できます。`;
+
   return {
-    title: `${wardInfo.name}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`,
-    description: `${wardInfo.name}エリアの機械式・立体駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と制限寸法を比較し、停められるかを一目で確認できます。`,
+    title,
+    description,
     alternates: { canonical: `/area/${wardInfo.slug}/car/${slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `https://www.tomepita.com/area/${wardInfo.slug}/car/${slug}`,
+      siteName: "トメピタ",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
@@ -86,61 +101,48 @@ export default async function AreaCarPage({ params, searchParams }: Props) {
       }
     : null;
 
-  // マッチング判定
-  const matchResults = dimension
-    ? restrictions.map((r) => {
-        const match = calculateMatch(
-          {
-            length_mm: dimension.length_mm,
-            width_mm: dimension.width_mm,
-            height_mm: dimension.height_mm,
-            weight_kg: dimension.weight_kg,
-          },
-          {
-            max_length_mm: r.max_length_mm,
-            max_width_mm: r.max_width_mm,
-            max_height_mm: r.max_height_mm,
-            max_weight_kg: r.max_weight_kg,
-          }
-        );
-        return { restriction: r, match };
-      })
-    : [];
-
-  matchResults.sort(
-    (a, b) => matchSortOrder(a.match.result) - matchSortOrder(b.match.result)
-  );
-
-  // 同一駐車場で複数制限がある場合、最良の結果のみ表示
-  const parkingResultMap = new Map<
-    number,
-    (typeof matchResults)[number]
-  >();
-  for (const mr of matchResults) {
-    const existing = parkingResultMap.get(mr.restriction.parking_lot_id);
-    if (!existing || matchSortOrder(mr.match.result) < matchSortOrder(existing.match.result)) {
-      parkingResultMap.set(mr.restriction.parking_lot_id, mr);
-    }
-  }
-  const uniqueParkingResults = Array.from(parkingResultMap.values()).sort(
-    (a, b) => matchSortOrder(a.match.result) - matchSortOrder(b.match.result)
-  );
-
-  const parkingMatchItems: ParkingMatchItem[] = uniqueParkingResults.map((item) => ({
-    restrictionId: item.restriction.id,
-    parkingLotName: item.restriction.parking_lot_name,
-    parkingLotSlug: item.restriction.parking_lot_slug,
-    parkingLotAddress: item.restriction.parking_lot_address ?? "",
-    parkingType: item.restriction.parking_type ?? "",
-    result: item.match.result,
-    details: item.match.details,
-    reason: formatMatchReason(item.match.details),
-  }));
-
+  // マッチング判定（共通パイプライン）
+  const { items: parkingMatchItems, matchDetails } = buildParkingMatchItems(dimension, restrictions);
   const okCount = parkingMatchItems.filter((i) => i.result === "ok").length;
+
+  const summaryLines = generateMatchSummary(
+    model.name,
+    model.maker_name,
+    decodedWard,
+    dimension,
+    matchDetails,
+    parkingMatchItems.length,
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: `${decodedWard}で${model.maker_name} ${model.name}が停められる駐車場`,
+          url: `https://www.tomepita.com/area/${ward}/car/${slug}`,
+          description: `${decodedWard}エリアの機械式・立体駐車場で${model.name}が駐車可能かを判定。`,
+          about: [
+            { "@type": "Car", name: model.name, manufacturer: { "@type": "Organization", name: model.maker_name } },
+            { "@type": "Place", name: decodedWard, address: { "@type": "PostalAddress", addressLocality: decodedWard, addressRegion: "東京都", addressCountry: "JP" } },
+          ],
+          ...(parkingMatchItems.length > 0
+            ? {
+                mainEntity: {
+                  "@type": "ItemList",
+                  numberOfItems: parkingMatchItems.length,
+                  itemListElement: parkingMatchItems.slice(0, 20).map((item, i) => ({
+                    "@type": "ListItem",
+                    position: i + 1,
+                    name: item.parkingLotName,
+                    url: `https://www.tomepita.com/parking/${item.parkingLotSlug}`,
+                  })),
+                },
+              }
+            : {}),
+        }}
+      />
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },
@@ -199,6 +201,20 @@ export default async function AreaCarPage({ params, searchParams }: Props) {
             この車種の寸法データはまだ登録されていません。
           </CardContent>
         </Card>
+      )}
+
+      {/* 判定サマリー */}
+      {summaryLines.length > 0 && (
+        <div className="mb-8 rounded-lg border bg-muted/30 p-4">
+          <h2 className="mb-2 text-base font-semibold">
+            {decodedWard}での{model.name}の駐車場適合まとめ
+          </h2>
+          <div className="space-y-1 text-sm text-foreground/80">
+            {summaryLines.map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* 判定リスト */}

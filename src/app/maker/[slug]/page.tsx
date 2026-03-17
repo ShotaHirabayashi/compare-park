@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { JsonLd } from "@/components/json-ld";
 import { getMakers, getMakerBySlug, getModelsByMakerSlug } from "@/lib/queries";
 
 interface Props {
@@ -20,10 +21,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const maker = await getMakerBySlug(slug);
   if (!maker) return { title: "メーカーが見つかりません" };
 
+  const title = `${maker.name}の車種一覧 — 駐車場サイズ適合 | トメピタ`;
+  const description = `${maker.name}の車種一覧。各車種の寸法と機械式・立体駐車場への適合判定を確認できます。`;
+
   return {
-    title: `${maker.name}の車種一覧 — 駐車場サイズ適合 | トメピタ`,
-    description: `${maker.name}の車種一覧。各車種の寸法と機械式・立体駐車場への適合判定を確認できます。`,
+    title,
+    description,
     alternates: { canonical: `/maker/${slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `https://www.tomepita.com/maker/${slug}`,
+      siteName: "トメピタ",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
@@ -45,6 +61,25 @@ export default async function MakerPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: `${maker.name}の車種一覧`,
+          url: `https://www.tomepita.com/maker/${maker.slug}`,
+          description: `${maker.name}の車種一覧。各車種の寸法と機械式・立体駐車場への適合判定を確認できます。`,
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: models.length,
+            itemListElement: models.map((model, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: model.name,
+              url: `https://www.tomepita.com/car/${model.slug}`,
+            })),
+          },
+        }}
+      />
       <Breadcrumb
         items={[
           { label: "トップ", href: "/" },

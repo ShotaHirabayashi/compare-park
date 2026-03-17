@@ -1,12 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Weight, MoveHorizontal, MoveVertical, ArrowUpDown } from "lucide-react";
+import { Weight, MoveHorizontal, MoveVertical, ArrowUpDown, CalendarDays } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingMatchList } from "@/components/parking-match-list";
-import type { ParkingMatchItem } from "@/components/parking-match-row";
 import { TrimSelector } from "@/components/trim-selector";
 import { AreaSearchMini } from "@/components/area-search-mini";
 import { JsonLd } from "@/components/json-ld";
@@ -18,7 +17,7 @@ import {
   getRelatedModelsByMaker,
 } from "@/lib/queries";
 import { getArticlesByCarSlug } from "@/lib/articles";
-import { calculateMatch, matchSortOrder, formatMatchReason } from "@/lib/matching";
+import { buildParkingMatchItems } from "@/lib/matching";
 import { TOKYO_WARD_MAP } from "@/lib/constants";
 
 const bodyTypeLabels: Record<string, string> = {
@@ -48,10 +47,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const model = await getModelBySlug(slug);
   if (!model) return { title: "車種が見つかりません" };
 
+  const title = `${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`;
+  const description = `${model.maker_name} ${model.name}の全長・全幅・全高・重量を一覧表示。機械式・立体駐車場に入るかの適合判定も確認できます。`;
+
   return {
-    title: `${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`,
-    description: `${model.maker_name} ${model.name}の全長・全幅・全高・重量を一覧表示。機械式・立体駐車場に入るかの適合判定も確認できます。`,
+    title,
+    description,
     alternates: { canonical: `/car/${slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `https://www.tomepita.com/car/${slug}`,
+      siteName: "トメピタ",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
@@ -114,61 +128,11 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
     weightKg: t.weightKg,
   }));
 
-  // 各駐車場制限とのマッチング判定
-  const matchResults = dimension
-    ? restrictions.map((r) => {
-        const match = calculateMatch(
-          {
-            length_mm: dimension.length_mm,
-            width_mm: dimension.width_mm,
-            height_mm: dimension.height_mm,
-            weight_kg: dimension.weight_kg,
-          },
-          {
-            max_length_mm: r.max_length_mm,
-            max_width_mm: r.max_width_mm,
-            max_height_mm: r.max_height_mm,
-            max_weight_kg: r.max_weight_kg,
-          }
-        );
-        return { restriction: r, match };
-      })
-    : [];
-
-  // OK -> CAUTION -> NG の順でソート
-  matchResults.sort(
-    (a, b) => matchSortOrder(a.match.result) - matchSortOrder(b.match.result)
-  );
-
-  // 同一駐車場で複数制限がある場合、最良の結果のみ表示するためにグループ化
-  const parkingResultMap = new Map<
-    number,
-    (typeof matchResults)[number]
-  >();
-  for (const mr of matchResults) {
-    const existing = parkingResultMap.get(mr.restriction.parking_lot_id);
-    if (!existing || matchSortOrder(mr.match.result) < matchSortOrder(existing.match.result)) {
-      parkingResultMap.set(mr.restriction.parking_lot_id, mr);
-    }
-  }
-  const uniqueParkingResults = Array.from(parkingResultMap.values()).sort(
-    (a, b) => matchSortOrder(a.match.result) - matchSortOrder(b.match.result)
-  );
-
-  // ParkingMatchList に渡すデータを整形
-  const parkingMatchItems: ParkingMatchItem[] = uniqueParkingResults.map((item) => ({
-    restrictionId: item.restriction.id,
-    parkingLotName: item.restriction.parking_lot_name,
-    parkingLotSlug: item.restriction.parking_lot_slug,
-    parkingLotAddress: item.restriction.parking_lot_address ?? "",
-    parkingType: item.restriction.parking_type ?? "",
-    result: item.match.result,
-    details: item.match.details,
-    reason: formatMatchReason(item.match.details),
-  }));
+  // 各駐車場制限とのマッチング判定（共通パイプライン）
+  const { items: parkingMatchItems } = buildParkingMatchItems(dimension, restrictions);
 
   // FAQ構造化データ生成
-  const okCount = uniqueParkingResults.filter((r) => r.match.result === "ok").length;
+  const okCount = parkingMatchItems.filter((r) => r.result === "ok").length;
   const faqItems: { question: string; answer: string }[] = [];
 
   if (dimension) {
@@ -261,7 +225,18 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
             {bodyTypeLabels[model.body_type] ?? model.body_type}
           </Badge>
         </div>
-        <p className="mt-1 text-muted-foreground">{model.maker_name}</p>
+        <div className="mt-1 flex items-center gap-4 text-muted-foreground">
+          <span>{model.maker_name}</span>
+          {model.updated_at && (
+            <span className="flex items-center gap-1 text-xs">
+              <CalendarDays className="size-3" />
+              <time dateTime={model.updated_at}>
+                {new Date(model.updated_at).toLocaleDateString("ja-JP")}
+              </time>
+              更新
+            </span>
+          )}
+        </div>
       </div>
 
       {/* 世代・グレード選択 */}

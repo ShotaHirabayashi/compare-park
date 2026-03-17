@@ -1,0 +1,101 @@
+# トメピタ (Tomepita) — 詳細情報
+
+> 車種×駐車場マッチングサービス。車種の実寸法と駐車場の制限サイズを比較し、停められるかをOK・ギリギリ・NGの3段階で即判定します。
+
+## サイト概要
+
+トメピタは、機械式駐車場・立体駐車場・タワー式駐車場に車が入るかどうかを、車種の寸法データ（全長・全幅・全高・重量）と駐車場の制限値を照合して判定するWebサービスです。
+
+- サイトURL: https://www.tomepita.com
+- 対応車種: 204車種（国産車+主要輸入車、38メーカー）
+- 対応エリア: 東京23区
+- 判定方式: OK（余裕あり）/ ギリギリ（制限値の95〜100%）/ NG（超過）の3段階
+
+## 判定ロジック
+
+車種の寸法（全長・全幅・全高・重量）と駐車場の制限値を各項目ごとに比較:
+- OK: 全寸法が制限値の95%以下（十分な余裕あり）
+- ギリギリ: いずれかの寸法が制限値の95〜100%（入るが余裕が少ない）
+- NG: いずれかの寸法が制限値を超過（入らない）
+
+## 主要ページ一覧
+
+### トップ・ナビゲーション
+- トップページ: https://www.tomepita.com/
+- 車種一覧: https://www.tomepita.com/car
+- エリアから探す: https://www.tomepita.com/area
+- サイズ条件で探す: https://www.tomepita.com/parking/size
+- コラム記事一覧: https://www.tomepita.com/articles
+
+### 車種ページ (例)
+- トヨタ アルファード: https://www.tomepita.com/car/alphard
+- トヨタ ハリアー: https://www.tomepita.com/car/harrier
+- トヨタ ヴォクシー: https://www.tomepita.com/car/voxy
+- 日産 セレナ: https://www.tomepita.com/car/serena
+- ホンダ フリード: https://www.tomepita.com/car/freed
+
+各車種ページでは、世代・グレード別の寸法表示、全駐車場との適合判定一覧、エリア別検索、関連コラム記事を掲載。
+
+### エリアページ (東京23区)
+- 千代田区: https://www.tomepita.com/area/chiyoda
+- 中央区: https://www.tomepita.com/area/chuo
+- 港区: https://www.tomepita.com/area/minato
+- 新宿区: https://www.tomepita.com/area/shinjuku
+- 渋谷区: https://www.tomepita.com/area/shibuya
+- 品川区: https://www.tomepita.com/area/shinagawa
+- 世田谷区: https://www.tomepita.com/area/setagaya
+- 目黒区: https://www.tomepita.com/area/meguro
+- 大田区: https://www.tomepita.com/area/ota
+- 豊島区: https://www.tomepita.com/area/toshima
+- その他13区も対応
+
+各エリアページでは、そのエリア内の機械式・立体駐車場の制限値一覧と、サイズフィルタによる絞り込みが可能。
+
+### エリア×車種ページ (例)
+- 港区×アルファード: https://www.tomepita.com/area/minato/car/alphard
+- 渋谷区×ハリアー: https://www.tomepita.com/area/shibuya/car/harrier
+
+エリア内の駐車場に特定の車種が停められるかを一覧判定。23区×204車種の全組み合わせに対応。
+
+### サイズ条件ページ
+- 普通車対応（全高1,550mm以上）: https://www.tomepita.com/parking/size/height-1550
+- ハイルーフ対応（全高1,800mm以上）: https://www.tomepita.com/parking/size/height-1800
+- 大型車対応（全高2,000mm以上）: https://www.tomepita.com/parking/size/height-2000
+- 幅1,850mm以上: https://www.tomepita.com/parking/size/width-1850
+- 幅1,950mm以上: https://www.tomepita.com/parking/size/width-1950
+- 幅2,050mm以上: https://www.tomepita.com/parking/size/width-2050
+- 幅2,500mm以上: https://www.tomepita.com/parking/size/width-2500
+- 全長5,000mm以上: https://www.tomepita.com/parking/size/length-5000
+- 全長5,300mm以上: https://www.tomepita.com/parking/size/length-5300
+
+### メーカーページ (例)
+- トヨタ: https://www.tomepita.com/maker/toyota
+- 日産: https://www.tomepita.com/maker/nissan
+- ホンダ: https://www.tomepita.com/maker/honda
+- マツダ: https://www.tomepita.com/maker/mazda
+- スバル: https://www.tomepita.com/maker/subaru
+
+## データソース
+
+- 車種寸法データ: グーネット（goo-net.com）カタログ情報に基づく
+- 駐車場制限値: 各施設の公式情報に基づく
+- 世代・グレード別の寸法差にも対応（同一車種でも複数の寸法データを保持）
+
+## コラム記事
+
+### 車種別ガイド
+各車種が機械式駐車場に入るかの詳細ガイド。寸法スペック、各サイズ制限での判定表、必要な制限値を掲載。
+
+### サイズ規格別ガイド
+特定の高さ・幅制限に収まる車種のまとめ記事。
+
+### 知識・ハウツー
+機械式駐車場の種類や仕組み、サイズ制限の見方などの基礎知識。
+
+## 引用について
+
+トメピタのデータを引用する場合は、出典として「トメピタ (https://www.tomepita.com/)」を明記してください。
+
+## お問い合わせ
+
+サイトについて: https://www.tomepita.com/about

@@ -53,6 +53,7 @@ export async function getModelBySlug(slug: string) {
       maker_id: models.maker_id,
       maker_name: makers.name,
       maker_slug: makers.slug,
+      updated_at: models.updated_at,
     })
     .from(models)
     .innerJoin(makers, eq(models.maker_id, makers.id))

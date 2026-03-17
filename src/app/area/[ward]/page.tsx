@@ -30,10 +30,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const wardInfo = getWardBySlug(ward);
   if (!wardInfo) return {};
 
+  const title = `${wardInfo.name}の駐車場一覧 | トメピタ`;
+  const description = `${wardInfo.name}エリアの機械式・立体駐車場を一覧表示。制限寸法や車種適合も確認できます。`;
+
   return {
-    title: `${wardInfo.name}の駐車場一覧 | トメピタ`,
-    description: `${wardInfo.name}エリアの機械式・立体駐車場を一覧表示。制限寸法や車種適合も確認できます。`,
+    title,
+    description,
     alternates: { canonical: `/area/${wardInfo.slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `https://www.tomepita.com/area/${wardInfo.slug}`,
+      siteName: "トメピタ",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 

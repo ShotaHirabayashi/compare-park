@@ -31,6 +31,7 @@ export function Pagination({ currentPage, totalPages, basePath }: PaginationProp
       {currentPage > 1 ? (
         <Link
           href={pageHref(basePath, currentPage - 1)}
+          rel="prev"
           className="inline-flex size-9 items-center justify-center rounded-md border text-sm transition-colors hover:bg-muted"
           aria-label="前のページ"
         >
@@ -69,6 +70,7 @@ export function Pagination({ currentPage, totalPages, basePath }: PaginationProp
       {currentPage < totalPages ? (
         <Link
           href={pageHref(basePath, currentPage + 1)}
+          rel="next"
           className="inline-flex size-9 items-center justify-center rounded-md border text-sm transition-colors hover:bg-muted"
           aria-label="次のページ"
         >

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Clock, Phone, ExternalLink } from "lucide-react";
+import { MapPin, Clock, Phone, ExternalLink, CalendarDays } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -52,10 +52,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const lot = await getParkingLotBySlug(slug);
   if (!lot) return { title: "駐車場が見つかりません" };
 
+  const title = `${lot.name} の制限寸法と対応車種 | トメピタ`;
+  const description = `${lot.name}(${lot.address ?? ""})の制限寸法を確認。機械式・立体駐車場に入る車種の一覧と適合判定も表示します。`;
+
   return {
-    title: `${lot.name} の制限寸法と対応車種 | トメピタ`,
-    description: `${lot.name}(${lot.address ?? ""})の制限寸法を確認。機械式・立体駐車場に入る車種の一覧と適合判定も表示します。`,
+    title,
+    description,
     alternates: { canonical: `/parking/${slug}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `https://www.tomepita.com/parking/${slug}`,
+      siteName: "トメピタ",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 
@@ -278,6 +293,16 @@ export default async function ParkingDetailPage({ params }: Props) {
             </Badge>
           )}
         </div>
+
+        {lot.updated_at && (
+          <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+            <CalendarDays className="size-3" />
+            <time dateTime={lot.updated_at}>
+              {new Date(lot.updated_at).toLocaleDateString("ja-JP")}
+            </time>
+            更新
+          </p>
+        )}
 
         <div className="mt-4 space-y-2 text-sm text-muted-foreground">
           {lot.address && (

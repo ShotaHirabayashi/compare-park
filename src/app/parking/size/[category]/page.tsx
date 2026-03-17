@@ -21,15 +21,33 @@ export function generateStaticParams() {
 
 export const revalidate = 86400;
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { category } = await params;
+  const { page: pageParam } = await searchParams;
   const cat = getSizeCategoryBySlug(category);
   if (!cat) return {};
 
+  const currentPage = Number(pageParam) || 1;
+  const title = `${cat.seoTitle}${currentPage > 1 ? ` (${currentPage}ページ目)` : ""} | トメピタ`;
+  const description = cat.description;
+
   return {
-    title: `${cat.seoTitle} | トメピタ`,
-    description: cat.description,
+    title,
+    description,
     alternates: { canonical: `/parking/size/${cat.slug}` },
+    ...(currentPage > 1 ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `https://www.tomepita.com/parking/size/${cat.slug}`,
+      siteName: "トメピタ",
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
   };
 }
 

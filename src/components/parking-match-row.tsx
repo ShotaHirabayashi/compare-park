@@ -5,7 +5,9 @@ import Link from "next/link";
 import { ChevronDown, ChevronRight, AlertTriangle, XCircle } from "lucide-react";
 import { MatchBadge } from "@/components/match-badge";
 import { DimensionCompare } from "@/components/dimension-compare";
-import type { MatchResult, DimensionDetail } from "@/lib/matching";
+import type { ParkingMatchItem } from "@/lib/matching";
+
+export type { ParkingMatchItem };
 
 const parkingTypeLabels: Record<string, string> = {
   mechanical: "機械式",
@@ -13,17 +15,6 @@ const parkingTypeLabels: Record<string, string> = {
   flat: "平面",
   tower: "タワー式",
 };
-
-export interface ParkingMatchItem {
-  restrictionId: number;
-  parkingLotName: string;
-  parkingLotSlug: string;
-  parkingLotAddress: string;
-  parkingType: string;
-  result: MatchResult;
-  details: DimensionDetail[];
-  reason: string | null;
-}
 
 interface ParkingMatchRowProps {
   item: ParkingMatchItem;
