@@ -41,7 +41,7 @@ export async function generateMetadata({
     title: `${article.frontmatter.title} | トメピタ`,
     description: article.frontmatter.description,
     alternates: {
-      canonical: `${BASE_URL}/articles/${slugStr}`,
+      canonical: `/articles/${slugStr}`,
     },
     openGraph: {
       type: "article",

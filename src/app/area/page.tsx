@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "エリアから駐車場を探す | トメピタ",
   description:
     "東京23区からエリアを選んで機械式・立体駐車場を検索。各区の駐車場数やサイズ制限も一覧表示します。",
+  alternates: { canonical: "/area" },
 };
 
 export default async function AreaPage() {

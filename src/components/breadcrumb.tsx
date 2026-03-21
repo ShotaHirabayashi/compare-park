@@ -24,12 +24,12 @@ export function Breadcrumb({ items, currentPath }: BreadcrumbProps) {
         ? `${BASE_URL}${item.href}`
         : isLast && currentPath
           ? `${BASE_URL}${currentPath}`
-          : undefined;
+          : BASE_URL;
       return {
         "@type": "ListItem" as const,
         position: index + 1,
         name: item.label,
-        ...(url ? { item: url } : {}),
+        item: url,
       };
     }),
   };

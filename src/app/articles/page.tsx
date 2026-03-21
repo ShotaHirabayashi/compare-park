@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description:
     "機械式・立体駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
   alternates: {
-    canonical: "https://www.tomepita.com/articles",
+    canonical: "/articles",
   },
 };
 

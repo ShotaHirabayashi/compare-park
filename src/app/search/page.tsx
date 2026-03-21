@@ -28,6 +28,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   return {
     title: `${parts.length > 0 ? parts.join(" x ") + " の" : ""}検索結果 | トメピタ`,
     description: "車種とエリアで絞り込んだ機械式・立体駐車場の適合判定結果を表示します。",
+    alternates: { canonical: "/search" },
   };
 }
 
