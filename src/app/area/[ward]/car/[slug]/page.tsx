@@ -11,6 +11,7 @@ import {
   getAllTrimsWithDimensions,
   getRestrictionsByWard,
   getModelsWithMaker,
+  getDimensionsByModelId,
 } from "@/lib/queries";
 import { buildParkingMatchItems, generateMatchSummary } from "@/lib/matching";
 import { TOKYO_WARD_MAP, getWardBySlug } from "@/lib/constants";
@@ -36,6 +37,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const model = await getModelBySlug(slug);
   if (!model) return { title: "車種が見つかりません" };
 
+  const restrictions = await getRestrictionsByWard(wardInfo.name);
+  const dimension = await getDimensionsByModelId(model.id);
+  const hasContent = restrictions.length > 0 && dimension !== null;
+
   const title = `${wardInfo.name}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`;
   const description = `${wardInfo.name}エリアの機械式・立体駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と制限寸法を比較し、停められるかを一目で確認できます。`;
 
@@ -43,6 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `/area/${wardInfo.slug}/car/${slug}` },
+    ...(hasContent ? {} : { robots: { index: false, follow: true } }),
     openGraph: {
       type: "website",
       title,

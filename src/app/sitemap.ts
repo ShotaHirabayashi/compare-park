@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/db";
-import { models, parkingLots, makers } from "@/db/schema";
+import { like } from "drizzle-orm";
+import { models, parkingLots, makers, vehicleRestrictions } from "@/db/schema";
 import { TOKYO_WARD_MAP, SIZE_CATEGORIES } from "@/lib/constants";
 import { getArticles } from "@/lib/articles";
 
@@ -14,6 +15,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     db.select({ slug: parkingLots.slug }).from(parkingLots),
     db.select({ slug: makers.slug }).from(makers),
   ]);
+
+  // 駐車場データが存在するエリアを特定（薄いコンテンツ排除）
+  const wardsWithParking = new Set<string>();
+  for (const w of TOKYO_WARD_MAP) {
+    const rows = await db
+      .select({ id: vehicleRestrictions.id })
+      .from(vehicleRestrictions)
+      .innerJoin(parkingLots, like(parkingLots.address, `%${w.name}%`))
+      .limit(1);
+    if (rows.length > 0) wardsWithParking.add(w.slug);
+  }
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: now, changeFrequency: "daily", priority: 1.0 },
@@ -54,15 +66,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // エリア×車種ページ（ロングテールSEO）
-  const areaCarPages: MetadataRoute.Sitemap = TOKYO_WARD_MAP.flatMap((w) =>
-    allModels.map((m) => ({
-      url: `${BASE_URL}/area/${w.slug}/car/${m.slug}`,
-      lastModified: now,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
-    }))
-  );
+  // エリア×車種ページ（駐車場データがあるエリアのみ）
+  const areaCarPages: MetadataRoute.Sitemap = TOKYO_WARD_MAP
+    .filter((w) => wardsWithParking.has(w.slug))
+    .flatMap((w) =>
+      allModels.map((m) => ({
+        url: `${BASE_URL}/area/${w.slug}/car/${m.slug}`,
+        lastModified: now,
+        changeFrequency: "weekly" as const,
+        priority: 0.6,
+      }))
+    );
 
   const articles = getArticles();
   const articlePages: MetadataRoute.Sitemap = articles.map((article) => ({

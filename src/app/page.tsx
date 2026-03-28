@@ -19,6 +19,7 @@ import { TOKYO_WARD_MAP, FAQ_ITEMS } from "@/lib/constants";
 export const revalidate = 86400; // 24h
 
 export const metadata: Metadata = {
+  title: "トメピタ | 機械式・立体駐車場に車が入るか即判定 — 車種サイズ×駐車場マッチング",
   alternates: { canonical: "/" },
 };
 

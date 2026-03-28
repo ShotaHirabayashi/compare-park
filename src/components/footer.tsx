@@ -18,11 +18,28 @@ const popularWards = [
   { href: "/area/shinagawa", label: "品川区" },
 ] as const;
 
+const popularCars = [
+  { href: "/car/alphard", label: "アルファード" },
+  { href: "/car/harrier", label: "ハリアー" },
+  { href: "/car/rav4", label: "RAV4" },
+  { href: "/car/n-box", label: "N-BOX" },
+  { href: "/car/noah", label: "ノア" },
+  { href: "/car/freed", label: "フリード" },
+] as const;
+
+const columnLinks = [
+  { href: "/articles", label: "コラム一覧" },
+  { href: "/articles?category=cars", label: "車種別ガイド" },
+  { href: "/articles?category=size-guide", label: "サイズ規格別" },
+  { href: "/articles?category=knowledge", label: "知識・ハウツー" },
+  { href: "/articles?category=compare", label: "車種比較" },
+] as const;
+
 export function Footer() {
   return (
     <footer className="border-t bg-background">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           {/* サイト案内 */}
           <div>
             <h3 className="mb-3 text-sm font-semibold text-foreground">
@@ -48,6 +65,42 @@ export function Footer() {
             </h3>
             <nav className="flex flex-col gap-2">
               {popularWards.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* 人気車種 */}
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-foreground">
+              人気車種
+            </h3>
+            <nav className="flex flex-col gap-2">
+              {popularCars.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* コラム */}
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-foreground">
+              コラム
+            </h3>
+            <nav className="flex flex-col gap-2">
+              {columnLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
