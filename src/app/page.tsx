@@ -97,6 +97,24 @@ export default async function Home() {
 
   return (
     <div>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "トメピタ",
+          url: "https://www.tomepita.com",
+          description:
+            "あなたの車がその機械式・立体駐車場に停められるか、寸法データで即判定。東京23区内の駐車場と車種のマッチングサービス。",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: "https://www.tomepita.com/search?car={search_term_string}",
+            },
+            "query-input": "required name=search_term_string",
+          },
+        }}
+      />
       {/* セクション1: ヒーロー + 即判定フォーム（統合） */}
       <section className="relative overflow-hidden pb-10 pt-12 sm:pb-12 sm:pt-16 md:pb-16 md:pt-24">
         {/* 背景画像 */}

@@ -65,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "トメピタ",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
     },
@@ -223,7 +223,7 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
       {/* 車種基本情報 */}
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold">{model.name}</h1>
+          <h1 className="text-3xl font-bold">{model.name}の寸法と駐車場適合</h1>
           <Badge variant="outline">
             {bodyTypeLabels[model.body_type] ?? model.body_type}
           </Badge>

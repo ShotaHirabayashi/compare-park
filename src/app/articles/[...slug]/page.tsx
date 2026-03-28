@@ -53,7 +53,7 @@ export async function generateMetadata({
       siteName: "トメピタ",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: `${article.frontmatter.title} | トメピタ`,
       description: article.frontmatter.description,
     },
@@ -80,6 +80,7 @@ export default async function ArticlePage({ params }: PageProps) {
     "@type": "Article",
     headline: article.frontmatter.title,
     description: article.frontmatter.description,
+    image: `${BASE_URL}/articles/${slugStr}/opengraph-image`,
     datePublished: article.frontmatter.date,
     dateModified: article.frontmatter.updatedAt ?? article.frontmatter.date,
     author: {

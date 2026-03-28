@@ -5,6 +5,16 @@ import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
 import { getMakers, getMakerBySlug, getModelsByMakerSlug } from "@/lib/queries";
 
+const bodyTypeLabels: Record<string, string> = {
+  sedan: "セダン",
+  suv: "SUV",
+  minivan: "ミニバン",
+  compact: "コンパクト",
+  wagon: "ワゴン",
+  coupe: "クーペ",
+  truck: "トラック",
+};
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
@@ -104,7 +114,7 @@ export default async function MakerPage({ params }: Props) {
             >
               <p className="font-medium">{model.name}</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {model.body_type}
+                {bodyTypeLabels[model.body_type ?? ""] ?? model.body_type}
               </p>
               {model.length_mm != null && model.width_mm != null && (
                 <p className="mt-2 text-xs text-muted-foreground">
