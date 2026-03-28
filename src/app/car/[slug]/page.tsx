@@ -11,6 +11,7 @@ import { AreaSearchMini } from "@/components/area-search-mini";
 import { JsonLd } from "@/components/json-ld";
 import {
   getModelBySlug,
+  getLatestGenerationYear,
   getAllTrimsWithDimensions,
   getAllRestrictions,
   getModelsWithMaker,
@@ -47,8 +48,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const model = await getModelBySlug(slug);
   if (!model) return { title: "車種が見つかりません" };
 
-  const title = `${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`;
-  const description = `${model.maker_name} ${model.name}の全長・全幅・全高・重量を一覧表示。機械式・立体駐車場に入るかの適合判定も確認できます。`;
+  const year = await getLatestGenerationYear(model.id);
+  const yearPrefix = year ? `【${year}年】` : "";
+  const title = `${yearPrefix}${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`;
+  const description = `${model.maker_name} ${model.name}${year ? `（${year}年モデル）` : ""}の全長・全幅・全高・重量を一覧表示。機械式・��体駐車���に入るかの適合判��も確認できます。`;
 
   return {
     title,

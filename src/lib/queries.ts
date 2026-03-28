@@ -78,6 +78,18 @@ export async function getModelsWithMaker() {
     .innerJoin(makers, eq(models.maker_id, makers.id));
 }
 
+/** 指定モデルの最新世代の開始年を取得する */
+export async function getLatestGenerationYear(modelId: number) {
+  const result = await db
+    .select({ startYear: generations.start_year })
+    .from(generations)
+    .where(eq(generations.model_id, modelId))
+    .orderBy(sql`${generations.start_year} DESC`)
+    .limit(1);
+
+  return result[0]?.startYear ?? null;
+}
+
 // ---------- Dimensions ----------
 
 /**
