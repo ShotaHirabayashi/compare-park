@@ -7,7 +7,8 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, Tag } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
-import { TableOfContents, extractHeadings } from "@/components/table-of-contents";
+import { TableOfContents } from "@/components/table-of-contents";
+import { extractHeadings } from "@/lib/extract-headings";
 import {
   getArticleBySlug,
   getArticles,
