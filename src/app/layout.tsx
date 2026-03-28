@@ -54,7 +54,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
+      <body
+        className={`${inter.variable} ${notoSansJP.variable} font-sans antialiased`}
+      >
+        <Header />
+        <main className="min-h-[calc(100dvh-128px)]">{children}</main>
+        <Footer />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="lazyOnload"
@@ -67,13 +72,6 @@ export default function RootLayout({
             gtag('config', '${GA_ID}');
           `}
         </Script>
-      </head>
-      <body
-        className={`${inter.variable} ${notoSansJP.variable} font-sans antialiased`}
-      >
-        <Header />
-        <main className="min-h-[calc(100dvh-128px)]">{children}</main>
-        <Footer />
       </body>
     </html>
   );

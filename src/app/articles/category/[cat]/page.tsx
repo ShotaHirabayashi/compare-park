@@ -1,41 +1,56 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Calendar } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
-import { getArticles, ARTICLE_CATEGORIES } from "@/lib/articles";
+import {
+  getArticles,
+  getArticlesByCategory,
+  ARTICLE_CATEGORIES,
+} from "@/lib/articles";
+
+const BASE_URL = "https://www.tomepita.com";
 
 export const revalidate = 86400;
 
-export const metadata: Metadata = {
-  title: "コラム | トメピタ",
-  description:
-    "機械式・立体駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
-  alternates: {
-    canonical: "/articles",
-  },
-};
-
-export default function ArticlesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ category?: string }>;
-}) {
-  return <ArticlesContent searchParamsPromise={searchParams} />;
+interface Props {
+  params: Promise<{ cat: string }>;
 }
 
-async function ArticlesContent({
-  searchParamsPromise,
-}: {
-  searchParamsPromise: Promise<{ category?: string }>;
-}) {
-  const { category: selectedCategory } = await searchParamsPromise;
+export function generateStaticParams() {
+  return Object.keys(ARTICLE_CATEGORIES).map((cat) => ({ cat }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { cat } = await params;
+  const label = ARTICLE_CATEGORIES[cat];
+  if (!label) return {};
+
+  const title = `${label}のコラム一覧 | トメピタ`;
+  const description = `${label}に関するコラム記事一覧。機械式・立体駐車場のサイズ制限や車種別の駐車場適合ガイドを掲載。`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: `/articles/category/${cat}` },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: `${BASE_URL}/articles/category/${cat}`,
+      siteName: "トメピタ",
+    },
+  };
+}
+
+export default async function CategoryPage({ params }: Props) {
+  const { cat } = await params;
+  const label = ARTICLE_CATEGORIES[cat];
+  if (!label) notFound();
+
+  const articles = getArticlesByCategory(cat);
   const allArticles = getArticles();
-
-  const filteredArticles = selectedCategory
-    ? allArticles.filter((a) => a.frontmatter.category === selectedCategory)
-    : allArticles;
-
   const activeCategories = [
     ...new Set(allArticles.map((a) => a.frontmatter.category)),
   ];
@@ -46,61 +61,61 @@ async function ArticlesContent({
         data={{
           "@context": "https://schema.org",
           "@type": "CollectionPage",
-          name: "コラム | トメピタ",
-          description: "機械式・立体駐車場のサイズ制限や車種別の駐車場適合ガイドなど、駐車場選びに役立つコラムを掲載しています。",
-          url: "https://www.tomepita.com/articles",
+          name: `${label}のコラム一覧 | トメピタ`,
+          description: `${label}に関するコラム記事一覧。`,
+          url: `${BASE_URL}/articles/category/${cat}`,
           mainEntity: {
             "@type": "ItemList",
-            numberOfItems: filteredArticles.length,
-            itemListElement: filteredArticles.slice(0, 20).map((article, index) => ({
+            numberOfItems: articles.length,
+            itemListElement: articles.slice(0, 20).map((article, index) => ({
               "@type": "ListItem",
               position: index + 1,
-              url: `https://www.tomepita.com/articles/${article.slug}`,
+              url: `${BASE_URL}/articles/${article.slug}`,
               name: article.frontmatter.title,
             })),
           },
         }}
       />
       <Breadcrumb
-        items={[{ label: "トップ", href: "/" }, { label: "コラム" }]}
-        currentPath="/articles"
+        items={[
+          { label: "トップ", href: "/" },
+          { label: "コラム", href: "/articles" },
+          { label },
+        ]}
+        currentPath={`/articles/category/${cat}`}
       />
 
-      <h1 className="mb-8 text-3xl font-bold">コラム</h1>
+      <h1 className="mb-8 text-3xl font-bold">{label}のコラム</h1>
 
       <div className="mb-8 flex flex-wrap gap-2">
         <Link
           href="/articles"
-          className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-            !selectedCategory
-              ? "bg-primary text-primary-foreground"
-              : "bg-muted text-muted-foreground hover:bg-muted/80"
-          }`}
+          className="rounded-full px-4 py-1.5 text-sm font-medium bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
         >
           すべて
         </Link>
-        {activeCategories.map((cat) => (
+        {activeCategories.map((c) => (
           <Link
-            key={cat}
-            href={`/articles/category/${cat}`}
+            key={c}
+            href={`/articles/category/${c}`}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              selectedCategory === cat
+              cat === c
                 ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            {ARTICLE_CATEGORIES[cat] ?? cat}
+            {ARTICLE_CATEGORIES[c] ?? c}
           </Link>
         ))}
       </div>
 
-      {filteredArticles.length === 0 ? (
+      {articles.length === 0 ? (
         <p className="py-12 text-center text-muted-foreground">
           該当する記事がありません。
         </p>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredArticles.map((article) => (
+          {articles.map((article) => (
             <Link
               key={article.slug}
               href={`/articles/${article.slug}`}

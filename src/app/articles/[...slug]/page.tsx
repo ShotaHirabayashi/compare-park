@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 import Link from "next/link";
 import { ArrowLeft, Calendar, Tag } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
+import { TableOfContents, extractHeadings } from "@/components/table-of-contents";
 import {
   getArticleBySlug,
   getArticles,
@@ -75,6 +77,8 @@ export default async function ArticlePage({ params }: PageProps) {
     article.frontmatter.category
   ).filter((a) => a.slug !== slugStr);
 
+  const tocItems = extractHeadings(article.content);
+
   const jsonLdData = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -111,7 +115,7 @@ export default async function ArticlePage({ params }: PageProps) {
         items={[
           { label: "トップ", href: "/" },
           { label: "コラム", href: "/articles" },
-          { label: categoryLabel, href: `/articles?category=${article.frontmatter.category}` },
+          { label: categoryLabel, href: `/articles/category/${article.frontmatter.category}` },
           { label: article.frontmatter.title },
         ]}
         currentPath={`/articles/${slugStr}`}
@@ -154,12 +158,15 @@ export default async function ArticlePage({ params }: PageProps) {
           )}
         </header>
 
+        <TableOfContents items={tocItems} />
+
         <div className="prose prose-gray max-w-none dark:prose-invert prose-headings:scroll-mt-20 prose-headings:font-bold prose-h2:mt-10 prose-h2:border-b prose-h2:pb-2 prose-h3:mt-8 prose-p:leading-relaxed prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-li:marker:text-primary">
           <MDXRemote
             source={article.content}
             options={{
               mdxOptions: {
                 remarkPlugins: [remarkGfm],
+                rehypePlugins: [rehypeSlug],
               },
             }}
             components={{

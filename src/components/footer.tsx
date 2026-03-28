@@ -29,10 +29,10 @@ const popularCars = [
 
 const columnLinks = [
   { href: "/articles", label: "コラム一覧" },
-  { href: "/articles?category=cars", label: "車種別ガイド" },
-  { href: "/articles?category=size-guide", label: "サイズ規格別" },
-  { href: "/articles?category=knowledge", label: "知識・ハウツー" },
-  { href: "/articles?category=compare", label: "車種比較" },
+  { href: "/articles/category/cars", label: "車種別ガイド" },
+  { href: "/articles/category/size-guide", label: "サイズ規格別" },
+  { href: "/articles/category/knowledge", label: "知識・ハウツー" },
+  { href: "/articles/category/compare", label: "車種比較" },
 ] as const;
 
 export function Footer() {
