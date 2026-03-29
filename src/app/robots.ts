@@ -23,6 +23,9 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "Bytespider", disallow: "/" },
       { userAgent: "cohere-ai", disallow: "/" },
     ],
-    sitemap: "https://www.tomepita.com/sitemap.xml",
+    sitemap: [
+      "https://www.tomepita.com/sitemap.xml",
+      "https://www.tomepita.com/llms.txt",
+    ],
   };
 }
