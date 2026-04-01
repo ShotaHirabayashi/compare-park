@@ -56,7 +56,16 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   async redirects() {
-    return wardRedirects;
+    return [
+      // www なし → www あり 301リダイレクト
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "tomepita.com" }],
+        destination: "https://www.tomepita.com/:path*",
+        permanent: true,
+      },
+      ...wardRedirects,
+    ];
   },
   async headers() {
     return [

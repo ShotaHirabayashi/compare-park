@@ -12,6 +12,7 @@ import { JsonLd } from "@/components/json-ld";
 import {
   getModelBySlug,
   getLatestGenerationYear,
+  getDimensionsByModelId,
   getAllTrimsWithDimensions,
   getAllRestrictions,
   getModelsWithMaker,
@@ -48,10 +49,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const model = await getModelBySlug(slug);
   if (!model) return { title: "車種が見つかりません" };
 
-  const year = await getLatestGenerationYear(model.id);
+  const [year, dim] = await Promise.all([
+    getLatestGenerationYear(model.id),
+    getDimensionsByModelId(model.id),
+  ]);
   const yearPrefix = year ? `【${year}年】` : "";
   const title = `${yearPrefix}${model.name} (${model.maker_name}) の寸法と駐車場適合 | トメピタ`;
-  const description = `${model.maker_name} ${model.name}${year ? `（${year}年モデル）` : ""}の全長・全幅・全高・重量を一覧表示。機械式・��体駐車���に入るかの適合判��も確認できます。`;
+  const dimText = dim
+    ? `全長${dim.length_mm?.toLocaleString() ?? "-"}mm・全幅${dim.width_mm?.toLocaleString() ?? "-"}mm・全高${dim.height_mm?.toLocaleString() ?? "-"}mm・重量${dim.weight_kg?.toLocaleString() ?? "-"}kg。`
+    : "全長・全幅・全高・重量を一覧表示。";
+  const description = `${model.maker_name} ${model.name}${year ? `（${year}年モデル）` : ""}の${dimText}機械式・立体駐車場に入るかサイズ判定できます。`;
 
   return {
     title,
