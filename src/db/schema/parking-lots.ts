@@ -25,6 +25,7 @@ export const parkingLots = sqliteTable("parking_lots", {
       "tower_parking",
       "public_facility",
       "hotel",
+      "airport",
       "other",
     ],
   }),
