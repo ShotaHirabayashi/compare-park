@@ -39,7 +39,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const restrictions = await getRestrictionsByWard(wardInfo.name);
   const dimension = await getDimensionsByModelId(model.id);
-  const hasContent = restrictions.length > 0 && dimension !== null;
+  // 制限データ10件以上 AND 寸法データありの場合のみインデックス許可
+  const hasContent = restrictions.length >= 10 && dimension !== null;
 
   const title = `${wardInfo.name}で${model.maker_name} ${model.name}が停められる駐車場 | トメピタ`;
   const description = `${wardInfo.name}エリアの機械式・立体駐車場で${model.maker_name} ${model.name}が駐車可能かを判定。全長・全幅・全高・重量と制限寸法を比較し、停められるかを一目で確認できます。`;
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: { canonical: `/area/${wardInfo.slug}/car/${slug}` },
-    ...(hasContent ? {} : { robots: { index: false, follow: true } }),
+    robots: hasContent ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: {
       type: "website",
       title,

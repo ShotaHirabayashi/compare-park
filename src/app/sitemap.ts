@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/db";
-import { like } from "drizzle-orm";
-import { models, parkingLots, makers, vehicleRestrictions } from "@/db/schema";
+import { models, parkingLots, makers } from "@/db/schema";
 import { TOKYO_WARD_MAP, SIZE_CATEGORIES } from "@/lib/constants";
 import { getArticles, ARTICLE_CATEGORIES } from "@/lib/articles";
 
@@ -68,26 +67,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // エリア × 車種ページ（駐車場データがあるエリアのみ）
-  const wardsWithParking = new Set<string>();
-  for (const w of TOKYO_WARD_MAP) {
-    const rows = await db
-      .select({ id: vehicleRestrictions.id })
-      .from(vehicleRestrictions)
-      .innerJoin(parkingLots, like(parkingLots.address, `%${w.name}%`))
-      .limit(1);
-    if (rows.length > 0) wardsWithParking.add(w.slug);
-  }
-  const areaCar: MetadataRoute.Sitemap = TOKYO_WARD_MAP
-    .filter((w) => wardsWithParking.has(w.slug))
-    .flatMap((w) =>
-      allModels.map((m) => ({
-        url: `${BASE_URL}/area/${w.slug}/car/${m.slug}`,
-        lastModified: now,
-        changeFrequency: "weekly" as const,
-        priority: 0.6,
-      }))
-    );
+  // エリア × 車種ページ: クロール予算節約のためサイトマップから除外
+  // （5,000件超の組み合わせページはGoogleのクロール予算を圧迫するため）
+  const areaCar: MetadataRoute.Sitemap = [];
 
   // コラム記事 + カテゴリページ
   const categoryPages: MetadataRoute.Sitemap = Object.keys(ARTICLE_CATEGORIES).map((cat) => ({
