@@ -262,6 +262,30 @@ export function InstantCheckForm({
             : "車種を選択してください"}
       </Button>
 
+      {/* 人気の車種クイック選択 */}
+      {!selectedVehicle && (
+        <div className="pt-2">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">人気の車種から選ぶ</p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { name: "アルファード", slug: "alphard", maker: "トヨタ" },
+              { name: "プリウス", slug: "prius-mechanical-parking-guide", maker: "トヨタ" },
+              { name: "ヴォクシー", slug: "voxy", maker: "トヨタ" },
+              { name: "ハリアー", slug: "harrier", maker: "トヨタ" },
+              { name: "N-BOX", slug: "n-box-mechanical-parking-guide", maker: "ホンダ" },
+            ].map((v) => (
+              <button
+                key={v.slug}
+                onClick={() => setSelectedVehicle({ name: v.name, slug: v.slug, makerName: v.maker })}
+                className="rounded-full border bg-background px-3 py-1 text-xs font-medium transition-colors hover:border-primary/50 hover:bg-primary/5"
+              >
+                {v.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 車種検索モーダル */}
       <SearchModal
         open={vehicleOpen}

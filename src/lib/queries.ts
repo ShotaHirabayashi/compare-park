@@ -63,7 +63,7 @@ export async function getModelBySlug(slug: string) {
   return result[0] ?? null;
 }
 
-export async function getModelsWithMaker() {
+export async function getPopularModelsWithDimensions() {
   return db
     .select({
       id: models.id,
@@ -73,9 +73,19 @@ export async function getModelsWithMaker() {
       image_url: models.image_url,
       maker_name: makers.name,
       maker_slug: makers.slug,
+      length_mm: dimensions.length_mm,
+      width_mm: dimensions.width_mm,
+      height_mm: dimensions.height_mm,
+      weight_kg: dimensions.weight_kg,
     })
     .from(models)
-    .innerJoin(makers, eq(models.maker_id, makers.id));
+    .innerJoin(makers, eq(models.maker_id, makers.id))
+    .innerJoin(generations, eq(generations.model_id, models.id))
+    .innerJoin(phases, eq(phases.generation_id, generations.id))
+    .innerJoin(trims, eq(trims.phase_id, phases.id))
+    .innerJoin(dimensions, eq(dimensions.trim_id, trims.id))
+    .where(eq(models.is_popular, true))
+    .groupBy(models.id);
 }
 
 /** 指定モデルの最新世代の開始年を取得する */
@@ -508,4 +518,30 @@ export async function getRelatedParkingLotsByWard(ward: string, excludeId: numbe
     .from(parkingLots)
     .where(and(like(parkingLots.address, `%${ward}%`), sql`${parkingLots.id} != ${excludeId}`))
     .limit(8);
+}
+
+/** 指定座標の周辺駐車場を取得する */
+export async function getNearbyParkingLots(lat: number, lng: number, radiusKm: number = 1.0) {
+  // SQLiteでの距離計算（簡易版: 1度 = 111kmとして計算）
+  const latDelta = radiusKm / 111.0;
+  const lngDelta = radiusKm / (111.0 * Math.cos(lat * (Math.PI / 180)));
+
+  return db
+    .select({
+      id: parkingLots.id,
+      name: parkingLots.name,
+      slug: parkingLots.slug,
+      address: parkingLots.address,
+      latitude: parkingLots.latitude,
+      longitude: parkingLots.longitude,
+      parking_type: parkingLots.parking_type,
+    })
+    .from(parkingLots)
+    .where(
+      and(
+        sql`${parkingLots.latitude} BETWEEN ${lat - latDelta} AND ${lat + latDelta}`,
+        sql`${parkingLots.longitude} BETWEEN ${lng - lngDelta} AND ${lng + lngDelta}`
+      )
+    )
+    .limit(20);
 }

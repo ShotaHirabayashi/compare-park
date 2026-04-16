@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingCard } from "@/components/parking-card";
 import { ParkingMapLoader } from "@/components/parking-map-loader";
+import { MyCarWardBanner } from "@/components/my-car-ward-banner";
+import { NearMeButton } from "@/components/near-me-button";
 import { VehicleComboboxNav } from "@/components/vehicle-combobox-nav";
 import { SizeFilter } from "@/components/size-filter";
 import { JsonLd } from "@/components/json-ld";
@@ -178,10 +180,15 @@ export default async function WardPage({ params, searchParams }: Props) {
         currentPath={`/area/${ward}`}
       />
 
-      <h1 className="mb-2 text-3xl font-bold">{decodedWard}の駐車場</h1>
-      <p className="mb-8 text-muted-foreground">
-        {decodedWard}エリアの駐車場一覧 ({lotsWithRestrictions.length}件)
-      </p>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{decodedWard}の駐車場</h1>
+          <p className="text-muted-foreground">
+            {decodedWard}エリアの駐車場一覧 ({lotsWithRestrictions.length}件)
+          </p>
+        </div>
+        <NearMeButton className="w-full sm:w-auto" />
+      </div>
 
       {/* サイズフィルタ */}
       <div className="mb-4">
@@ -191,6 +198,12 @@ export default async function WardPage({ params, searchParams }: Props) {
           currentMinLength={minLength}
         />
       </div>
+
+      <MyCarWardBanner
+        wardSlug={ward}
+        wardName={decodedWard}
+        className="mb-8"
+      />
 
       {/* 車種選択で適合確認 */}
       <div className="mb-8 rounded-lg border bg-muted/30 p-4">

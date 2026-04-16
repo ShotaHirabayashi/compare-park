@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MapPin, Clock, Phone, ExternalLink, CalendarDays } from "lucide-react";
+import { MapPin, Clock, Phone, ExternalLink, CalendarDays, Car } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -17,6 +17,7 @@ import {
   getOperatingHoursByParkingLotId,
   getAllDimensions,
   getRelatedParkingLotsByWard,
+  getPopularModelsWithDimensions,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder, type MatchResult } from "@/lib/matching";
 import { getWardSlug } from "@/lib/constants";
@@ -85,12 +86,34 @@ export default async function ParkingDetailPage({ params }: Props) {
   const lot = await getParkingLotBySlug(slug);
   if (!lot) notFound();
 
-  const [restrictions, fees, hours, allDims] = await Promise.all([
+  const [restrictions, fees, hours, allDims, popularModels] = await Promise.all([
     getRestrictionsByParkingLotId(lot.id),
     getFeesByParkingLotId(lot.id),
     getOperatingHoursByParkingLotId(lot.id),
     getAllDimensions(),
+    getPopularModelsWithDimensions(),
   ]);
+
+  // 人気車種のうち、この駐車場に「OK」で停められるものを抽出
+  const okPopularModels = popularModels.filter((model) => {
+    return restrictions.some((r) => {
+      const match = calculateMatch(
+        {
+          length_mm: model.length_mm,
+          width_mm: model.width_mm,
+          height_mm: model.height_mm,
+          weight_kg: model.weight_kg,
+        },
+        {
+          max_length_mm: r.max_length_mm,
+          max_width_mm: r.max_width_mm,
+          max_height_mm: r.max_height_mm,
+          max_weight_kg: r.max_weight_kg,
+        }
+      );
+      return match.result === "ok";
+    });
+  });
 
   const ward = extractWard(lot.address);
   const wardSlug = ward ? getWardSlug(ward) : null;
@@ -464,22 +487,46 @@ export default async function ParkingDetailPage({ params }: Props) {
             <CardContent className="py-8 text-center text-muted-foreground">
               制限サイズデータがまだ登録されていません。
             </CardContent>
-          </Card>
-        )}
-      </section>
+          {/* 制限値一覧 */}
+          ...
+          </section>
 
-      {/* あなたの車は停められる？ */}
-      {restrictions.length > 0 && vehiclesForChecker.length > 0 && (
-        <section className="mb-10">
-          <h2 className="mb-4 text-xl font-bold">あなたの車は停められる？</h2>
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <InlineParkingChecker
-              restrictions={restrictionsForChecker}
-              vehicles={vehiclesForChecker}
-            />
-          </div>
-        </section>
-      )}
+          {/* この駐車場に停められる人気の車種 */}
+          {okPopularModels.length > 0 && (
+            <section className="mb-10">
+              <h2 className="mb-4 text-xl font-bold">{lot.name}に停められる人気の車種</h2>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {okPopularModels.map((m) => (
+                  <Link
+                    key={m.slug}
+                    href={`/car/${m.slug}`}
+                    className="group flex items-center gap-3 rounded-xl border bg-background p-3 transition-all hover:border-primary/50 hover:bg-muted/50 hover:shadow-md"
+                  >
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                      <Car className="size-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] text-muted-foreground">{m.maker_name}</p>
+                      <p className="truncate text-sm font-bold group-hover:text-primary">{m.name}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* あなたの車は停められる？ */}
+          {restrictions.length > 0 && vehiclesForChecker.length > 0 && (
+            <section className="mb-10">
+              <h2 className="mb-4 text-xl font-bold">あなたの車は停められる？</h2>
+              <div className="rounded-lg border bg-muted/30 p-4">
+                <InlineParkingChecker
+                  restrictions={restrictionsForChecker}
+                  vehicles={vehiclesForChecker}
+                />
+              </div>
+            </section>
+          )}
 
       {/* 車種との適合判定 */}
       <section>

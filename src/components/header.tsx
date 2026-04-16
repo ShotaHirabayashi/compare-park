@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getModelsForSearch } from "@/lib/queries";
 import { HeaderSearch } from "./header-search";
+import { HeaderMyCar } from "./header-my-car";
 import { HeaderMobileNav } from "./header-mobile-nav";
 
 const navLinks = [
@@ -22,6 +23,8 @@ export async function Header() {
             <Image src="/logo.svg" alt="トメピタ" width={28} height={28} />
             <span className="hidden text-xl font-bold text-primary sm:inline-block">トメピタ</span>
           </Link>
+
+          <HeaderMyCar />
 
           {/* Desktop search */}
           <HeaderSearch vehicles={vehicles} className="hidden md:flex" />

@@ -10,20 +10,21 @@ import {
   getParkingLotsByWard,
   getRestrictionsByParkingLotId,
   getParkingLots,
-  getAllRestrictions,
+  getNearbyParkingLots,
 } from "@/lib/queries";
 import { calculateMatch, matchSortOrder } from "@/lib/matching";
 import Link from "next/link";
 
 interface Props {
-  searchParams: Promise<{ car?: string; ward?: string }>;
+  searchParams: Promise<{ car?: string; ward?: string; lat?: string; lng?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const sp = await searchParams;
   const parts: string[] = [];
   if (sp.car) parts.push(sp.car);
-  if (sp.ward) parts.push(sp.ward);
+  if (sp.lat && sp.lng) parts.push("現在地周辺");
+  else if (sp.ward) parts.push(sp.ward);
 
   return {
     title: `${parts.length > 0 ? parts.join(" x ") + " の" : ""}検索結果 | トメピタ`,
@@ -37,15 +38,19 @@ export default async function SearchPage({ searchParams }: Props) {
   const sp = await searchParams;
   const carSlug = sp.car;
   const ward = sp.ward;
+  const lat = sp.lat ? parseFloat(sp.lat) : null;
+  const lng = sp.lng ? parseFloat(sp.lng) : null;
 
   // 車種情報の取得
   const model = carSlug ? await getModelBySlug(carSlug) : null;
   const dimension =
     model ? await getDimensionsByModelId(model.id) : null;
 
-  // 駐車場の取得（区指定があれば絞り込み）
+  // 駐車場の取得
   let lots: Awaited<ReturnType<typeof getParkingLots>>;
-  if (ward) {
+  if (lat && lng) {
+    lots = await getNearbyParkingLots(lat, lng, 3.0);
+  } else if (ward) {
     lots = await getParkingLotsByWard(ward);
   } else {
     lots = await getParkingLots();
@@ -135,12 +140,16 @@ export default async function SearchPage({ searchParams }: Props) {
             車種: {model.maker_name} {model.name}
           </span>
         )}
-        {ward && (
+        {lat && lng ? (
+          <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">
+            エリア: 現在地周辺
+          </span>
+        ) : ward && (
           <span className="rounded-full bg-primary/10 px-3 py-1 text-primary">
             エリア: {ward}
           </span>
         )}
-        {!model && !ward && (
+        {!model && !ward && !lat && (
           <span>全駐車場を表示しています</span>
         )}
       </div>

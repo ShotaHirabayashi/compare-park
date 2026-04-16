@@ -1,257 +1,94 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Search, ChevronRight } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { MatchBadge } from "@/components/match-badge";
-import { JsonLd } from "@/components/json-ld";
-import {
-  getModelBySlug,
-  getDimensionsByModelId,
-  getParkingLotBySlug,
-  getRestrictionsByParkingLotId,
-} from "@/lib/queries";
-import { calculateMatch } from "@/lib/matching";
-import { getWardSlug } from "@/lib/constants";
+import { getAllDestinations, categoryLabels } from "@/lib/destinations";
 
-interface Props {
-  searchParams: Promise<{ car?: string; parking?: string }>;
-}
+export const metadata: Metadata = {
+  title: "目的地から駐車場を探す | トメピタ",
+  description: "主要な百貨店、ホテル、病院、空港などの周辺で、お持ちの車が停められる駐車場をサイズ判定付きで探せます。",
+};
 
-export async function generateMetadata({
-  searchParams,
-}: Props): Promise<Metadata> {
-  const { car, parking } = await searchParams;
-  if (!car || !parking) return { title: "判定結果 | トメピタ" };
+export default async function CheckIndexPage() {
+  const destinations = getAllDestinations();
 
-  const [model, lot] = await Promise.all([
-    getModelBySlug(car),
-    getParkingLotBySlug(parking),
-  ]);
-
-  if (!model || !lot)
-    return { title: "判定結果 | トメピタ", robots: { index: false } };
-
-  return {
-    title: `${model.maker_name} ${model.name}は${lot.name}に停められる？ | トメピタ`,
-    description: `${model.maker_name} ${model.name}の寸法と${lot.name}の制限サイズを比較。駐車可能かどうかを判定します。`,
-    robots: { index: false },
-  };
-}
-
-function extractWard(address: string | null): string | null {
-  if (!address) return null;
-  const match = address.match(/([\u4e00-\u9fa5]+区)/);
-  return match ? match[1] : null;
-}
-
-export default async function CheckPage({ searchParams }: Props) {
-  const { car, parking } = await searchParams;
-  if (!car || !parking) notFound();
-
-  const [model, lot] = await Promise.all([
-    getModelBySlug(car),
-    getParkingLotBySlug(parking),
-  ]);
-  if (!model || !lot) notFound();
-
-  const [dimension, restrictions] = await Promise.all([
-    getDimensionsByModelId(model.id),
-    getRestrictionsByParkingLotId(lot.id),
-  ]);
-
-  const wardName = extractWard(lot.address);
-  const wardSlug = wardName ? getWardSlug(wardName) : null;
-
-  // 全制限でマッチング、最良結果を選択
-  let bestMatch = dimension && restrictions.length > 0
-    ? calculateMatch(
-        {
-          length_mm: dimension.length_mm,
-          width_mm: dimension.width_mm,
-          height_mm: dimension.height_mm,
-          weight_kg: dimension.weight_kg,
-        },
-        {
-          max_length_mm: restrictions[0].max_length_mm,
-          max_width_mm: restrictions[0].max_width_mm,
-          max_height_mm: restrictions[0].max_height_mm,
-          max_weight_kg: restrictions[0].max_weight_kg,
-        }
-      )
-    : null;
-
-  if (dimension && restrictions.length > 1) {
-    for (let i = 1; i < restrictions.length; i++) {
-      const match = calculateMatch(
-        {
-          length_mm: dimension.length_mm,
-          width_mm: dimension.width_mm,
-          height_mm: dimension.height_mm,
-          weight_kg: dimension.weight_kg,
-        },
-        {
-          max_length_mm: restrictions[i].max_length_mm,
-          max_width_mm: restrictions[i].max_width_mm,
-          max_height_mm: restrictions[i].max_height_mm,
-          max_weight_kg: restrictions[i].max_weight_kg,
-        }
-      );
-      if (
-        bestMatch &&
-        (match.result === "ok" ||
-          (match.result === "caution" && bestMatch.result === "ng"))
-      ) {
-        bestMatch = match;
-      }
-    }
-  }
+  // カテゴリごとにグルーピング
+  const grouped = destinations.reduce((acc, d) => {
+    if (!acc[d.category]) acc[d.category] = [];
+    acc[d.category].push(d);
+    return acc;
+  }, {} as Record<string, typeof destinations>);
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: `${model.maker_name} ${model.name} × ${lot.name} 適合判定`,
-          url: `https://www.tomepita.com/check?car=${model.slug}&parking=${lot.slug}`,
-          description: `${model.maker_name} ${model.name}が${lot.name}に停められるか寸法比較で判定`,
-        }}
-      />
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <Breadcrumb
-        items={[{ label: "トップ", href: "/" }, { label: "判定結果" }]}
+        items={[{ label: "トップ", href: "/" }, { label: "目的地から探す" }]}
         currentPath="/check"
       />
 
-      {/* メインカード */}
-      <Card className="mb-8">
-        <CardContent className="p-6 text-center sm:p-8">
-          <h1 className="text-xl font-bold sm:text-2xl">
-            {model.maker_name} {model.name}
-          </h1>
-          <p className="my-2 text-2xl text-muted-foreground">&times;</p>
-          <p className="text-lg font-semibold">{lot.name}</p>
-          {lot.parking_type && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              ({lot.parking_type === "mechanical"
-                ? "機械式"
-                : lot.parking_type === "self_propelled"
-                  ? "自走式"
-                  : lot.parking_type === "flat"
-                    ? "平面"
-                    : lot.parking_type === "tower"
-                      ? "タワー式"
-                      : lot.parking_type})
-            </p>
-          )}
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl font-bold sm:text-4xl">目的地から駐車場を探す</h1>
+        <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+          お出かけ先の公式駐車場に車が入るか不安ですか？<br className="hidden sm:block" />
+          目的地を選んで、あなたの車に最適な駐車場を1秒判定。
+        </p>
+      </div>
 
-          <div className="mt-6 flex justify-center">
-            {bestMatch ? (
-              <MatchBadge result={bestMatch.result} className="text-lg px-6 py-2" />
-            ) : (
-              <p className="text-muted-foreground">
-                {!dimension
-                  ? "寸法データがないため判定できません"
-                  : "制限データがないため判定できません"}
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* 寸法比較カード */}
-      {bestMatch && bestMatch.details.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-4 text-lg font-bold">寸法比較</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {bestMatch.details.map((d) => {
-              const diff = d.limit - d.value;
-              const unit = d.dimension === "weight" ? "kg" : "mm";
-              const status =
-                d.ratio <= 0.95
-                  ? "ok"
-                  : d.ratio <= 1.0
-                    ? "caution"
-                    : "ng";
-              const ratio = Math.min((d.value / d.limit) * 100, 100);
-              const barColor = {
-                ok: "bg-match-ok",
-                caution: "bg-match-caution",
-                ng: "bg-match-ng",
-              }[status];
-
-              return (
-                <Card key={d.dimension}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-medium text-foreground">{d.label}</span>
-                      <MatchBadge result={status} compact />
+      <div className="grid gap-10">
+        {Object.entries(grouped).map(([category, items]) => (
+          <section key={category}>
+            <h2 className="mb-6 flex items-center gap-2 text-xl font-bold border-b pb-2">
+              <MapPin className="size-5 text-primary" />
+              {categoryLabels[category] ?? category}
+            </h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((dest) => (
+                <Link
+                  key={dest.slug}
+                  href={`/check/${dest.slug}`}
+                  className="group block rounded-xl border bg-background p-5 transition-all hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-bold group-hover:text-primary transition-colors">
+                        {dest.name}
+                      </h3>
+                      <p className="mt-1 text-xs text-muted-foreground truncate max-w-[200px]">
+                        {dest.address}
+                      </p>
                     </div>
-                    <div className="mt-2 flex items-baseline gap-1 text-sm">
-                      <span className="font-semibold">{d.value.toLocaleString()}{unit}</span>
-                      <span className="text-muted-foreground">→</span>
-                      <span className="text-muted-foreground">制限 {d.limit.toLocaleString()}{unit}</span>
-                    </div>
-                    <div className="mt-2">
-                      <div className="relative h-2.5 overflow-hidden rounded-full bg-muted">
-                        <div
-                          className={`h-full rounded-full transition-all ${barColor}`}
-                          style={{ width: `${ratio}%` }}
-                        />
-                      </div>
-                    </div>
-                    <p
-                      className={`mt-1.5 text-sm font-medium ${
-                        status === "ok"
-                          ? "text-match-ok"
-                          : status === "caution"
-                            ? "text-match-caution"
-                            : "text-match-ng"
-                      }`}
-                    >
-                      余裕: {diff >= 0 ? `+${diff}` : diff}{unit}
-                    </p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-      )}
+                    <ChevronRight className="size-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                      公式: {dest.max_height_mm ? `高さ${dest.max_height_mm}mm` : "詳細あり"}
+                    </span>
+                    {dest.max_width_mm && (
+                      <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground">
+                        幅{dest.max_width_mm}mm
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
 
-      {/* 次のアクション */}
-      <section>
-        <h2 className="mb-4 text-lg font-bold">次のアクション</h2>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Link
-            href={`/car/${model.slug}`}
-            className="rounded-lg border border-border p-4 text-sm transition-colors hover:bg-muted"
-          >
-            <p className="font-medium">この車で他の駐車場も探す</p>
-            <p className="mt-1 text-muted-foreground">
-              {model.maker_name} {model.name} の詳細ページへ
-            </p>
-          </Link>
-          <Link
-            href={`/parking/${lot.slug}`}
-            className="rounded-lg border border-border p-4 text-sm transition-colors hover:bg-muted"
-          >
-            <p className="font-medium">この駐車場に入る車種を見る</p>
-            <p className="mt-1 text-muted-foreground">{lot.name} の詳細ページへ</p>
-          </Link>
-          {wardSlug && wardName && (
-            <Link
-              href={`/area/${wardSlug}/car/${model.slug}`}
-              className="rounded-lg border border-border p-4 text-sm transition-colors hover:bg-muted"
-            >
-              <p className="font-medium">{wardName}で他の駐車場を探す</p>
-              <p className="mt-1 text-muted-foreground">
-                {wardName}エリアで{model.name}の適合を確認
-              </p>
-            </Link>
-          )}
+      {/* 検索で見つからない場合への導線 */}
+      <div className="mt-16 rounded-2xl bg-muted/30 p-8 text-center border border-dashed">
+        <h3 className="text-lg font-bold">目的地が見つかりませんか？</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
+          地名や駅名、車種名から直接検索することも可能です。
+        </p>
+        <div className="mt-6 flex justify-center gap-4">
+          <Link href="/area" className="text-sm font-bold text-primary hover:underline">エリアから探す</Link>
+          <Link href="/car" className="text-sm font-bold text-primary hover:underline">車種から探す</Link>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

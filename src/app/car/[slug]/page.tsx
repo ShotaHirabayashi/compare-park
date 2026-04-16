@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingMatchList } from "@/components/parking-match-list";
 import { TrimSelector } from "@/components/trim-selector";
+import { MyCarToggle } from "@/components/my-car-toggle";
+import { DimensionVisualizer } from "@/components/dimension-visualizer";
 import { AreaSearchMini } from "@/components/area-search-mini";
 import { JsonLd } from "@/components/json-ld";
 import {
@@ -229,23 +231,38 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
 
       {/* 車種基本情報 */}
       <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold">{model.name}の寸法と駐車場適合</h1>
-          <Badge variant="outline">
-            {bodyTypeLabels[model.body_type] ?? model.body_type}
-          </Badge>
-        </div>
-        <div className="mt-1 flex items-center gap-4 text-muted-foreground">
-          <span>{model.maker_name}</span>
-          {model.updated_at && (
-            <span className="flex items-center gap-1 text-xs">
-              <CalendarDays className="size-3" />
-              <time dateTime={model.updated_at}>
-                {new Date(model.updated_at).toLocaleDateString("ja-JP")}
-              </time>
-              更新
-            </span>
-          )}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">{model.name}の寸法と駐車場適合</h1>
+              <Badge variant="outline">
+                {bodyTypeLabels[model.body_type] ?? model.body_type}
+              </Badge>
+            </div>
+            <div className="mt-1 flex items-center gap-4 text-muted-foreground">
+              <span>{model.maker_name}</span>
+              {model.updated_at && (
+                <span className="flex items-center gap-1 text-xs">
+                  <CalendarDays className="size-3" />
+                  <time dateTime={model.updated_at}>
+                    {new Date(model.updated_at).toLocaleDateString("ja-JP")}
+                  </time>
+                  更新
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="shrink-0">
+            <MyCarToggle
+              slug={model.slug}
+              name={model.name}
+              makerName={model.maker_name}
+              lengthMm={dimension?.length_mm ?? undefined}
+              widthMm={dimension?.width_mm ?? undefined}
+              heightMm={dimension?.height_mm ?? undefined}
+              weightKg={dimension?.weight_kg ?? undefined}
+            />
+          </div>
         </div>
       </div>
 
@@ -259,9 +276,58 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
         />
       )}
 
-      {/* 寸法サマリーカード */}
+      {/* 寸法サマリー */}
       {dimension && (
-        <div className="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-10 space-y-6">
+          <h2 className="text-xl font-bold">サイズ詳細と駐車場制限の比較</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {dimension.height_mm != null && (
+              <DimensionVisualizer
+                label="全高 (高さ)"
+                value={dimension.height_mm}
+                limits={[
+                  { value: 1550, label: "普通車" },
+                  { value: 1800, label: "ミドル" },
+                  { value: 2000, label: "ハイルーフ" },
+                ]}
+              />
+            )}
+            {dimension.width_mm != null && (
+              <DimensionVisualizer
+                label="全幅 (車幅)"
+                value={dimension.width_mm}
+                limits={[
+                  { value: 1850, label: "標準" },
+                  { value: 1900, label: "ワイド" },
+                  { value: 2050, label: "大型" },
+                ]}
+              />
+            )}
+            {dimension.length_mm != null && (
+              <DimensionVisualizer
+                label="全長 (長さ)"
+                value={dimension.length_mm}
+                limits={[
+                  { value: 5000, label: "標準" },
+                  { value: 5300, label: "ロング" },
+                ]}
+              />
+            )}
+            {dimension.weight_kg != null && (
+              <DimensionVisualizer
+                label="重量"
+                value={dimension.weight_kg}
+                unit="kg"
+                limits={[
+                  { value: 2000, label: "標準" },
+                  { value: 2300, label: "重量車" },
+                  { value: 2500, label: "超重量" },
+                ]}
+              />
+            )}
+          </div>
+          
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {dimension.length_mm != null && (
             <Card>
               <CardContent className="flex items-center gap-3 pt-2">

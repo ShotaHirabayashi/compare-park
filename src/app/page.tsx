@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Car, Search, CheckCircle, MapPin, Ruler } from "lucide-react";
+import { NearMeButton } from "@/components/near-me-button";
 import {
   getMakers,
   getPopularModels,
@@ -190,16 +191,19 @@ export default async function Home() {
           <p className="mb-6 text-center text-sm text-muted-foreground">
             東京23区の駐車場を探す
           </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {TOKYO_WARD_MAP.map((w) => (
-              <Link
-                key={w.slug}
-                href={`/area/${w.slug}`}
-                className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary"
-              >
-                {w.name}
-              </Link>
-            ))}
+          <div className="flex flex-col items-center gap-4">
+            <NearMeButton className="w-full max-w-xs" />
+            <div className="flex flex-wrap justify-center gap-2">
+              {TOKYO_WARD_MAP.map((w) => (
+                <Link
+                  key={w.slug}
+                  href={`/area/${w.slug}`}
+                  className="rounded-full bg-muted px-3 py-1.5 text-sm font-medium transition-colors hover:bg-primary/10 hover:text-primary"
+                >
+                  {w.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>
