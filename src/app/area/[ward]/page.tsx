@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { ParkingCard } from "@/components/parking-card";
+import { ParkingMapLoader } from "@/components/parking-map-loader";
 import { VehicleComboboxNav } from "@/components/vehicle-combobox-nav";
 import { SizeFilter } from "@/components/size-filter";
 import { JsonLd } from "@/components/json-ld";
@@ -74,7 +75,15 @@ export default async function WardPage({ params, searchParams }: Props) {
   const hasSizeFilter = sizeFilter && !isNaN(sizeFilter.threshold);
 
   let lotsWithRestrictions: Array<{
-    lot: { id: number; name: string; slug: string; address: string | null; parking_type: string | null };
+    lot: {
+      id: number;
+      name: string;
+      slug: string;
+      address: string | null;
+      latitude: number | null;
+      longitude: number | null;
+      parking_type: string | null;
+    };
     restriction: {
       max_length_mm: number | null;
       max_width_mm: number | null;
@@ -92,7 +101,15 @@ export default async function WardPage({ params, searchParams }: Props) {
       sizeFilter.threshold
     );
     lotsWithRestrictions = filteredLots.map((lot) => ({
-      lot: { id: lot.id, name: lot.name, slug: lot.slug, address: lot.address, parking_type: lot.parking_type },
+      lot: {
+        id: lot.id,
+        name: lot.name,
+        slug: lot.slug,
+        address: lot.address,
+        latitude: lot.latitude,
+        longitude: lot.longitude,
+        parking_type: lot.parking_type,
+      },
       restriction: {
         max_length_mm: lot.max_length_mm,
         max_width_mm: lot.max_width_mm,
@@ -106,10 +123,30 @@ export default async function WardPage({ params, searchParams }: Props) {
       lots.map(async (lot) => {
         const restrictions = await getRestrictionsByParkingLotId(lot.id);
         const firstRestriction = restrictions[0] ?? null;
-        return { lot, restriction: firstRestriction };
+        return {
+          lot: {
+            id: lot.id,
+            name: lot.name,
+            slug: lot.slug,
+            address: lot.address,
+            latitude: lot.latitude,
+            longitude: lot.longitude,
+            parking_type: lot.parking_type,
+          },
+          restriction: firstRestriction,
+        };
       })
     );
   }
+
+  // マップ用データ整形
+  const mapItems = lotsWithRestrictions.map(({ lot }) => ({
+    parkingLotName: lot.name,
+    parkingLotSlug: lot.slug,
+    latitude: lot.latitude,
+    longitude: lot.longitude,
+    address: lot.address,
+  }));
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -165,6 +202,17 @@ export default async function WardPage({ params, searchParams }: Props) {
           basePath={`/area/${ward}/car`}
         />
       </div>
+
+      {/* マップ表示 */}
+      {mapItems.length > 0 && (
+        <div className="mb-10">
+          <h2 className="mb-4 text-xl font-bold">{decodedWard}の駐車場マップ</h2>
+          <ParkingMapLoader
+            items={mapItems}
+            center={wardInfo.lat && wardInfo.lng ? [wardInfo.lat, wardInfo.lng] : undefined}
+          />
+        </div>
+      )}
 
       {lotsWithRestrictions.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
 import { ParkingMatchList } from "@/components/parking-match-list";
+import { ParkingMapLoader } from "@/components/parking-map-loader";
 import {
   getModelBySlug,
   getAllTrimsWithDimensions,
@@ -221,6 +222,19 @@ export default async function AreaCarPage({ params, searchParams }: Props) {
               <p key={i}>{line}</p>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* マップ表示 */}
+      {parkingMatchItems.length > 0 && (
+        <div className="mb-10">
+          <h2 className="mb-4 text-xl font-bold">
+            {decodedWard}の駐車場マップ
+          </h2>
+          <ParkingMapLoader
+            items={parkingMatchItems}
+            center={wardInfo.lat && wardInfo.lng ? [wardInfo.lat, wardInfo.lng] : undefined}
+          />
         </div>
       )}
 

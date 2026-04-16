@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import * as Sentry from "@sentry/nextjs";
 
 export default function Error({
   error,
@@ -12,6 +13,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
+    // Sentry にエラーを報告
+    Sentry.captureException(error);
     console.error(error);
   }, [error]);
 

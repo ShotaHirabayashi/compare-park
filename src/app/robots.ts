@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   const allowWithRestrictions = {
     allow: "/",
-    disallow: ["/check", "/api/"],
+    disallow: ["/check", "/api/", "/search"],
   };
 
   return {

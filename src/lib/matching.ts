@@ -127,6 +127,8 @@ export interface RestrictionRecord {
   parking_lot_slug: string;
   parking_lot_address: string | null;
   parking_type: string | null;
+  latitude: number | null;
+  longitude: number | null;
   max_length_mm: number | null;
   max_width_mm: number | null;
   max_height_mm: number | null;
@@ -139,6 +141,8 @@ export interface ParkingMatchItem {
   parkingLotName: string;
   parkingLotSlug: string;
   parkingLotAddress: string;
+  latitude: number | null;
+  longitude: number | null;
   parkingType: string;
   result: MatchResult;
   details: DimensionDetail[];
@@ -207,6 +211,8 @@ export function buildParkingMatchItems(
     parkingLotName: item.restriction.parking_lot_name,
     parkingLotSlug: item.restriction.parking_lot_slug,
     parkingLotAddress: item.restriction.parking_lot_address ?? "",
+    latitude: item.restriction.latitude,
+    longitude: item.restriction.longitude,
     parkingType: item.restriction.parking_type ?? "",
     result: item.match.result,
     details: item.match.details,

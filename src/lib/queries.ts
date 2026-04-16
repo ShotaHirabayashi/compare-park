@@ -225,6 +225,8 @@ export async function getAllRestrictions() {
       parking_lot_slug: parkingLots.slug,
       parking_lot_address: parkingLots.address,
       parking_type: parkingLots.parking_type,
+      latitude: parkingLots.latitude,
+      longitude: parkingLots.longitude,
     })
     .from(vehicleRestrictions)
     .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id));
@@ -247,6 +249,8 @@ export async function getRestrictionsByWard(ward: string) {
       parking_lot_slug: parkingLots.slug,
       parking_lot_address: parkingLots.address,
       parking_type: parkingLots.parking_type,
+      latitude: parkingLots.latitude,
+      longitude: parkingLots.longitude,
     })
     .from(vehicleRestrictions)
     .innerJoin(parkingLots, eq(vehicleRestrictions.parking_lot_id, parkingLots.id))
@@ -278,6 +282,8 @@ export async function getParkingLotsBySizeCondition(
       name: parkingLots.name,
       slug: parkingLots.slug,
       address: parkingLots.address,
+      latitude: parkingLots.latitude,
+      longitude: parkingLots.longitude,
       parking_type: parkingLots.parking_type,
       restriction_name: vehicleRestrictions.restriction_name,
       max_length_mm: vehicleRestrictions.max_length_mm,
@@ -320,6 +326,8 @@ export async function getParkingLotsByWardAndSize(
       name: parkingLots.name,
       slug: parkingLots.slug,
       address: parkingLots.address,
+      latitude: parkingLots.latitude,
+      longitude: parkingLots.longitude,
       parking_type: parkingLots.parking_type,
       restriction_name: vehicleRestrictions.restriction_name,
       max_length_mm: vehicleRestrictions.max_length_mm,
