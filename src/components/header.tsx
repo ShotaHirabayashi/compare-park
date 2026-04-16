@@ -1,37 +1,31 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from "@/components/ui/sheet";
+import { getModelsForSearch } from "@/lib/queries";
+import { HeaderSearch } from "./header-search";
+import { HeaderMobileNav } from "./header-mobile-nav";
 
 const navLinks = [
-  { href: "/#check", label: "駐車場を判定" },
   { href: "/car", label: "車種一覧" },
   { href: "/area", label: "エリア" },
   { href: "/articles", label: "コラム" },
 ] as const;
 
-export function Header() {
-  const [open, setOpen] = useState(false);
+export async function Header() {
+  const vehicles = await getModelsForSearch();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo.svg" alt="トメピタ" width={32} height={32} />
-          <span className="text-xl font-bold text-primary">トメピタ</span>
-        </Link>
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-4 md:gap-8">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.svg" alt="トメピタ" width={28} height={28} />
+            <span className="hidden text-xl font-bold text-primary sm:inline-block">トメピタ</span>
+          </Link>
+
+          {/* Desktop search */}
+          <HeaderSearch vehicles={vehicles} className="hidden md:flex" />
+        </div>
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 md:flex">
@@ -46,37 +40,10 @@ export function Header() {
           ))}
         </nav>
 
-        {/* Mobile hamburger */}
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger
-            render={
-              <Button variant="ghost" size="icon" className="md:hidden" />
-            }
-          >
-            <Menu className="size-5" />
-            <span className="sr-only">メニューを開く</span>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[280px]">
-            <SheetHeader>
-              <SheetTitle>
-                <span className="text-primary">トメピタ</span>
-              </SheetTitle>
-            </SheetHeader>
-            <nav className="flex flex-col gap-4 px-4">
-              {navLinks.map((link) => (
-                <SheetClose key={link.href} render={<span />}>
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="text-base font-medium text-foreground transition-colors hover:text-primary"
-                  >
-                    {link.label}
-                  </Link>
-                </SheetClose>
-              ))}
-            </nav>
-          </SheetContent>
-        </Sheet>
+        {/* Mobile search & nav */}
+        <div className="flex items-center gap-2 md:hidden">
+          <HeaderMobileNav navLinks={navLinks} vehicles={vehicles} />
+        </div>
       </div>
     </header>
   );

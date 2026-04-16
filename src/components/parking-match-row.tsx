@@ -24,7 +24,10 @@ export function ParkingMatchRow({ item }: ParkingMatchRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="border-b border-border last:border-b-0">
+    <div 
+      id={`parking-${item.parkingLotSlug}`} 
+      className="border-b border-border last:border-b-0 transition-all duration-500"
+    >
       <div className="flex items-start gap-3 px-4 py-3">
         <div className="min-w-0 flex-1">
           <Link

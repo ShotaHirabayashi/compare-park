@@ -93,9 +93,21 @@ export default function ParkingMap({ items, center, zoom = 14 }: Props) {
             key={item.parkingLotSlug}
             position={[item.latitude!, item.longitude!]}
             icon={createCustomIcon(item.result)}
+            eventHandlers={{
+              click: () => {
+                const element = document.getElementById(`parking-${item.parkingLotSlug}`);
+                if (element) {
+                  element.scrollIntoView({ behavior: "smooth", block: "center" });
+                  element.classList.add("ring-2", "ring-primary", "ring-offset-2", "rounded-lg");
+                  setTimeout(() => {
+                    element.classList.remove("ring-2", "ring-primary", "ring-offset-2", "rounded-lg");
+                  }, 2000);
+                }
+              },
+            }}
           >
             <Popup>
-              <div className="p-1 min-w-[120px]">
+              <div className="p-1 min-w-[140px]">
                 <p className="font-bold text-sm leading-tight mb-1">{item.parkingLotName}</p>
                 {item.result ? (
                   <div className="flex items-center gap-2 mb-2">
@@ -113,13 +125,25 @@ export default function ParkingMap({ items, center, zoom = 14 }: Props) {
                     <p className="text-[10px] text-muted-foreground line-clamp-1">{item.address}</p>
                   </div>
                 )}
-                <a 
-                  href={`/parking/${item.parkingLotSlug}`}
-                  className="inline-flex items-center gap-1 text-xs text-primary font-medium hover:underline"
-                >
-                  <Info className="size-3" />
-                  詳細を見る
-                </a>
+                
+                <div className="flex flex-col gap-1.5 border-t pt-2 mt-1">
+                  <a 
+                    href={`/parking/${item.parkingLotSlug}`}
+                    className="inline-flex items-center gap-1.5 text-[11px] text-primary font-bold hover:underline"
+                  >
+                    <Info className="size-3" />
+                    詳細ページへ
+                  </a>
+                  <button 
+                    onClick={() => {
+                      const element = document.getElementById(`parking-${item.parkingLotSlug}`);
+                      element?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }}
+                    className="text-left text-[10px] text-muted-foreground hover:text-foreground underline underline-offset-4"
+                  >
+                    リストで詳しく見る
+                  </button>
+                </div>
               </div>
             </Popup>
           </Marker>
