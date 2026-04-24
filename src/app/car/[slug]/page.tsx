@@ -384,6 +384,7 @@ export default async function CarDetailPage({ params, searchParams }: Props) {
               </CardContent>
             </Card>
           )}
+          </div>
         </div>
       )}
 

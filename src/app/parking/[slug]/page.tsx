@@ -487,9 +487,9 @@ export default async function ParkingDetailPage({ params }: Props) {
             <CardContent className="py-8 text-center text-muted-foreground">
               制限サイズデータがまだ登録されていません。
             </CardContent>
-          {/* 制限値一覧 */}
-          ...
-          </section>
+          </Card>
+        )}
+      </section>
 
           {/* この駐車場に停められる人気の車種 */}
           {okPopularModels.length > 0 && (

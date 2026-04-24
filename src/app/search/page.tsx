@@ -47,7 +47,9 @@ export default async function SearchPage({ searchParams }: Props) {
     model ? await getDimensionsByModelId(model.id) : null;
 
   // 駐車場の取得
-  let lots: Awaited<ReturnType<typeof getParkingLots>>;
+  // 3つのクエリの戻り値から、このページで必要なフィールドだけを共通型として抽出
+  type LotRow = Awaited<ReturnType<typeof getNearbyParkingLots>>[number];
+  let lots: LotRow[];
   if (lat && lng) {
     lots = await getNearbyParkingLots(lat, lng, 3.0);
   } else if (ward) {

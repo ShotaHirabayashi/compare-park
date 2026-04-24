@@ -25,6 +25,22 @@ export async function getModelsByMaker(makerId: number) {
   return db.select().from(models).where(eq(models.maker_id, makerId));
 }
 
+export async function getModelsWithMaker() {
+  return db
+    .select({
+      id: models.id,
+      name: models.name,
+      slug: models.slug,
+      body_type: models.body_type,
+      image_url: models.image_url,
+      maker_name: makers.name,
+      maker_slug: makers.slug,
+    })
+    .from(models)
+    .innerJoin(makers, eq(models.maker_id, makers.id))
+    .orderBy(makers.display_order, models.name);
+}
+
 export async function getPopularModels() {
   return db
     .select({

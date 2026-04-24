@@ -40,11 +40,9 @@ export function HeaderMobileNav({ navLinks, vehicles }: HeaderMobileNavProps) {
       )}
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Menu className="size-5" />
-            <span className="sr-only">メニューを開く</span>
-          </Button>
+        <SheetTrigger render={<Button variant="ghost" size="icon" />}>
+          <Menu className="size-5" />
+          <span className="sr-only">メニューを開く</span>
         </SheetTrigger>
         <SheetContent side="right" className="w-[280px]">
           <SheetHeader>

@@ -1,6 +1,16 @@
 import type { MetadataRoute } from "next";
+import { eq, like, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { models, parkingLots, makers } from "@/db/schema";
+import {
+  models,
+  parkingLots,
+  makers,
+  generations,
+  phases,
+  trims,
+  dimensions,
+  vehicleRestrictions,
+} from "@/db/schema";
 import { TOKYO_WARD_MAP, SIZE_CATEGORIES } from "@/lib/constants";
 import { getArticles, ARTICLE_CATEGORIES } from "@/lib/articles";
 
@@ -67,9 +77,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  // エリア × 車種ページ: クロール予算節約のためサイトマップから除外
-  // （5,000件超の組み合わせページはGoogleのクロール予算を圧迫するため）
-  const areaCar: MetadataRoute.Sitemap = [];
+  // エリア × 車種ページ: データが十分あるページのみサイトマップに登録
+  // 判定条件は page.tsx の hasContent と揃える:
+  //   restrictions.length >= 10 AND dimension !== null
+  //
+  // 1) dimension を持つ model slug 一覧（1クエリ）
+  const modelsWithDim = await db
+    .selectDistinct({ slug: models.slug })
+    .from(models)
+    .innerJoin(generations, eq(generations.model_id, models.id))
+    .innerJoin(phases, eq(phases.generation_id, generations.id))
+    .innerJoin(trims, eq(trims.phase_id, phases.id))
+    .innerJoin(dimensions, eq(dimensions.trim_id, trims.id));
+
+  // 2) 各wardのrestriction件数を集計（COUNT 23本）
+  const wardCounts = await Promise.all(
+    TOKYO_WARD_MAP.map(async (w) => {
+      const [row] = await db
+        .select({ cnt: sql<number>`count(*)` })
+        .from(vehicleRestrictions)
+        .innerJoin(
+          parkingLots,
+          eq(vehicleRestrictions.parking_lot_id, parkingLots.id),
+        )
+        .where(like(parkingLots.address, `%${w.name}%`));
+      return { ward: w, count: Number(row?.cnt ?? 0) };
+    }),
+  );
+  const eligibleWards = wardCounts.filter((w) => w.count >= 10);
+
+  // 3) 直積でサイトマップ生成（hasContent=true のページのみ）
+  const areaCar: MetadataRoute.Sitemap = eligibleWards.flatMap((ew) =>
+    modelsWithDim.map((m) => ({
+      url: `${BASE_URL}/area/${ew.ward.slug}/car/${m.slug}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    })),
+  );
 
   // コラム記事 + カテゴリページ
   const categoryPages: MetadataRoute.Sitemap = Object.keys(ARTICLE_CATEGORIES).map((cat) => ({
